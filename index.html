@@ -929,21 +929,21 @@
             renderSeats();
             closeModal();
             
-            // EXECUTION PRIORITY FIXED:
-            // 1. WhatsApp native anchor simulation ensures popup blocker does not trigger
-            const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
-            
-            const waLink = document.createElement('a');
-            waLink.href = `https://wa.me/91${phone}?text=${encodeURIComponent(welcomeMsg)}`;
-            waLink.target = '_blank';
-            document.body.appendChild(waLink);
-            waLink.click();
-            waLink.remove();
+            // SECURITY ORDER FIXED:
+            // 1. Pehle Direct Native Image Download process chalega
+            downloadSlipImage(name, currentSeatNumber);
 
-            // 2. High Priority canvas tracking blocks download simulation inside gallery sandbox
+            // 2. Exact 1 second baad WhatsApp window trigger hogi, jisse browser block nahi karega
             setTimeout(() => {
-                downloadSlipImage(name, currentSeatNumber);
-            }, 350);
+                const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे गैलरी से अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
+                
+                const waLink = document.createElement('a');
+                waLink.href = `https://wa.me/91${phone}?text=${encodeURIComponent(welcomeMsg)}`;
+                waLink.target = '_blank';
+                document.body.appendChild(waLink);
+                waLink.click();
+                waLink.remove();
+            }, 1000);
         }
 
         function clearSeat() {
@@ -995,25 +995,29 @@
 
             html2canvas(slipElement, { 
                 useCORS: true, 
-                scale: 3, // High definition crisp image
+                scale: 3, // Premium quality text print
                 logging: false
             }).then(canvas => {
-                const dataUrl = canvas.toDataURL('image/png');
-                
-                // Forceful native attachment download method
-                const fileLink = document.createElement('a');
-                fileLink.setAttribute('download', `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`);
-                fileLink.setAttribute('href', dataUrl);
-                document.body.appendChild(fileLink);
-                
-                fileLink.click();
-                
-                // Cleanup context directly
-                setTimeout(() => {
-                    fileLink.remove();
-                    container.style.left = "-9999px";
-                    container.style.top = "-9999px";
-                }, 100);
+                // High-performance canvas conversion to high-quality Blob object
+                canvas.toBlob((blob) => {
+                    if (!blob) return;
+                    
+                    const blobUrl = URL.createObjectURL(blob);
+                    const fileLink = document.createElement('a');
+                    fileLink.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
+                    fileLink.href = blobUrl;
+                    
+                    document.body.appendChild(fileLink);
+                    fileLink.click();
+                    
+                    // Instant memory footprint cleanup
+                    setTimeout(() => {
+                        fileLink.remove();
+                        URL.revokeObjectURL(blobUrl);
+                        container.style.left = "-9999px";
+                        container.style.top = "-9999px";
+                    }, 150);
+                }, 'image/png');
 
             }).catch(err => {
                 console.error("Rendering canvas context trace broke:", err);
