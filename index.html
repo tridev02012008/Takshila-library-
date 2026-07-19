@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V3</title>
+    <title>Takshila Smart Library PRO V4</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1321; /* Dark Theme Background */
+            background-color: #0d1321; 
             color: #ffffff;
             margin: 0;
             padding: 20px;
@@ -23,7 +23,6 @@
             font-size: 24px;
         }
         
-        /* Financial & Control Panel Styling */
         .dashboard-container {
             max-width: 1000px;
             width: 100%;
@@ -97,22 +96,7 @@
             color: #fff;
             box-sizing: border-box;
         }
-        .search-box::placeholder {
-            color: #566885;
-        }
-        .backup-btns button {
-            padding: 9px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 13px;
-            margin-left: 5px;
-        }
-        .btn-download { background-color: #2563eb; color: white; }
-        .btn-upload { background-color: #7c3aed; color: white; }
         
-        /* Seat Layout & Design */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
@@ -144,17 +128,8 @@
             text-align: center;
         }
         .seat:hover { transform: scale(1.04); }
-        
-        .seat.occupied { 
-            background-color: #1c1d42; 
-            border-color: #3f4294;
-        }
-        
-        .seat.warning-alert { 
-            background-color: #242223;
-            border-color: #d4a327; 
-        }
-        
+        .seat.occupied { background-color: #1c1d42; border-color: #3f4294; }
+        .seat.warning-alert { background-color: #242223; border-color: #d4a327; }
         .seat.expired-alert { 
             background-color: #2c161a !important; 
             border: 2px dashed #e53e3e !important;
@@ -166,7 +141,6 @@
             50% { opacity: 1; border-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
             100% { opacity: 0.5; border-color: #b91c1c; box-shadow: 0 0 2px #ef4444; }
         }
-        
         .seat.hidden { display: none !important; }
         
         .seat-name {
@@ -180,7 +154,6 @@
             margin-top: 2px;
         }
         
-        /* Indicators System */
         .indicators-area {
             width: 100%;
             display: flex;
@@ -189,7 +162,6 @@
             justify-content: center;
             margin: auto 0;
         }
-
         .all-shift-line {
             width: 50px;
             height: 4px;
@@ -197,7 +169,6 @@
             border-radius: 2px;
             margin: 4px 0;
         }
-
         .single-night-dot {
             width: 6px;
             height: 6px;
@@ -205,9 +176,7 @@
             border-radius: 50%;
             margin-top: 2px;
         }
-        .single-night-dot.active {
-            background-color: #a855f7;
-        }
+        .single-night-dot.active { background-color: #a855f7; }
 
         .four-dots-container {
             display: flex;
@@ -216,7 +185,6 @@
             align-items: center;
             margin: 6px 0;
         }
-
         .shift-dot {
             width: 7px;
             height: 7px;
@@ -228,7 +196,6 @@
         .shift-dot.active-afternoon { background-color: #3b82f6; }
         .shift-dot.active-evening { background-color: #ec4899; }
 
-        /* Due Blinking Tag */
         .due-blink-tag {
             background: #3a1c24;
             color: #f87171;
@@ -257,14 +224,13 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            overflow-y: auto;
         }
         .modal-content {
             background: #172237;
             color: white;
             padding: 25px;
             border-radius: 16px;
-            width: 460px;
+            width: 480px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
@@ -307,6 +273,29 @@
             color: white;
         }
         
+        .shift-checkbox-group {
+            background: #10192c;
+            border: 1px solid #2a3b5c;
+            border-radius: 6px;
+            padding: 8px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+        .shift-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #e2e8f0;
+            cursor: pointer;
+        }
+        .shift-checkbox-item input {
+            cursor: pointer;
+            width: auto;
+            margin: 0;
+        }
+
         .camera-section {
             margin-top: 15px;
             background: #10192c;
@@ -362,8 +351,6 @@
         .btn-cancel { background-color: #475569; color: white; }
         .btn-whatsapp { background-color: #25d366; color: white; display: none; }
         .btn-download-slip { background-color: #eab308; color: black; display: none; }
-        
-        /* Locked status message */
         .lock-msg {
             background: #3b2314;
             color: #f59e0b;
@@ -376,7 +363,6 @@
             display: none;
         }
 
-        /* Digital yellow receipt */
         #receipt-template-container {
             position: absolute;
             left: -9999px;
@@ -411,7 +397,6 @@
     <h1>Takshila Smart Library PRO</h1>
     
     <div class="dashboard-container">
-        <!-- Financial Analytics Panels -->
         <div class="finance-panel">
             <div class="fin-card daily">
                 <h4>Daily Collection Today</h4>
@@ -423,11 +408,9 @@
             </div>
         </div>
 
-        <!-- Filters and Configurations -->
         <div class="controls-panel">
             <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
             
-            <!-- SEPARATE INDEPENDENT ADMIN PANEL AT TOP -->
             <div class="admin-global-auth">
                 <label style="font-size: 12px; font-weight: bold; color: #60a5fa;">Admin PIN:</label>
                 <input type="password" id="global-admin-pin" placeholder="Enter System PIN" oninput="validateGlobalAdminPin()">
@@ -446,7 +429,7 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
-    <!-- Edit/Registration Modal (Cleaned up from Admin verification inputs) -->
+    <!-- Registration / Viewer Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
@@ -470,15 +453,15 @@
                     <input type="tel" id="student-phone" placeholder="Enter 10 digit number">
                 </div>
                 <div class="form-group">
-                    <label>Select Shift</label>
-                    <select id="student-shift" onchange="handleShiftLogic()">
-                        <option value="Morning">Morning (6 AM - 10 AM)</option>
-                        <option value="Noon">Noon (10 AM - 2 PM)</option>
-                        <option value="Afternoon">Afternoon (2 PM - 6 PM)</option>
-                        <option value="Evening">Evening (6 PM - 10 PM)</option>
-                        <option value="All Shift">All Shift (6 AM - 10 PM)</option>
-                        <option value="Night">Night (10 PM - 6 AM)</option>
-                    </select>
+                    <label>Select Shifts * (Multiple selection allowed)</label>
+                    <div class="shift-checkbox-group" id="shift-checkboxes">
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Morning" name="shifts"> Morning (6AM-10AM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Noon" name="shifts"> Noon (10AM-2PM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Afternoon" name="shifts"> Afternoon (2PM-6PM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Evening" name="shifts"> Evening (6PM-10PM)</label>
+                        <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="All Shift" name="shifts" id="shift-all-box"> All Shift (6AM-10PM)</label>
+                        <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="Night" name="shifts" id="shift-night-box"> Night (10PM-6AM)</label>
+                    </div>
                 </div>
             </div>
 
@@ -538,7 +521,7 @@
         </div>
     </div>
 
-    <!-- HIDDEN DIGITAL YELLOW RECEIPT TEMPLATE -->
+    <!-- HIDDEN SLIP TEMPLATE FOR HTML2CANVAS -->
     <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
@@ -596,6 +579,23 @@
 
         const gridContainer = document.getElementById('seats-grid');
 
+        // Mutual exclusive logic for shifts checkboxes
+        document.querySelectorAll('input[name="shifts"]').forEach(box => {
+            box.addEventListener('change', function() {
+                const allBox = document.getElementById('shift-all-box');
+                const nightBox = document.getElementById('shift-night-box');
+                
+                if (this === allBox && this.checked) {
+                    document.querySelectorAll('input[name="shifts"]').forEach(b => { if(b !== allBox) b.checked = false; });
+                } else if (this === nightBox && this.checked) {
+                    document.querySelectorAll('input[name="shifts"]').forEach(b => { if(b !== nightBox) b.checked = false; });
+                } else if (this.checked) {
+                    allBox.checked = false;
+                    nightBox.checked = false;
+                }
+            });
+        });
+
         function validateGlobalAdminPin() {
             const inputPin = document.getElementById('global-admin-pin').value;
             const indicator = document.getElementById('auth-status-indicator');
@@ -614,7 +614,6 @@
         function runFinanceAuditAndReset() {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
-            const currentYear = now.getFullYear();
             const currentMonth = now.getMonth(); 
             const currentDay = now.getDate();
 
@@ -649,8 +648,7 @@
                     if(student.receiptDate === todayStr) {
                         dailyTotal += paid;
                     }
-
-                    if(rDate.getMonth() === currentMonth && rDate.getFullYear() === currentYear) {
+                    if(rDate.getMonth() === currentMonth && rDate.getFullYear() === now.getFullYear()) {
                         monthlyTotal += paid;
                     }
                 }
@@ -694,15 +692,15 @@
                         }
                     }
 
-                    const activeShift = libraryData[i].shift;
-                    if(activeShift === "All Shift" || activeShift === "Night") {
+                    const activeShift = libraryData[i].shift || '';
+                    if(activeShift.includes("All Shift") || activeShift.includes("Night")) {
                         const line = document.createElement('div');
                         line.classList.add('all-shift-line');
                         indicatorsArea.appendChild(line);
 
                         const nightDot = document.createElement('div');
                         nightDot.classList.add('single-night-dot');
-                        if(activeShift === "Night") {
+                        if(activeShift.includes("Night")) {
                             line.style.backgroundColor = "#334155"; 
                             nightDot.classList.add('active');
                         }
@@ -715,7 +713,7 @@
                         shiftsList.forEach(shft => {
                             const d = document.createElement('div');
                             d.classList.add('shift-dot');
-                            if(activeShift === shft) {
+                            if(activeShift.includes(shft)) {
                                 d.classList.add(`active-${shft.toLowerCase()}`);
                             }
                             fourDotsContainer.appendChild(d);
@@ -756,21 +754,6 @@
             filterSeats();
         }
 
-        function handleShiftLogic() {
-            const shiftSelect = document.getElementById('student-shift');
-            const selectedValue = shiftSelect.value;
-            
-            Array.from(shiftSelect.options).forEach(opt => opt.style.display = 'block');
-
-            if (selectedValue === "All Shift") {
-                Array.from(shiftSelect.options).forEach(opt => {
-                    if(opt.value !== "All Shift" && opt.value !== "Night") {
-                        opt.style.display = 'none';
-                    }
-                });
-            }
-        }
-
         function openModal(seatNum) {
             currentSeatNumber = seatNum;
             document.getElementById('modal-title').innerText = `Seat Number ${seatNum}`;
@@ -780,21 +763,21 @@
             document.getElementById('snap-btn').style.display = 'none';
             document.getElementById('start-cam-btn').style.display = 'inline-block';
             
-            const shiftSelect = document.getElementById('student-shift');
-            Array.from(shiftSelect.options).forEach(opt => opt.style.display = 'block');
+            // Clear checks
+            document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
 
             const isOccupied = !!libraryData[seatNum];
 
             document.getElementById('student-name').disabled = isOccupied;
             document.getElementById('student-address').disabled = isOccupied;
             document.getElementById('student-phone').disabled = isOccupied;
-            document.getElementById('student-shift').disabled = isOccupied;
             document.getElementById('fee-monthly').disabled = isOccupied;
             document.getElementById('fee-paid').disabled = isOccupied;
             document.getElementById('fee-due').disabled = isOccupied;
             document.getElementById('pay-mode').disabled = isOccupied;
             document.getElementById('receipt-date').disabled = isOccupied;
             document.getElementById('next-payment-date').disabled = isOccupied;
+            document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = isOccupied);
             
             if (isOccupied) {
                 document.getElementById('lock-notice').style.display = 'block';
@@ -804,19 +787,25 @@
                 document.getElementById('whatsapp-btn').style.display = 'inline-block';
                 document.getElementById('download-slip-btn').style.display = 'inline-block';
                 
-                document.getElementById('student-name').value = libraryData[seatNum].name;
-                document.getElementById('student-address').value = libraryData[seatNum].address || 'Bhagalpur';
-                document.getElementById('student-phone').value = libraryData[seatNum].phone || '';
-                document.getElementById('student-shift').value = libraryData[seatNum].shift || 'Morning';
-                document.getElementById('fee-monthly').value = libraryData[seatNum].monthlyFee || 700;
-                document.getElementById('fee-paid').value = libraryData[seatNum].paidFee || 700;
-                document.getElementById('fee-due').value = libraryData[seatNum].due || 0;
-                document.getElementById('pay-mode').value = libraryData[seatNum].payMode || 'UPI';
-                document.getElementById('receipt-date').value = libraryData[seatNum].receiptDate || '';
-                document.getElementById('next-payment-date').value = libraryData[seatNum].nextPaymentDate || '';
+                const data = libraryData[seatNum];
+                document.getElementById('student-name').value = data.name;
+                document.getElementById('student-address').value = data.address || 'Bhagalpur';
+                document.getElementById('student-phone').value = data.phone || '';
+                document.getElementById('fee-monthly').value = data.monthlyFee || 700;
+                document.getElementById('fee-paid').value = data.paidFee || 700;
+                document.getElementById('fee-due').value = data.due || 0;
+                document.getElementById('pay-mode').value = data.payMode || 'UPI';
+                document.getElementById('receipt-date').value = data.receiptDate || '';
+                document.getElementById('next-payment-date').value = data.nextPaymentDate || '';
                 
-                if(libraryData[seatNum].docImage) {
-                    capturedImageBase64 = libraryData[seatNum].docImage;
+                // restore checkbox view
+                const activeShifts = data.shift ? data.shift.split(', ') : [];
+                document.querySelectorAll('input[name="shifts"]').forEach(b => {
+                    if(activeShifts.includes(b.value)) b.checked = true;
+                });
+
+                if(data.docImage) {
+                    capturedImageBase64 = data.docImage;
                     const imgPreview = document.getElementById('photo-preview');
                     imgPreview.src = capturedImageBase64;
                     imgPreview.style.display = 'block';
@@ -834,7 +823,6 @@
                 document.getElementById('student-name').value = '';
                 document.getElementById('student-address').value = 'Bhagalpur';
                 document.getElementById('student-phone').value = '';
-                document.getElementById('student-shift').value = 'Morning';
                 document.getElementById('fee-monthly').value = 700;
                 document.getElementById('fee-paid').value = 700;
                 document.getElementById('fee-due').value = 0;
@@ -851,7 +839,6 @@
                 document.getElementById('photo-preview').style.display = 'none';
             }
             
-            handleShiftLogic();
             document.getElementById('student-modal').style.display = 'flex';
         }
 
@@ -908,17 +895,29 @@
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             const nextDate = document.getElementById('next-payment-date').value;
+            
+            // Collect checked shifts
+            let selectedShifts = [];
+            document.querySelectorAll('input[name="shifts"]:checked').forEach(cb => {
+                selectedShifts.push(cb.value);
+            });
 
             if (!name || !phone || !nextDate) {
-                alert("Student Name, Phone Number aur Next Payment Date optional nahi hain!");
+                alert("Student Name, Phone Number aur Next Payment Date mandatory hain!");
                 return;
             }
+            if (selectedShifts.length === 0) {
+                alert("Kripya kam se kam ek ya do shift select karein!");
+                return;
+            }
+
+            const shiftString = selectedShifts.join(', ');
 
             libraryData[currentSeatNumber] = {
                 name: name,
                 address: document.getElementById('student-address').value || 'Bhagalpur',
                 phone: phone,
-                shift: document.getElementById('student-shift').value,
+                shift: shiftString,
                 monthlyFee: document.getElementById('fee-monthly').value,
                 paidFee: document.getElementById('fee-paid').value,
                 due: document.getElementById('fee-due').value,
@@ -934,22 +933,23 @@
             renderSeats();
             closeModal();
             
+            // PRIORITY FIXED: Open WhatsApp instantly first to completely bypass browser security blocker 
+            const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
+            const encodedText = encodeURIComponent(welcomeMsg);
+            window.open(`https://wa.me/91${phone}?text=${encodedText}`, '_blank');
+
+            // Trigger silent high-quality image download to gallery right after opening WhatsApp window
             setTimeout(() => {
-                downloadSlipAndRedirectWhatsApp(name, currentSeatNumber, phone);
-            }, 200);
+                downloadSlipImage(name, currentSeatNumber);
+            }, 300);
         }
 
         function clearSeat() {
-            if (!libraryData[currentSeatNumber]) {
-                alert("Ye seat pehle se khali hai.");
-                return;
-            }
-
+            if (!libraryData[currentSeatNumber]) return;
             if (!isSystemAdminUnlocked) {
                 alert("Seat vacant karne ke liye top dashboard control panel par authorization PIN daliye.");
                 return;
             }
-
             if (confirm(`Kya aap Seat Number ${currentSeatNumber} ko vacant karna chahte hain?`)) {
                 delete libraryData[currentSeatNumber];
                 localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
@@ -998,29 +998,8 @@
 
                 container.style.left = "-9999px";
                 container.style.top = "-9999px";
-            });
-        }
-
-        function downloadSlipAndRedirectWhatsApp(studentName, seatNum, phone) {
-            const slipElement = document.getElementById('library-slip-element');
-            const container = document.getElementById('receipt-template-container');
-            container.style.left = "0px";
-            container.style.top = "0px";
-
-            html2canvas(slipElement, { useCORS: true, scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
-                link.href = canvas.toDataURL();
-                link.click(); // Devices auto download
-
-                container.style.left = "-9999px";
-                container.style.top = "-9999px";
-
-                // Direct welcome messaging engine trigger 
-                const data = libraryData[seatNum];
-                const message = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${data.name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${seatNum}* (${data.shift}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${data.paidFee} (${data.payMode})\nDues Amount: ₹${data.due}\nNext Due Date: *${data.nextPaymentDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
-                const encodedText = encodeURIComponent(message);
-                window.open(`https://wa.me/91${phone}?text=${encodedText}`, '_blank');
+            }).catch(err => {
+                console.error("Slip render failed", err);
             });
         }
 
