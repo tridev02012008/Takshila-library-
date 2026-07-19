@@ -63,6 +63,24 @@
             align-items: center;
             justify-content: space-between;
         }
+        .admin-global-auth {
+            background: #1a2333;
+            border: 1px solid #3b82f6;
+            padding: 8px 12px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .admin-global-auth input {
+            background: #0d1321;
+            color: #fff;
+            border: 1px solid #2a3b5c;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            width: 130px;
+        }
         .stats {
             font-size: 14px;
             font-weight: bold;
@@ -73,7 +91,7 @@
             border: 1px solid #2a3b5c;
             border-radius: 8px;
             width: 100%;
-            max-width: 350px;
+            max-width: 250px;
             font-size: 14px;
             background-color: #10192c;
             color: #fff;
@@ -408,7 +426,16 @@
         <!-- Filters and Configurations -->
         <div class="controls-panel">
             <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
-            <input type="text" id="search-input" class="search-box" placeholder="Search student name or seat number..." oninput="filterSeats()">
+            
+            <!-- SEPARATE INDEPENDENT ADMIN PANEL AT TOP -->
+            <div class="admin-global-auth">
+                <label style="font-size: 12px; font-weight: bold; color: #60a5fa;">Admin PIN:</label>
+                <input type="password" id="global-admin-pin" placeholder="Enter System PIN" oninput="validateGlobalAdminPin()">
+                <span id="auth-status-indicator" style="font-size: 11px; color: #ef4444; font-weight: bold;">✕ Locked</span>
+            </div>
+
+            <input type="text" id="search-input" class="search-box" placeholder="Search student..." oninput="filterSeats()">
+            
             <div class="backup-btns">
                 <button class="btn-download" onclick="exportBackup()">Backup Data</button>
                 <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
@@ -419,18 +446,16 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
-    <!-- Edit/Registration Modal -->
+    <!-- Edit/Registration Modal (Cleaned up from Admin verification inputs) -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
             
-            <div id="lock-notice" class="lock-msg">This seat is locked. To modify or send data again, Admin must vacate/delete it first.</div>
+            <div id="lock-notice" class="lock-msg">This seat is locked. To modify, system admin must vacate/delete it first.</div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <label>Student Name *</label>
-                    </div>
+                    <label>Student Name *</label>
                     <input type="text" id="student-name" placeholder="Enter Full Name">
                 </div>
                 <div class="form-group">
@@ -467,7 +492,7 @@
                     <input type="number" id="fee-paid" value="700">
                 </div>
                 <div class="form-group">
-                    <label>Dues (₹) [Editable]</label>
+                    <label>Dues (₹)</label>
                     <input type="number" id="fee-due" value="0" style="background:#10192c; font-weight:bold; color:#ef4444; border-color: #7f1d1d;">
                 </div>
             </div>
@@ -490,14 +515,6 @@
                 </div>
             </div>
 
-            <!-- Admin Verification Section -->
-            <div class="form-row" id="admin-verification-row">
-                <div class="form-group">
-                    <label style="color: #60a5fa;" id="admin-pin-label">Admin Verification PIN *</label>
-                    <input type="password" id="admin-pin" placeholder="Enter Authorized 10-digit PIN">
-                </div>
-            </div>
-
             <div class="camera-section" id="camera-area">
                 <label style="display:block; margin-bottom:5px; font-size:12px; color:#94a3b8;">Document Verification (ID Proof)</label>
                 <video id="video-preview" autoplay playsinline></video>
@@ -508,7 +525,6 @@
                 </div>
             </div>
 
-            <!-- Dedicated Action Buttons for Locked View -->
             <div class="form-row button-flex">
                 <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="triggerWhatsAppOnly()">Send WhatsApp Message</button>
                 <button class="btn btn-download-slip" id="download-slip-btn" onclick="triggerSlipDownloadOnly()">Download Slip</button>
@@ -522,7 +538,7 @@
         </div>
     </div>
 
-    <!-- HIDDEN DIGITAL YELLOW RECEIPT -->
+    <!-- HIDDEN DIGITAL YELLOW RECEIPT TEMPLATE -->
     <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
@@ -575,19 +591,25 @@
         let localStream = null;
         let capturedImageBase64 = null;
         
-        // Session memory storage to skip continuous admin inputs
-        let isAdminSessionVerified = false;
-
-        // Valid Admin PINS requested by user
-        const ALLOWED_ADMIN_PINS = [
-            "9815761696",
-            "9835964135",
-            "7634993778",
-            "9155435099",
-            "7488038058"
-        ];
+        let isSystemAdminUnlocked = false;
+        const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
 
         const gridContainer = document.getElementById('seats-grid');
+
+        function validateGlobalAdminPin() {
+            const inputPin = document.getElementById('global-admin-pin').value;
+            const indicator = document.getElementById('auth-status-indicator');
+            
+            if (ALLOWED_ADMIN_PINS.includes(inputPin)) {
+                isSystemAdminUnlocked = true;
+                indicator.innerText = "✓ Unlocked";
+                indicator.style.color = "#10b981";
+            } else {
+                isSystemAdminUnlocked = false;
+                indicator.innerText = "✕ Locked";
+                indicator.style.color = "#ef4444";
+            }
+        }
 
         function runFinanceAuditAndReset() {
             const now = new Date();
@@ -665,14 +687,13 @@
 
                         if (diffDays <= 0) {
                             seat.classList.remove('occupied');
-                            seat.classList.add('expired-alert'); // Continuous Blinking active via CSS
+                            seat.classList.add('expired-alert'); 
                         } else if (diffDays <= 2) {
                             seat.classList.remove('occupied');
                             seat.classList.add('warning-alert');
                         }
                     }
 
-                    // Shift Indicators Processing System
                     const activeShift = libraryData[i].shift;
                     if(activeShift === "All Shift" || activeShift === "Night") {
                         const line = document.createElement('div');
@@ -682,12 +703,11 @@
                         const nightDot = document.createElement('div');
                         nightDot.classList.add('single-night-dot');
                         if(activeShift === "Night") {
-                            line.style.backgroundColor = "#334155"; // hide main line color
+                            line.style.backgroundColor = "#334155"; 
                             nightDot.classList.add('active');
                         }
                         indicatorsArea.appendChild(nightDot);
                     } else {
-                        // 4 dots layout for normal custom fields
                         const fourDotsContainer = document.createElement('div');
                         fourDotsContainer.classList.add('four-dots-container');
                         
@@ -740,11 +760,9 @@
             const shiftSelect = document.getElementById('student-shift');
             const selectedValue = shiftSelect.value;
             
-            // Show all options initially
             Array.from(shiftSelect.options).forEach(opt => opt.style.display = 'block');
 
             if (selectedValue === "All Shift") {
-                // Keep only All Shift and Night accessible as requested
                 Array.from(shiftSelect.options).forEach(opt => {
                     if(opt.value !== "All Shift" && opt.value !== "Night") {
                         opt.style.display = 'none';
@@ -753,19 +771,9 @@
             }
         }
 
-        function checkAdminSessionAuth() {
-            if(isAdminSessionVerified) {
-                document.getElementById('admin-verification-row').style.display = 'none';
-                return true;
-            }
-            document.getElementById('admin-verification-row').style.display = 'flex';
-            return false;
-        }
-
         function openModal(seatNum) {
             currentSeatNumber = seatNum;
             document.getElementById('modal-title').innerText = `Seat Number ${seatNum}`;
-            document.getElementById('admin-pin').value = '';
             stopCamera();
             
             document.getElementById('video-preview').style.display = 'none';
@@ -791,7 +799,6 @@
             if (isOccupied) {
                 document.getElementById('lock-notice').style.display = 'block';
                 document.getElementById('save-btn').style.display = 'none';
-                document.getElementById('admin-verification-row').style.display = 'none';
                 document.getElementById('camera-area').style.display = 'none';
                 
                 document.getElementById('whatsapp-btn').style.display = 'inline-block';
@@ -820,10 +827,6 @@
             } else {
                 document.getElementById('lock-notice').style.display = 'none';
                 document.getElementById('save-btn').style.display = 'inline-block';
-                
-                // Track current session verification state
-                checkAdminSessionAuth();
-                
                 document.getElementById('camera-area').style.display = 'block';
                 document.getElementById('whatsapp-btn').style.display = 'none';
                 document.getElementById('download-slip-btn').style.display = 'none';
@@ -861,8 +864,7 @@
                 document.getElementById('snap-btn').style.display = 'inline-block';
                 document.getElementById('start-cam-btn').style.display = 'none';
             } catch (err) {
-                alert("Camera open nahi ho paya. Kripya permissions check karein.");
-                console.error(err);
+                alert("Camera access denied.");
             }
         }
 
@@ -875,7 +877,6 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            
             const imgPreview = document.getElementById('photo-preview');
             imgPreview.src = capturedImageBase64;
             imgPreview.style.display = 'block';
@@ -899,13 +900,9 @@
         }
 
         function saveSeat() {
-            if (!isAdminSessionVerified) {
-                const pin = document.getElementById('admin-pin').value;
-                if (!ALLOWED_ADMIN_PINS.includes(pin)) {
-                    alert("Galat Admin PIN! Seat save karne ke liye sahi authorized PIN dalein.");
-                    return;
-                }
-                isAdminSessionVerified = true; // Set state to true for this session runtime
+            if (!isSystemAdminUnlocked) {
+                alert("Aapka Admin Status Locked hai! Kripya top screen control panel par sahi PIN dalkar pehle unlock karein.");
+                return;
             }
 
             const name = document.getElementById('student-name').value.trim();
@@ -913,7 +910,7 @@
             const nextDate = document.getElementById('next-payment-date').value;
 
             if (!name || !phone || !nextDate) {
-                alert("Student Name, Phone Number aur Next Payment Due Date mandatory hain!");
+                alert("Student Name, Phone Number aur Next Payment Date optional nahi hain!");
                 return;
             }
 
@@ -933,12 +930,10 @@
 
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
             
-            // Set dynamic text attributes inside DOM receipt 
             generateDigitalSlipData(currentSeatNumber);
             renderSeats();
             closeModal();
             
-            // Execute Instant Automation triggers (Background Download + Direct WhatsApp redirection)
             setTimeout(() => {
                 downloadSlipAndRedirectWhatsApp(name, currentSeatNumber, phone);
             }, 200);
@@ -946,20 +941,16 @@
 
         function clearSeat() {
             if (!libraryData[currentSeatNumber]) {
-                alert("Ye seat pehle se hi khali hai.");
+                alert("Ye seat pehle se khali hai.");
                 return;
             }
 
-            if (!isAdminSessionVerified) {
-                const pin = document.getElementById('admin-pin').value;
-                if (!ALLOWED_ADMIN_PINS.includes(pin)) {
-                    alert("Seat Vacant karne ke liye Sahi Admin PIN dalna mandatory hai.");
-                    return;
-                }
-                isAdminSessionVerified = true;
+            if (!isSystemAdminUnlocked) {
+                alert("Seat vacant karne ke liye top dashboard control panel par authorization PIN daliye.");
+                return;
             }
 
-            if (confirm(`Kya aap sach me Seat Number ${currentSeatNumber} ko vacant/delete karna chahte hain?`)) {
+            if (confirm(`Kya aap Seat Number ${currentSeatNumber} ko vacant karna chahte hain?`)) {
                 delete libraryData[currentSeatNumber];
                 localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                 renderSeats();
@@ -1020,14 +1011,14 @@
                 const link = document.createElement('a');
                 link.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
                 link.href = canvas.toDataURL();
-                link.click(); // Triggers high quality yellow slip storage download
+                link.click(); // Devices auto download
 
                 container.style.left = "-9999px";
                 container.style.top = "-9999px";
 
-                // Immediately open full WhatsApp welcome API hook
+                // Direct welcome messaging engine trigger 
                 const data = libraryData[seatNum];
-                const message = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${data.name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${seatNum}* (${data.shift}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${data.paidFee} (${data.payMode})\nDues Amount: ₹${data.due}\nNext Due Date: *${data.nextPaymentDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे सुरक्षित रखें।\n\nThank you for choosing Takshila Library!`;
+                const message = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${data.name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${seatNum}* (${data.shift}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${data.paidFee} (${data.payMode})\nDues Amount: ₹${data.due}\nNext Due Date: *${data.nextPaymentDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
                 const encodedText = encodeURIComponent(message);
                 window.open(`https://wa.me/91${phone}?text=${encodedText}`, '_blank');
             });
@@ -1081,7 +1072,7 @@
                         alert("Data successfully restore ho gaya!");
                     }
                 } catch (err) {
-                    alert("Invalid JSON file! Kripya sahi backup file select karein.");
+                    alert("Invalid JSON file!");
                 }
             };
             reader.readAsText(file);
