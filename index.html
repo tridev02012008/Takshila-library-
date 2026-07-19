@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V6</title>
+    <title>Takshila Smart Library PRO V7</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -619,17 +619,26 @@
 
     <script>
         const TOTAL_SEATS = 89;
-        let libraryData = JSON.parse(localStorage.getItem('takshila_library_data')) || {};
+        let libraryData = {};
+        
+        try {
+            libraryData = JSON.parse(localStorage.getItem('takshila_library_data')) || {};
+        } catch(e) {
+            console.error("Localstorage failed, initializing blank object", e);
+            libraryData = {};
+        }
+
         let currentSeatNumber = null;
         let localStream = null;
         let capturedImageBase64 = null;
-        let cachedWhatsAppUrl = ""; // Stores WhatsApp URL
+        let cachedWhatsAppUrl = ""; 
         
         let isSystemAdminUnlocked = false;
         const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
 
         const gridContainer = document.getElementById('seats-grid');
 
+        // Handle shift exclusion rules smoothly
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
                 const allBox = document.getElementById('shift-all-box');
@@ -674,14 +683,15 @@
             const currentMonth = now.getMonth(); 
 
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            document.getElementById('current-month-label').innerText = monthNames[currentMonth];
+            const monthLabel = document.getElementById('current-month-label');
+            if(monthLabel) monthLabel.innerText = monthNames[currentMonth];
 
             let dailyTotal = 0;
             let monthlyTotal = 0;
 
             for (let seat in libraryData) {
                 const student = libraryData[seat];
-                if(student.receiptDate) {
+                if(student && student.receiptDate) {
                     const rDate = new Date(student.receiptDate);
                     const paid = parseFloat(student.paidFee) || 0;
 
@@ -771,11 +781,11 @@
                     } else {
                         const nameSpan = document.createElement('span');
                         nameSpan.classList.add('seat-name');
-                        nameSpan.innerText = libraryData[i].name;
+                        nameSpan.innerText = libraryData[i].name || '';
                         seat.appendChild(nameSpan);
                     }
                     
-                    seat.setAttribute('data-search-string', `${i} ${libraryData[i].name.toLowerCase()} ${libraryData[i].phone || ''} due:${dueAmt}`);
+                    seat.setAttribute('data-search-string', `${i} ${(libraryData[i].name || '').toLowerCase()} ${libraryData[i].phone || ''} due:${dueAmt}`);
                 } else {
                     const emptySpacer = document.createElement('span');
                     emptySpacer.style.height = "14px";
@@ -825,7 +835,6 @@
             document.getElementById('snap-btn').style.display = 'none';
             document.getElementById('start-cam-btn').style.display = 'inline-block';
             
-            // Hide the WhatsApp link until download finishes
             document.getElementById('whatsapp-direct-btn').style.display = 'none'; 
             cachedWhatsAppUrl = "";
 
@@ -962,7 +971,11 @@
             if(!recordData) return false;
 
             libraryData[currentSeatNumber] = recordData;
-            localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+            try {
+                localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+            } catch(e) {
+                alert("Storage error, but data updated locally.");
+            }
             renderSeats();
             toggleFormLock(true);
             return true;
@@ -1014,7 +1027,7 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        // STEP 1: DOWNLOAD SLIP WITHOUT ANY POPUP BLOCKS
+        // IMPROVED: ERROR BALANCING FLOW TO PREVENT CODES CRASHING ON MOBILE BROWSERS
         function executeSaveAndDownloadSlipOnly() {
             if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
                 const isSaved = saveSeatAutomaticOnly();
@@ -1025,51 +1038,52 @@
             if (!record) return;
 
             fillSlipData(record);
+            
+            // Build text message link payload ready
+            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
+            cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
+
             const target = document.getElementById('library-slip-element');
             
-            // Generate receipt snapshot
+            // Safe execution check for library availability
+            if (typeof html2canvas === "undefined") {
+                console.warn("html2canvas library not loaded properly. Diverting flow to text directly.");
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
+                return;
+            }
+
             html2canvas(target, { 
                 useCORS: true, 
-                scale: 3, 
+                scale: 2, 
                 logging: false, 
                 allowTaint: true,
                 backgroundColor: "#fff7c2"
             }).then(canvas => {
-                const dataUrl = canvas.toDataURL('image/png');
+                try {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch(e) {
+                    console.error("Native download failed, continuing flow.", e);
+                }
                 
-                // Directly trigger browser image download
-                const link = document.createElement('a');
-                link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                // Prepare WhatsApp Content
-                const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
-                const encoded = encodeURIComponent(msg);
-                
-                // Save url to global scope variable
-                cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`;
-                
-                // STEP 2: SHOW WHATSAPP GREEN ACTION BUTTON
-                const waBtn = document.getElementById('whatsapp-direct-btn');
-                waBtn.style.display = 'block';
-                
+                // Keep UI reliable by displaying trigger button anyway
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
             }).catch(err => {
-                alert("Download failed. Showing WhatsApp redirection directly.");
-                const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nसीट संख्या *${currentSeatNumber}*।`;
-                cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
+                console.error("Canvas parsing failed.", err);
                 document.getElementById('whatsapp-direct-btn').style.display = 'block';
             });
         }
 
-        // STEP 3: DEDICATED USER CLIK HANDLER FOR OPENING WHATSAPP Safely
         function openWhatsAppChatDirectly() {
             if(cachedWhatsAppUrl) {
                 window.open(cachedWhatsAppUrl, '_blank');
             } else {
-                alert("Please click Download Slip first.");
+                alert("Please prepare data payload properly.");
             }
         }
 
@@ -1100,7 +1114,10 @@
             reader.readAsText(file);
         }
 
-        renderSeats();
+        // Initialize display layout render structure safely
+        window.onload = function() {
+            renderSeats();
+        };
     </script>
 </body>
 </html>
