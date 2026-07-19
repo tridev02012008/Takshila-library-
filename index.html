@@ -993,8 +993,9 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        // ONE CLICK PIPELINE - AUTOMATIC DOWNLOAD & WHATSAPP
+        // ONE CLICK PIPELINE - ABSOLUTE FIXED FOR MOBILE & DESKTOP POP-UP BLOCKERS
         function executeSaveDownloadAndWhatsapp() {
+            // 1. Save data securely
             if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
                 const isSaved = saveSeatAutomaticOnly();
                 if (!isSaved) return;
@@ -1003,39 +1004,41 @@
             const record = libraryData[currentSeatNumber];
             if (!record) return;
 
+            // 2. Map template values
             fillSlipData(record);
             
-            // Welcome Message & Details
+            // 3. Compose text
             const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
             const encoded = encodeURIComponent(msg);
             const whatsappUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`;
 
-            const target = document.getElementById('library-slip-element');
-            
-            html2canvas(target, { 
-                useCORS: true, 
-                scale: 3, 
-                logging: false, 
-                allowTaint: true,
-                backgroundColor: "#fff7c2"
-            }).then(canvas => {
-                const dataUrl = canvas.toDataURL('image/png');
+            // FIXED ACTION 1: Trigger window open immediately on user gesture to avoid pop-up blocking
+            window.open(whatsappUrl, '_blank');
+
+            // FIXED ACTION 2: Render canvas layout asynchronously with a small layout delay
+            setTimeout(() => {
+                const target = document.getElementById('library-slip-element');
                 
-                // Automatic Receipt Slip Image Download Triggers
-                const link = document.createElement('a');
-                link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                // Automatic Open WhatsApp Chat instantly
-                window.open(whatsappUrl, '_blank');
-
-            }).catch(err => {
-                console.log("Canvas error, opening WhatsApp link directly.");
-                window.open(whatsappUrl, '_blank');
-            });
+                html2canvas(target, { 
+                    useCORS: true, 
+                    scale: 3, 
+                    logging: false, 
+                    allowTaint: true,
+                    backgroundColor: "#fff7c2"
+                }).then(canvas => {
+                    const dataUrl = canvas.toDataURL('image/png');
+                    
+                    // Trigger download routine
+                    const link = document.createElement('a');
+                    link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }).catch(err => {
+                    console.log("Canvas error: ", err);
+                });
+            }, 500); 
         }
 
         function exportBackup() {
