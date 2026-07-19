@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V5</title>
+    <title>Takshila Smart Library PRO V6</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -249,6 +249,7 @@
         }
         .form-row.button-flex {
             margin-top: 15px;
+            flex-direction: column;
             gap: 10px;
         }
         .form-group {
@@ -351,17 +352,30 @@
         .btn-cancel { background-color: #475569; color: white; }
         
         .btn-combined {
-            background: linear-gradient(135deg, #eab308 0%, #25d366 100%);
-            color: #000000;
+            background: linear-gradient(135deg, #eab308 0%, #3b82f6 100%);
+            color: #ffffff;
             font-weight: 800;
             text-transform: uppercase;
-            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             transition: all 0.2s;
             width: 100%;
         }
-        .btn-combined:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+        
+        /* WHATSAPP TRIGGER BUTTON */
+        .btn-whatsapp-trigger {
+            background: #25d366;
+            color: #000000;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+            display: none; /* Initially Hidden */
+            width: 100%;
+            animation: bounce-glow 1s infinite alternate;
+        }
+
+        @keyframes bounce-glow {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4); }
+            100% { transform: scale(1.02); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.7); }
         }
 
         .backup-btns button {
@@ -543,8 +557,10 @@
                 </div>
             </div>
 
+            <!-- BUTTON ACTIONS GROUP -->
             <div class="form-row button-flex">
-                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveDownloadAndWhatsapp()">💾 Save & Send Slip</button>
+                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveAndDownloadSlipOnly()">📥 Save & Download Slip</button>
+                <button class="btn btn-whatsapp-trigger" id="whatsapp-direct-btn" onclick="openWhatsAppChatDirectly()">✅ Open WhatsApp Chat</button>
             </div>
 
             <div class="btn-group">
@@ -607,6 +623,7 @@
         let currentSeatNumber = null;
         let localStream = null;
         let capturedImageBase64 = null;
+        let cachedWhatsAppUrl = ""; // Stores WhatsApp URL
         
         let isSystemAdminUnlocked = false;
         const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
@@ -808,6 +825,10 @@
             document.getElementById('snap-btn').style.display = 'none';
             document.getElementById('start-cam-btn').style.display = 'inline-block';
             
+            // Hide the WhatsApp link until download finishes
+            document.getElementById('whatsapp-direct-btn').style.display = 'none'; 
+            cachedWhatsAppUrl = "";
+
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
 
             const record = libraryData[seatNum];
@@ -993,9 +1014,8 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        // ONE CLICK PIPELINE - RESOLVED DOWNLOADING FLOW FIRST
-        function executeSaveDownloadAndWhatsapp() {
-            // 1. डेटा सुरक्षित रूप से सेव करें
+        // STEP 1: DOWNLOAD SLIP WITHOUT ANY POPUP BLOCKS
+        function executeSaveAndDownloadSlipOnly() {
             if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
                 const isSaved = saveSeatAutomaticOnly();
                 if (!isSaved) return;
@@ -1004,12 +1024,10 @@
             const record = libraryData[currentSeatNumber];
             if (!record) return;
 
-            // 2. टेम्पलेट में डिटेल्स भरें
             fillSlipData(record);
-            
             const target = document.getElementById('library-slip-element');
             
-            // ACTION 1: सबसे पहले स्लिप इमेज बनाने का काम करें ताकि डाउनलोड फ़ेल न हो
+            // Generate receipt snapshot
             html2canvas(target, { 
                 useCORS: true, 
                 scale: 3, 
@@ -1019,7 +1037,7 @@
             }).then(canvas => {
                 const dataUrl = canvas.toDataURL('image/png');
                 
-                // डाउनलोड को तुरंत ट्रिगर करें
+                // Directly trigger browser image download
                 const link = document.createElement('a');
                 link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
                 link.href = dataUrl;
@@ -1027,19 +1045,32 @@
                 link.click();
                 document.body.removeChild(link);
 
-                // ACTION 2: डाउनलोड होने के तुरंत बाद वॉट्सऐप चैट ओपन करें
+                // Prepare WhatsApp Content
                 const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
                 const encoded = encodeURIComponent(msg);
-                const whatsappUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`;
                 
-                window.open(whatsappUrl, '_blank');
-
+                // Save url to global scope variable
+                cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`;
+                
+                // STEP 2: SHOW WHATSAPP GREEN ACTION BUTTON
+                const waBtn = document.getElementById('whatsapp-direct-btn');
+                waBtn.style.display = 'block';
+                
             }).catch(err => {
-                console.log("Canvas mapping error: ", err);
-                // अगर किसी वजह से इमेज फेल भी हो, तो वॉट्सऐप जरूर खुलना चाहिए
-                const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nविवरण: सीट संख्या *${currentSeatNumber}*।`;
-                window.open(`https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`, '_blank');
+                alert("Download failed. Showing WhatsApp redirection directly.");
+                const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nसीट संख्या *${currentSeatNumber}*।`;
+                cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
             });
+        }
+
+        // STEP 3: DEDICATED USER CLIK HANDLER FOR OPENING WHATSAPP Safely
+        function openWhatsAppChatDirectly() {
+            if(cachedWhatsAppUrl) {
+                window.open(cachedWhatsAppUrl, '_blank');
+            } else {
+                alert("Please click Download Slip first.");
+            }
         }
 
         function exportBackup() {
