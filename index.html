@@ -349,8 +349,21 @@
         .btn-save { background-color: #10b981; color: white; }
         .btn-clear { background-color: #ef4444; color: white; }
         .btn-cancel { background-color: #475569; color: white; }
-        .btn-whatsapp { background-color: #25d366; color: white; display: none; }
-        .btn-download-slip { background-color: #eab308; color: black; display: none; }
+        
+        .btn-combined {
+            background: linear-gradient(135deg, #eab308 0%, #25d366 100%);
+            color: #000000;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            transition: all 0.2s;
+            width: 100%;
+        }
+        .btn-combined:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(37, 211, 102, 0.5);
+        }
+
         .backup-btns button {
             background: #1e293b;
             color: #fff;
@@ -515,6 +528,7 @@
                         <option value="Chandan">Chandan</option>
                         <option value="Tridev">Tridev</option>
                         <option value="Ravi">Ravi</option>
+                        <option value="Asha">Asha</option>
                     </select>
                 </div>
             </div>
@@ -530,12 +544,11 @@
             </div>
 
             <div class="form-row button-flex">
-                <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="triggerWhatsAppOnly()">Send WhatsApp Message</button>
-                <button class="btn btn-download-slip" id="download-slip-btn" onclick="triggerSlipDownloadOnly()">Download Slip</button>
+                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveDownloadAndWhatsapp()">💾 Save & Send Slip</button>
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-save" id="save-btn" onclick="saveSeat()">Save Asset</button>
+                <button class="btn btn-save" id="save-btn" onclick="saveSeatAutomaticOnly()">Save Asset Only</button>
                 <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()">Vacant</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
             </div>
@@ -642,7 +655,6 @@
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
             const currentMonth = now.getMonth(); 
-            const currentDay = now.getDate();
 
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             document.getElementById('current-month-label').innerText = monthNames[currentMonth];
@@ -784,8 +796,7 @@
             document.getElementById('vacant-btn').style.display = isOccupied && isSystemAdminUnlocked ? 'inline-block' : 'none';
             document.getElementById('camera-area').style.display = shouldLock ? 'none' : 'block';
             
-            document.getElementById('whatsapp-btn').style.display = isOccupied ? 'inline-block' : 'none';
-            document.getElementById('download-slip-btn').style.display = isOccupied ? 'inline-block' : 'none';
+            document.getElementById('combined-action-btn').style.display = 'inline-block';
         }
 
         function openModal(seatNum) {
@@ -890,26 +901,26 @@
             }
         }
 
-        function saveSeat() {
+        function validateAndParseData() {
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             const nextPay = document.getElementById('next-payment-date').value;
             
             if(!name || !phone || !nextPay) {
                 alert("Please fill all mandatory (*) fields.");
-                return;
+                return null;
             }
 
             let selectedShifts = [];
             document.querySelectorAll('input[name="shifts"]:checked').forEach(b => selectedShifts.push(b.value));
             if(selectedShifts.length === 0) {
                 alert("Please pick at least one Shift assignment.");
-                return;
+                return null;
             }
 
             calculateDues();
 
-            libraryData[currentSeatNumber] = {
+            return {
                 name: name,
                 address: document.getElementById('student-address').value.trim(),
                 phone: phone,
@@ -923,11 +934,17 @@
                 signature: document.getElementById('slip-signature-picker').value,
                 idProof: capturedImageBase64
             };
+        }
 
+        function saveSeatAutomaticOnly() {
+            const recordData = validateAndParseData();
+            if(!recordData) return false;
+
+            libraryData[currentSeatNumber] = recordData;
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
             renderSeats();
             toggleFormLock(true);
-            alert("Record configured securely!");
+            return true;
         }
 
         function clearSeat() {
@@ -957,10 +974,7 @@
             });
         }
 
-        function fillSlipData() {
-            const record = libraryData[currentSeatNumber];
-            if(!record) return;
-
+        function fillSlipData(record) {
             document.getElementById('slip-no-val').innerText = `TXL-${1000 + currentSeatNumber}`;
             document.getElementById('slip-date-val').innerText = record.receiptDate || '--/--/----';
             document.getElementById('slip-name-val').innerText = record.name;
@@ -979,25 +993,49 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        function triggerSlipDownloadOnly() {
-            fillSlipData();
+        // ONE CLICK PIPELINE - FLAWLESS RENDER & DISPATCH ENGINE
+        function executeSaveDownloadAndWhatsapp() {
+            // 1. Save data unconditionally first
+            if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
+                const isSaved = saveSeatAutomaticOnly();
+                if (!isSaved) return;
+            }
+
+            const record = libraryData[currentSeatNumber];
+            if (!record) return;
+
+            // 2. Refresh the DOM layout of the hidden ticket
+            fillSlipData(record);
+            
+            // 3. Execution of Enhanced Multi-Device Graphic Capturing Engine
             const target = document.getElementById('library-slip-element');
             
-            html2canvas(target, { scale: 2 }).then(canvas => {
+            html2canvas(target, { 
+                useCORS: true, 
+                scale: 3, 
+                logging: false, 
+                allowTaint: true,
+                backgroundColor: "#fff7c2"
+            }).then(canvas => {
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Native Anchor Download Method
                 const link = document.createElement('a');
-                link.download = `Slip_Seat_${currentSeatNumber}_${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
+                link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
                 link.click();
+                document.body.removeChild(link);
+
+                // 4. Instant Dispatch Handshake with Messaging Matrix
+                setTimeout(() => {
+                    const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nआपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
+                    const encoded = encodeURIComponent(msg);
+                    window.open(`https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`, '_blank');
+                }, 400);
+            }).catch(err => {
+                alert("Download Error: ब्राउज़र सुरक्षा रुकावट। कृपया दोबारा प्रयास करें।");
             });
-        }
-
-        function triggerWhatsAppOnly() {
-            const record = libraryData[currentSeatNumber];
-            if(!record) return;
-
-            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nआपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
-            const encoded = encodeURIComponent(msg);
-            window.open(`https://wa.me/91${record.phone}?text=${encoded}`, '_blank');
         }
 
         function exportBackup() {
