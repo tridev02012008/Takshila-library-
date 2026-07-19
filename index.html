@@ -498,6 +498,18 @@
                 </div>
             </div>
 
+            <!-- SIGNATURE EXTRA DROPDOWN CONFIG -->
+            <div class="form-row">
+                <div class="form-group" style="width: 100%;">
+                    <label style="color:#60a5fa; font-weight: bold;">Authorized Signature By *</label>
+                    <select id="slip-signature-picker">
+                        <option value="Chandan">Chandan</option>
+                        <option value="Tridev">Tridev</option>
+                        <option value="Ravi">Ravi</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="camera-section" id="camera-area">
                 <label style="display:block; margin-bottom:5px; font-size:12px; color:#94a3b8;">Document Verification (ID Proof)</label>
                 <video id="video-preview" autoplay playsinline></video>
@@ -561,7 +573,7 @@
                 <div>Mob. No: <span id="slip-mob-val"></span></div>
                 <div style="text-align:right;">
                     <div style="font-size:16px; margin-bottom:15px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
-                    <div style="border-top:1px dashed #000; width:120px; padding-top:5px; font-style:italic;">Chandan<br><span style="font-size:10px;">Signature</span></div>
+                    <div style="border-top:1px dashed #000; width:120px; padding-top:5px; font-style:italic;"><span id="slip-signature-renderer">Chandan</span><br><span style="font-size:10px;">Signature</span></div>
                 </div>
             </div>
         </div>
@@ -775,6 +787,7 @@
             document.getElementById('pay-mode').disabled = isOccupied;
             document.getElementById('receipt-date').disabled = isOccupied;
             document.getElementById('next-payment-date').disabled = isOccupied;
+            document.getElementById('slip-signature-picker').disabled = isOccupied;
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = isOccupied);
             
             if (isOccupied) {
@@ -795,6 +808,7 @@
                 document.getElementById('pay-mode').value = data.payMode || 'UPI';
                 document.getElementById('receipt-date').value = data.receiptDate || '';
                 document.getElementById('next-payment-date').value = data.nextPaymentDate || '';
+                document.getElementById('slip-signature-picker').value = data.signatureAuthority || 'Chandan';
                 
                 const activeShifts = data.shift ? data.shift.split(', ') : [];
                 document.querySelectorAll('input[name="shifts"]').forEach(b => {
@@ -824,6 +838,7 @@
                 document.getElementById('fee-paid').value = 700;
                 document.getElementById('fee-due').value = 0;
                 document.getElementById('pay-mode').value = 'UPI';
+                document.getElementById('slip-signature-picker').value = 'Chandan';
                 
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('receipt-date').value = today;
@@ -892,6 +907,7 @@
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             const nextDate = document.getElementById('next-payment-date').value;
+            const chosenSig = document.getElementById('slip-signature-picker').value;
             
             let selectedShifts = [];
             document.querySelectorAll('input[name="shifts"]:checked').forEach(cb => {
@@ -920,6 +936,7 @@
                 payMode: document.getElementById('pay-mode').value,
                 receiptDate: document.getElementById('receipt-date').value,
                 nextPaymentDate: nextDate,
+                signatureAuthority: chosenSig,
                 docImage: capturedImageBase64
             };
 
@@ -929,11 +946,10 @@
             renderSeats();
             closeModal();
             
-            // SECURITY ORDER FIXED:
-            // 1. Pehle Direct Native Image Download process chalega
+            // DOWNLOAD RE-ENGINEERED MECHANISM
             downloadSlipImage(name, currentSeatNumber);
 
-            // 2. Exact 1 second baad WhatsApp window trigger hogi, jisse browser block nahi karega
+            // WhatsApp triggers 1.2 seconds after download file stream finishes safely
             setTimeout(() => {
                 const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे गैलरी से अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
                 
@@ -943,7 +959,7 @@
                 document.body.appendChild(waLink);
                 waLink.click();
                 waLink.remove();
-            }, 1000);
+            }, 1200);
         }
 
         function clearSeat() {
@@ -977,6 +993,7 @@
             document.getElementById('slip-mob-val').innerText = data.phone;
             document.getElementById('slip-total-val').innerText = data.paidFee;
             document.getElementById('slip-mode-val').innerText = data.payMode;
+            document.getElementById('slip-signature-renderer').innerText = data.signatureAuthority || 'Chandan';
         }
 
         function triggerSlipDownloadOnly() {
@@ -990,37 +1007,34 @@
             const slipElement = document.getElementById('library-slip-element');
             const container = document.getElementById('receipt-template-container');
             
+            // Bring element to visible layout for capturing thread safely
             container.style.left = "0px";
             container.style.top = "0px";
 
             html2canvas(slipElement, { 
                 useCORS: true, 
-                scale: 3, // Premium quality text print
-                logging: false
+                scale: 3, 
+                logging: false,
+                useOverflow: true
             }).then(canvas => {
-                // High-performance canvas conversion to high-quality Blob object
-                canvas.toBlob((blob) => {
-                    if (!blob) return;
-                    
-                    const blobUrl = URL.createObjectURL(blob);
-                    const fileLink = document.createElement('a');
-                    fileLink.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
-                    fileLink.href = blobUrl;
-                    
-                    document.body.appendChild(fileLink);
-                    fileLink.click();
-                    
-                    // Instant memory footprint cleanup
-                    setTimeout(() => {
-                        fileLink.remove();
-                        URL.revokeObjectURL(blobUrl);
-                        container.style.left = "-9999px";
-                        container.style.top = "-9999px";
-                    }, 150);
-                }, 'image/png');
+                // FIXED GALLERY DOWNLOAD: Raw Base64 image data string directly pipe to link
+                const rawImageUri = canvas.toDataURL("image/png");
+                
+                const fileLink = document.createElement('a');
+                fileLink.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
+                fileLink.href = rawImageUri;
+                
+                document.body.appendChild(fileLink);
+                fileLink.click();
+                
+                setTimeout(() => {
+                    fileLink.remove();
+                    container.style.left = "-9999px";
+                    container.style.top = "-9999px";
+                }, 200);
 
             }).catch(err => {
-                console.error("Rendering canvas context trace broke:", err);
+                console.error("Canvas context generation error trace:", err);
             });
         }
 
