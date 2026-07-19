@@ -218,6 +218,10 @@
             display: flex;
             gap: 10px;
         }
+        .form-row.button-flex {
+            margin-top: 15px;
+            gap: 10px;
+        }
         .form-group {
             flex: 1;
             display: flex;
@@ -293,6 +297,8 @@
         .btn-save { background-color: #10b981; color: white; }
         .btn-clear { background-color: #ef4444; color: white; }
         .btn-cancel { background-color: #475569; color: white; }
+        .btn-whatsapp { background-color: #25d366; color: white; display: none; }
+        .btn-download-slip { background-color: #eab308; color: black; display: none; }
         
         /* Locked status message */
         .lock-msg {
@@ -455,6 +461,12 @@
                     <button type="button" class="cam-btn" id="start-cam-btn" onclick="initiateCamera()">Open Camera</button>
                     <button type="button" class="cam-btn" id="snap-btn" onclick="captureSnapshot()" style="display:none; background:#10b981;">Take Photo</button>
                 </div>
+            </div>
+
+            <!-- Dedicated Action Buttons for Locked View -->
+            <div class="form-row button-flex">
+                <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="triggerWhatsAppOnly()">Send WhatsApp Message</button>
+                <button class="btn btn-download-slip" id="download-slip-btn" onclick="triggerSlipDownloadOnly()">Download Slip</button>
             </div>
 
             <div class="btn-group">
@@ -674,7 +686,7 @@
 
             const isOccupied = !!libraryData[seatNum];
 
-            // Lock input details if already occupied/saved to prevent duplicate mismatch trigger
+            // Toggle element controls state base on lock
             document.getElementById('student-name').disabled = isOccupied;
             document.getElementById('student-address').disabled = isOccupied;
             document.getElementById('student-phone').disabled = isOccupied;
@@ -691,6 +703,10 @@
                 document.getElementById('save-btn').style.display = 'none';
                 document.getElementById('admin-verification-row').style.display = 'none';
                 document.getElementById('camera-area').style.display = 'none';
+                
+                // Show dynamic communication triggers on locked view
+                document.getElementById('whatsapp-btn').style.display = 'inline-block';
+                document.getElementById('download-slip-btn').style.display = 'inline-block';
                 
                 document.getElementById('student-name').value = libraryData[seatNum].name;
                 document.getElementById('student-address').value = libraryData[seatNum].address || 'Bhagalpur';
@@ -717,6 +733,10 @@
                 document.getElementById('save-btn').style.display = 'inline-block';
                 document.getElementById('admin-verification-row').style.display = 'flex';
                 document.getElementById('camera-area').style.display = 'block';
+                
+                // Hide dynamic communication triggers on fresh register view
+                document.getElementById('whatsapp-btn').style.display = 'none';
+                document.getElementById('download-slip-btn').style.display = 'none';
                 
                 document.getElementById('student-name').value = '';
                 document.getElementById('student-address').value = 'Bhagalpur';
@@ -827,7 +847,7 @@
 
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
             
-            // Generate and send digital slip link
+            // Build temporary elements and generate workflow
             generateDigitalSlipImageAndTrigger(currentSeatNumber);
         }
 
@@ -849,6 +869,46 @@
                 closeModal();
                 renderSeats();
             }
+        }
+
+        // Dedicated helper function for manual WhatsApp updates on locked cards
+        function triggerWhatsAppOnly() {
+            const data = libraryData[currentSeatNumber];
+            if (!data) return;
+            const whatsappMsg = `*तक्षशिला लाईब्रेरी, भागलपुर* \n\nप्रिय *${data.name}*,\nआपकी Seat No. *${currentSeatNumber}* (${data.shift}) का पेमेंट विवरण अपडेटेड है।\n\n*विवरण:*\n• जमा राशि: ₹${data.paidFee} (${data.payMode})\n• बकाया (Dues): ₹${data.due}\n• अगले भुगतान की तिथि: ${data.nextPaymentDate}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी`;
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=91${data.phone}&text=${encodeURIComponent(whatsappMsg)}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // Dedicated helper function for manual Slip download on locked cards
+        function triggerSlipDownloadOnly() {
+            const data = libraryData[currentSeatNumber];
+            if (!data) return;
+
+            document.getElementById('slip-no-val').innerText = data.slipNo || '---';
+            document.getElementById('slip-date-val').innerText = data.receiptDate || '--/--/----';
+            document.getElementById('slip-name-val').innerText = data.name;
+            document.getElementById('slip-address-val').innerText = data.address;
+            document.getElementById('slip-seat-val').innerText = currentSeatNumber;
+            document.getElementById('slip-shift-val').innerText = data.shift;
+            
+            document.getElementById('table-monthly').innerText = '₹' + data.monthlyFee;
+            document.getElementById('table-validity').innerText = data.receiptDate || '-';
+            document.getElementById('table-next-date').innerText = data.nextPaymentDate;
+            document.getElementById('table-dues').innerText = '₹' + data.due;
+            
+            document.getElementById('slip-mob-val').innerText = data.phone;
+            document.getElementById('slip-total-val').innerText = data.paidFee;
+            document.getElementById('slip-mode-val').innerText = data.payMode;
+
+            const target = document.getElementById('library-slip-element');
+            html2canvas(target, { scale: 2, useCORS: true }).then(canvas => {
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
+                link.href = dataUrl;
+                link.click();
+            });
         }
 
         function generateDigitalSlipImageAndTrigger(seatNum) {
