@@ -16,24 +16,58 @@
         }
         h1 {
             color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        .controls-panel {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            max-width: 900px;
+            width: 100%;
             margin-bottom: 20px;
+            box-sizing: border-box;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            justify-content: space-between;
         }
         .stats {
-            margin-bottom: 20px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #34495e;
         }
+        .search-box {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            width: 250px;
+            font-size: 14px;
+        }
+        .backup-btns button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 12px;
+            margin-left: 5px;
+        }
+        .btn-download { background-color: #3498db; color: white; }
+        .btn-upload { background-color: #9b59b6; color: white; }
+        
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 12px;
             max-width: 900px;
             width: 100%;
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-sizing: border-box;
         }
         .seat {
             aspect-ratio: 1;
@@ -41,14 +75,14 @@
             color: white;
             display: flex;
             flex-direction: column;
-            justify-center: center;
+            justify-content: center;
             align-items: center;
             border-radius: 8px;
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.2s, background-color 0.2s;
-            font-size: 14px;
-            justify-content: center;
+            font-size: 16px;
+            position: relative;
         }
         .seat:hover {
             transform: scale(1.05);
@@ -56,15 +90,26 @@
         .seat.occupied {
             background-color: #e74c3c;
         }
+        .seat.hidden {
+            display: none !important;
+        }
         .seat-name {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: normal;
             margin-top: 4px;
-            max-width: 60px;
+            max-width: 70px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
+        .seat-shift {
+            font-size: 8px;
+            background: rgba(0,0,0,0.2);
+            padding: 1px 4px;
+            border-radius: 3px;
+            margin-top: 2px;
+        }
+
         /* Modal Style */
         .modal {
             display: none;
@@ -73,37 +118,51 @@
             background-color: rgba(0,0,0,0.5);
             justify-content: center;
             align-items: center;
+            z-index: 1000;
         }
         .modal-content {
             background: white;
             padding: 25px;
             border-radius: 10px;
-            width: 300px;
+            width: 320px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
         .modal-content h3 {
             margin-top: 0;
             color: #2c3e50;
+            border-bottom: 2px solid #f4f7f6;
+            padding-bottom: 10px;
         }
-        .modal-content input {
+        .modal-content label {
+            font-size: 12px;
+            color: #7f8c8d;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        .modal-content input, .modal-content select {
             width: 100%;
             padding: 8px;
-            margin: 10px 0;
+            margin: 5px 0 10px 0;
             box-sizing: border-box;
             border: 1px solid #ccc;
             border-radius: 4px;
+            font-size: 14px;
         }
         .btn-group {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
+            margin-top: 20px;
+            gap: 5px;
         }
         .btn {
-            padding: 8px 15px;
+            padding: 10px 15px;
             border: none;
             border-radius: 4px;
             cursor: pointer;
             font-weight: bold;
+            flex: 1;
+            font-size: 13px;
         }
         .btn-save { background-color: #2ecc71; color: white; }
         .btn-clear { background-color: #e74c3c; color: white; }
@@ -113,16 +172,40 @@
 <body>
 
     <h1>Takshila Smart Library</h1>
-    <div class="stats">Total Seats: 89 | Occupied: <span id="occupied-count">0</span></div>
+    
+    <!-- Controls & Search Panel -->
+    <div class="controls-panel">
+        <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
+        <input type="text" id="search-input" class="search-box" placeholder="Search Name, Phone or Seat..." oninput="filterSeats()">
+        <div class="backup-btns">
+            <button class="btn-download" onclick="exportBackup()">Backup Data</button>
+            <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
+            <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
+        </div>
+    </div>
 
+    <!-- Grid Layout -->
     <div class="grid-container" id="seats-grid"></div>
 
     <!-- Student Detail Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
-            <input type="text" id="student-name" placeholder="Student Name">
-            <input type="tel" id="student-phone" placeholder="Phone Number">
+            
+            <label>Student Name *</label>
+            <input type="text" id="student-name" placeholder="Enter Full Name">
+            
+            <label>Phone Number</label>
+            <input type="tel" id="student-phone" placeholder="Enter 10-digit Mobile">
+
+            <label>Select Shift</label>
+            <select id="student-shift">
+                <option value="Full Day">Full Day</option>
+                <option value="Morning">Morning (6 AM - 12 PM)</option>
+                <option value="Evening">Evening (1 PM - 7 PM)</option>
+                <option value="Night">Night (8 PM - 6 AM)</option>
+            </select>
+
             <div class="btn-group">
                 <button class="btn btn-save" onclick="saveSeat()">Save</button>
                 <button class="btn btn-clear" onclick="clearSeat()">Vacant</button>
@@ -138,7 +221,7 @@
 
         const gridContainer = document.getElementById('seats-grid');
 
-        // Generate 89 Seats
+        // Render All Seats
         function renderSeats() {
             gridContainer.innerHTML = '';
             let occupiedCount = 0;
@@ -146,16 +229,31 @@
             for (let i = 1; i <= TOTAL_SEATS; i++) {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
+                seat.setAttribute('data-seat-num', i);
                 seat.innerText = i;
 
                 if (libraryData[i]) {
                     seat.classList.add('occupied');
                     occupiedCount++;
                     
+                    // Add Name
                     const nameSpan = document.createElement('span');
                     nameSpan.classList.add('seat-name');
                     nameSpan.innerText = libraryData[i].name;
                     seat.appendChild(nameSpan);
+
+                    // Add Shift Badge
+                    if(libraryData[i].shift) {
+                        const shiftSpan = document.createElement('span');
+                        shiftSpan.classList.add('seat-shift');
+                        shiftSpan.innerText = libraryData[i].shift;
+                        seat.appendChild(shiftSpan);
+                    }
+                    
+                    // For searching
+                    seat.setAttribute('data-search-string', `${i} ${libraryData[i].name.toLowerCase()} ${libraryData[i].phone || ''}`);
+                } else {
+                    seat.setAttribute('data-search-string', `${i}`);
                 }
 
                 seat.onclick = () => openModal(i);
@@ -163,18 +261,25 @@
             }
 
             document.getElementById('occupied-count').innerText = occupiedCount;
+            document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedCount;
+            
+            // Re-apply filter if user is currently searching
+            filterSeats();
         }
 
+        // Open Booking Modal
         function openModal(seatNum) {
             currentSeatNumber = seatNum;
             document.getElementById('modal-title').innerText = `Seat Number ${seatNum}`;
             
             if (libraryData[seatNum]) {
                 document.getElementById('student-name').value = libraryData[seatNum].name;
-                document.getElementById('student-phone').value = libraryData[seatNum].phone;
+                document.getElementById('student-phone').value = libraryData[seatNum].phone || '';
+                document.getElementById('student-shift').value = libraryData[seatNum].shift || 'Full Day';
             } else {
                 document.getElementById('student-name').value = '';
                 document.getElementById('student-phone').value = '';
+                document.getElementById('student-shift').value = 'Full Day';
             }
             
             document.getElementById('student-modal').style.display = 'flex';
@@ -184,31 +289,88 @@
             document.getElementById('student-modal').style.display = 'none';
         }
 
+        // Save Data
         function saveSeat() {
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
+            const shift = document.getElementById('student-shift').value;
 
             if (name === "") {
                 alert("Please enter student name");
                 return;
             }
 
-            libraryData[currentSeatNumber] = { name, phone };
+            libraryData[currentSeatNumber] = { name, phone, shift };
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
             closeModal();
             renderSeats();
         }
 
+        // Make Seat Vacant
         function clearSeat() {
             if (libraryData[currentSeatNumber]) {
-                delete libraryData[currentSeatNumber];
-                localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+                if(confirm(`Are you sure you want to vacant Seat ${currentSeatNumber}?`)) {
+                    delete libraryData[currentSeatNumber];
+                    localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+                    closeModal();
+                    renderSeats();
+                }
+            } else {
+                closeModal();
             }
-            closeModal();
-            renderSeats();
         }
 
-        // Initial Render
+        // Search Filter Logic
+        function filterSeats() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const seats = document.querySelectorAll('.seat');
+
+            seats.forEach(seat => {
+                const searchStr = seat.getAttribute('data-search-string');
+                if (searchStr.includes(query)) {
+                    seat.classList.remove('hidden');
+                } else {
+                    seat.classList.add('hidden');
+                }
+            });
+        }
+
+        // Backup Data Download Feature
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(libraryData));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `takshila_library_backup_${new Date().toISOString().slice(0,10)}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        // Restore Data Feature
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    if (typeof parsedData === 'object' && parsedData !== null) {
+                        libraryData = parsedData;
+                        localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+                        renderSeats();
+                        alert("Data successfully restored!");
+                    } else {
+                        alert("Invalid backup file format.");
+                    }
+                } catch (err) {
+                    alert("Error reading backup file.");
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Initial System Boot
         renderSeats();
     </script>
 </body>
