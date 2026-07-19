@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V7</title>
+    <title>Takshila Smart Library PRO V8</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -237,6 +237,34 @@
             box-sizing: border-box;
             border: 1px solid #2a3b5c;
         }
+        
+        /* POPUP FOR MOBILE SLIP PREVIEW */
+        .slip-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .slip-preview-content {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+        }
+        .slip-preview-content img {
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
         .modal-content h3 {
             margin-top: 0;
             color: #ffffff;
@@ -368,7 +396,7 @@
             font-weight: 800;
             text-transform: uppercase;
             box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
-            display: none; /* Initially Hidden */
+            display: none; 
             width: 100%;
             animation: bounce-glow 1s infinite alternate;
         }
@@ -559,7 +587,7 @@
 
             <!-- BUTTON ACTIONS GROUP -->
             <div class="form-row button-flex">
-                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveAndDownloadSlipOnly()">📥 Save & Download Slip</button>
+                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveAndDownloadSlipOnly()">📥 Save & Generate Slip Image</button>
                 <button class="btn btn-whatsapp-trigger" id="whatsapp-direct-btn" onclick="openWhatsAppChatDirectly()">✅ Open WhatsApp Chat</button>
             </div>
 
@@ -568,6 +596,18 @@
                 <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()">Vacant</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- NEW POPUP FOR MOBILE SLIP SAVING -->
+    <div class="slip-preview-modal" id="slip-preview-popup">
+        <div class="slip-preview-content">
+            <h3 style="color: #f59e0b; margin-top:0;">रसीद तैयार है!</h3>
+            <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 10px;">
+                नीचे दी गई रसीद पर <b>1 सेकंड के लिए उंगली दबाकर रखें (Long Press)</b> और फिर <b>Download/Save Image</b> पर क्लिक करें।
+            </p>
+            <img id="generated-slip-img" src="" alt="Library Receipt">
+            <button class="btn btn-cancel" onclick="closeSlipPreviewPopup()" style="width:100%;">बंद करें (Close)</button>
         </div>
     </div>
 
@@ -584,7 +624,7 @@
                 <div>Date: <span id="slip-date-val">--/--/----</span></div>
             </div>
             <div class="slip-field"><strong>Name:</strong> <span id="slip-name-val"></span></div>
-            <div class="slip-field"><strong>Address:</strong> <span id="slip-address-val"></span></div>
+            <div class="slip-address" style="display:none;"><span id="slip-address-val"></span></div>
             
             <div style="display:flex; justify-content:space-between; margin:6px 0;">
                 <div style="flex:1;" class="slip-field"><strong>Seat No:</strong> <span id="slip-seat-val"></span></div>
@@ -638,7 +678,6 @@
 
         const gridContainer = document.getElementById('seats-grid');
 
-        // Handle shift exclusion rules smoothly
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
                 const allBox = document.getElementById('shift-all-box');
@@ -1027,7 +1066,7 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        // IMPROVED: ERROR BALANCING FLOW TO PREVENT CODES CRASHING ON MOBILE BROWSERS
+        // IMPROVED MOBILE FALLBACK GENERATION FOR EASY SAVING
         function executeSaveAndDownloadSlipOnly() {
             if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
                 const isSaved = saveSeatAutomaticOnly();
@@ -1039,15 +1078,13 @@
 
             fillSlipData(record);
             
-            // Build text message link payload ready
             const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
             cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
 
             const target = document.getElementById('library-slip-element');
             
-            // Safe execution check for library availability
             if (typeof html2canvas === "undefined") {
-                console.warn("html2canvas library not loaded properly. Diverting flow to text directly.");
+                alert("रेंडर लाइब्रेरी लोड नहीं हो सकी, पर आप वॉट्सऐप मैसेज भेज सकते हैं।");
                 document.getElementById('whatsapp-direct-btn').style.display = 'block';
                 return;
             }
@@ -1059,19 +1096,25 @@
                 allowTaint: true,
                 backgroundColor: "#fff7c2"
             }).then(canvas => {
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Show in Popup for Long Press Save
+                const previewImg = document.getElementById('generated-slip-img');
+                previewImg.src = dataUrl;
+                document.getElementById('slip-preview-popup').style.display = 'flex';
+
+                // Try auto-download just in case browser supports it
                 try {
-                    const dataUrl = canvas.toDataURL('image/png');
                     const link = document.createElement('a');
-                    link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
+                    link.download = `Slip_Seat_${currentSeatNumber}.png`;
                     link.href = dataUrl;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
                 } catch(e) {
-                    console.error("Native download failed, continuing flow.", e);
+                    console.log("Auto-download blocked, relying on manual long-press.");
                 }
                 
-                // Keep UI reliable by displaying trigger button anyway
                 document.getElementById('whatsapp-direct-btn').style.display = 'block';
             }).catch(err => {
                 console.error("Canvas parsing failed.", err);
@@ -1079,11 +1122,15 @@
             });
         }
 
+        function closeSlipPreviewPopup() {
+            document.getElementById('slip-preview-popup').style.display = 'none';
+        }
+
         function openWhatsAppChatDirectly() {
             if(cachedWhatsAppUrl) {
                 window.open(cachedWhatsAppUrl, '_blank');
             } else {
-                alert("Please prepare data payload properly.");
+                alert("विवरण तैयार नहीं है।");
             }
         }
 
@@ -1108,13 +1155,12 @@
                     renderSeats();
                     alert("System configuration recovery absolute!");
                 } catch (err) {
-                    alert("Faulty configuration architecture schema standard payload rejected.");
+                    alert("Faulty configuration payload rejected.");
                 }
             };
             reader.readAsText(file);
         }
 
-        // Initialize display layout render structure safely
         window.onload = function() {
             renderSeats();
         };
