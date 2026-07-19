@@ -993,9 +993,8 @@
             document.getElementById('slip-signature-renderer').innerText = record.signature;
         }
 
-        // ONE CLICK PIPELINE - FIXED DOWNLOAD & WHATSAPP APPS REDIRECT FLOW
+        // ONE CLICK PIPELINE - AUTOMATIC DOWNLOAD & WHATSAPP
         function executeSaveDownloadAndWhatsapp() {
-            // 1. डेटा सुरक्षित रूप से लोकल स्टोरेज में सेव करें
             if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
                 const isSaved = saveSeatAutomaticOnly();
                 if (!isSaved) return;
@@ -1004,15 +1003,13 @@
             const record = libraryData[currentSeatNumber];
             if (!record) return;
 
-            // 2. स्लिप टेम्पलेट में डेटा भरें
             fillSlipData(record);
             
-            // 3. वॉट्सऐप मैसेज स्ट्रिंग तैयार करें
+            // Welcome Message & Details
             const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
             const encoded = encodeURIComponent(msg);
             const whatsappUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encoded}`;
 
-            // 4. पहले कैनवास से स्लिप को रेंडर करके डाउनलोड करें, फिर तुरंत वॉट्सऐप ओपन करें
             const target = document.getElementById('library-slip-element');
             
             html2canvas(target, { 
@@ -1022,10 +1019,9 @@
                 allowTaint: true,
                 backgroundColor: "#fff7c2"
             }).then(canvas => {
-                // इमेज यूआरएल तैयार करें
                 const dataUrl = canvas.toDataURL('image/png');
                 
-                // डाउनलोड लिंक बनाकर एंकर क्लिक करें
+                // Automatic Receipt Slip Image Download Triggers
                 const link = document.createElement('a');
                 link.download = `Slip_Seat_${currentSeatNumber}_${record.name.replace(/\s+/g, '_')}.png`;
                 link.href = dataUrl;
@@ -1033,14 +1029,12 @@
                 link.click();
                 document.body.removeChild(link);
 
-                // डाउनलोड स्टार्ट होते ही 300ms के अंदर वॉट्सऐप पर रीडायरेक्ट कर दें
-                setTimeout(() => {
-                    window.location.href = whatsappUrl; 
-                }, 300);
+                // Automatic Open WhatsApp Chat instantly
+                window.open(whatsappUrl, '_blank');
 
             }).catch(err => {
-                console.log("Canvas mapping error, running straight to whatsapp url.");
-                window.location.href = whatsappUrl;
+                console.log("Canvas error, opening WhatsApp link directly.");
+                window.open(whatsappUrl, '_blank');
             });
         }
 
@@ -1071,7 +1065,6 @@
             reader.readAsText(file);
         }
 
-        // Initialize App on load
         renderSeats();
     </script>
 </body>
