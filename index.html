@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO</title>
+    <title>Takshila Smart Library PRO V3</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f4f8;
+            background-color: #0d1321; /* Dark Theme Background from Screenshot */
+            color: #ffffff;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -17,17 +18,44 @@
             align-items: center;
         }
         h1 {
-            color: #1a2a3a;
-            margin-bottom: 5px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 24px;
         }
-        .controls-panel {
-            background: white;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        
+        /* Financial & Control Panel Styling */
+        .dashboard-container {
             max-width: 1000px;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
             margin-bottom: 20px;
+        }
+        .finance-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            width: 100%;
+        }
+        .fin-card {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            text-align: center;
+            border-left: 5px solid #2563eb;
+        }
+        .fin-card.daily { border-left-color: #10b981; }
+        .fin-card.month { border-left-color: #eab308; }
+        .fin-card h4 { margin: 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; }
+        .fin-card p { margin: 5px 0 0 0; font-size: 22px; font-weight: bold; color: #ffffff; }
+
+        .controls-panel {
+            background: #172237;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             box-sizing: border-box;
             display: flex;
             flex-wrap: wrap;
@@ -36,16 +64,23 @@
             justify-content: space-between;
         }
         .stats {
-            font-size: 15px;
+            font-size: 14px;
             font-weight: bold;
-            color: #34495e;
+            color: #94a3b8;
         }
         .search-box {
-            padding: 10px 15px;
-            border: 1px solid #cbd5e1;
+            padding: 12px 15px;
+            border: 1px solid #2a3b5c;
             border-radius: 8px;
-            width: 280px;
+            width: 100%;
+            max-width: 350px;
             font-size: 14px;
+            background-color: #10192c;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .search-box::placeholder {
+            color: #566885;
         }
         .backup-btns button {
             padding: 9px 15px;
@@ -59,74 +94,99 @@
         .btn-download { background-color: #2563eb; color: white; }
         .btn-upload { background-color: #7c3aed; color: white; }
         
+        /* Screenshot Exact Seat Layout & Design */
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
-            gap: 15px;
-            max-width: 1000px;
+            grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+            gap: 12px;
             width: 100%;
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+            background: #10192c;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
             box-sizing: border-box;
         }
         .seat {
-            aspect-ratio: 1;
-            background-color: #10b981;
-            color: white;
+            aspect-ratio: 0.78; /* Rectangular aspect ratio matching the screenshot */
+            background-color: #1b2640; /* Empty/Available seat dark slate color */
+            border: 1.5px solid #2e3f64;
+            color: #ffffff;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: space-between;
             align-items: center;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.2s, background-color 0.2s;
-            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s, border-color 0.2s;
+            font-size: 18px;
             position: relative;
-            padding: 5px;
+            padding: 12px 6px 8px 6px;
             box-sizing: border-box;
             text-align: center;
         }
-        .seat:hover { transform: scale(1.05); }
-        .seat.occupied { background-color: #ef4444; }
+        .seat:hover { transform: scale(1.04); }
+        
+        /* Occupied Shift Styles (Blue/Purple Variant from screen) */
+        .seat.occupied { 
+            background-color: #1c1d42; 
+            border-color: #3f4294;
+        }
+        
+        /* 2 Din Pehle Warning Alert (Yellow Border from screenshot) */
+        .seat.warning-alert { 
+            background-color: #242223;
+            border-color: #d4a327; 
+        }
+        
+        /* Month Lagne ke Baad Expired (Dark Red Background & Red Dashed Border) */
+        .seat.expired-alert { 
+            background-color: #2c161a !important; 
+            border: 2px dashed #e53e3e !important;
+        }
+        
         .seat.hidden { display: none !important; }
         
         .seat-name {
             font-size: 10px;
             font-weight: normal;
-            margin-top: 3px;
-            max-width: 85px;
+            color: #94a3b8;
+            max-width: 75px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        .seat-shift {
-            font-size: 8px;
-            background: rgba(0,0,0,0.25);
-            padding: 2px 5px;
-            border-radius: 4px;
-            margin-top: 3px;
-            font-weight: normal;
-        }
         
-        .due-alert {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #f59e0b;
-            color: white;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-size: 9px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            animation: arrow-blink 1s infinite alternate;
+        /* Screenshot Indicator Dot/Line Placeholder style */
+        .seat-indicator-line {
+            width: 30px;
+            height: 4px;
+            background-color: #4a5d7e;
+            border-radius: 2px;
+            margin: 4px 0;
         }
-        @keyframes arrow-blink {
-            0% { transform: scale(0.9); background-color: #d97706; }
-            100% { transform: scale(1.1); background-color: #ef4444; }
+        .seat.occupied .seat-indicator-line { background-color: #38bdf8; }
+        .seat.warning-alert .seat-indicator-line { background-color: #eab308; }
+        .seat.expired-alert .seat-indicator-line { background-color: #ef4444; }
+        
+        /* Due Arrow and Amount Blinking Tag */
+        .due-blink-tag {
+            background: #3a1c24;
+            color: #f87171;
+            border: 1px solid #7f1d1d;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: auto;
+            animation: text-pulse 1s infinite alternate;
+        }
+        @keyframes text-pulse {
+            0% { opacity: 0.4; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
         /* Modal Layout */
@@ -134,26 +194,28 @@
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(15, 23, 42, 0.6);
+            background-color: rgba(0, 0, 0, 0.75);
             justify-content: center;
             align-items: center;
             z-index: 1000;
             overflow-y: auto;
         }
         .modal-content {
-            background: white;
+            background: #172237;
+            color: white;
             padding: 25px;
-            border-radius: 12px;
+            border-radius: 16px;
             width: 460px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             box-sizing: border-box;
+            border: 1px solid #2a3b5c;
         }
         .modal-content h3 {
             margin-top: 0;
-            color: #1e293b;
-            border-bottom: 2px solid #f1f5f9;
+            color: #ffffff;
+            border-bottom: 1px solid #2a3b5c;
             padding-bottom: 10px;
         }
         .form-row {
@@ -168,24 +230,26 @@
         }
         .modal-content label {
             font-size: 11px;
-            color: #64748b;
+            color: #94a3b8;
             font-weight: 600;
             margin-bottom: 4px;
         }
         .modal-content input, .modal-content select {
-            padding: 7px 10px;
+            padding: 8px 10px;
             box-sizing: border-box;
-            border: 1px solid #cbd5e1;
+            border: 1px solid #2a3b5c;
             border-radius: 6px;
             font-size: 13px;
+            background: #10192c;
+            color: white;
         }
         
         .camera-section {
             margin-top: 15px;
-            background: #f8fafc;
+            background: #10192c;
             padding: 10px;
             border-radius: 8px;
-            border: 1px dashed #cbd5e1;
+            border: 1px dashed #2a3b5c;
             text-align: center;
         }
         #video-preview {
@@ -205,7 +269,7 @@
             margin-top: 5px;
         }
         .cam-btn {
-            background: #475569;
+            background: #334155;
             color: white;
             border: none;
             padding: 6px 12px;
@@ -232,9 +296,9 @@
         }
         .btn-save { background-color: #10b981; color: white; }
         .btn-clear { background-color: #ef4444; color: white; }
-        .btn-cancel { background-color: #64748b; color: white; }
+        .btn-cancel { background-color: #475569; color: white; }
 
-        /* Hidden Receipt Style for Generation (Matching Yellow Slip image) */
+        /* Hidden Receipt Style */
         #receipt-template-container {
             position: absolute;
             left: -9999px;
@@ -254,70 +318,48 @@
             border-bottom: 2px solid #000;
             padding-bottom: 8px;
         }
-        .slip-header h2 {
-            margin: 0;
-            font-size: 26px;
-            font-weight: bold;
-        }
-        .slip-header p {
-            margin: 3px 0;
-            font-size: 11px;
-            font-weight: bold;
-        }
-        .slip-meta {
-            display: flex;
-            justify-content: space-between;
-            margin: 12px 0;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        .slip-field {
-            margin: 6px 0;
-            font-size: 14px;
-            border-bottom: 1px dotted #000;
-            padding-bottom: 2px;
-        }
-        .slip-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-        .slip-table th, .slip-table td {
-            border: 1px solid #000;
-            padding: 6px;
-            font-size: 13px;
-            text-align: left;
-        }
-        .slip-table th {
-            background-color: rgba(0,0,0,0.05);
-        }
-        .slip-footer {
-            margin-top: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            font-weight: bold;
-            font-size: 14px;
-        }
+        .slip-header h2 { margin: 0; font-size: 26px; font-weight: bold; }
+        .slip-header p { margin: 3px 0; font-size: 11px; font-weight: bold; }
+        .slip-meta { display: flex; justify-content: space-between; margin: 12px 0; font-size: 14px; font-weight: bold; }
+        .slip-field { margin: 6px 0; font-size: 14px; border-bottom: 1px dotted #000; padding-bottom: 2px; }
+        .slip-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .slip-table th, .slip-table td { border: 1px solid #000; padding: 6px; font-size: 13px; text-align: left; }
+        .slip-table th { background-color: rgba(0,0,0,0.05); }
+        .slip-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
     <h1>Takshila Smart Library PRO</h1>
     
-    <div class="controls-panel">
-        <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
-        <input type="text" id="search-input" class="search-box" placeholder="Search Student, Phone or Due..." oninput="filterSeats()">
-        <div class="backup-btns">
-            <button class="btn-download" onclick="exportBackup()">Backup Data</button>
-            <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
-            <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
+    <div class="dashboard-container">
+        <!-- Live Financial Analytics Panels -->
+        <div class="finance-panel">
+            <div class="fin-card daily">
+                <h4>Daily Collection Today</h4>
+                <p>₹<span id="daily-amount">0</span></p>
+            </div>
+            <div class="fin-card month">
+                <h4>Monthly Collection (<span id="current-month-label">Month</span>)</h4>
+                <p>₹<span id="monthly-amount">0</span></p>
+            </div>
+        </div>
+
+        <!-- Filters and Configurations -->
+        <div class="controls-panel">
+            <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
+            <input type="text" id="search-input" class="search-box" placeholder="Search student name or seat number..." oninput="filterSeats()">
+            <div class="backup-btns">
+                <button class="btn-download" onclick="exportBackup()">Backup Data</button>
+                <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
+                <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
+            </div>
         </div>
     </div>
 
     <div class="grid-container" id="seats-grid"></div>
 
-    <!-- Main Entry/Edit Modal -->
+    <!-- Edit/Registration Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
@@ -351,7 +393,6 @@
                 </div>
             </div>
 
-            <!-- Fee Breaking Structure As Per Yellow Slip Receipt -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Monthly Fee (₹)</label>
@@ -374,7 +415,7 @@
                 </div>
                 <div class="form-group">
                     <label>Dues (₹)</label>
-                    <input type="number" id="fee-due" value="0" readonly style="background:#e2e8f0; font-weight:bold; color:#b91c1c;">
+                    <input type="number" id="fee-due" value="0" readonly style="background:#10192c; font-weight:bold; color:#ef4444; border-color: #7f1d1d;">
                 </div>
                 <div class="form-group">
                     <label>Payment Mode</label>
@@ -391,13 +432,13 @@
                     <input type="date" id="receipt-date">
                 </div>
                 <div class="form-group">
-                    <label>Next Payment Due Date</label>
+                    <label>Next Payment Due Date *</label>
                     <input type="date" id="next-payment-date">
                 </div>
             </div>
 
             <div class="camera-section">
-                <label style="display:block; margin-bottom:5px; font-size:12px;">Document Verification (ID Proof)</label>
+                <label style="display:block; margin-bottom:5px; font-size:12px; color:#94a3b8;">Document Verification (ID Proof)</label>
                 <video id="video-preview" autoplay playsinline></video>
                 <img id="photo-preview" alt="Verified Document Docs">
                 <div>
@@ -414,7 +455,7 @@
         </div>
     </div>
 
-    <!-- HIDDEN DIGITAL YELLOW RECEIPT GENERATOR CONTAINER -->
+    <!-- HIDDEN DIGITAL YELLOW RECEIPT -->
     <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
@@ -471,50 +512,117 @@
 
         const gridContainer = document.getElementById('seats-grid');
 
-        // Set Default Dates on Load
-        window.onload = function() {
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('receipt-date').value = today;
-            
-            // Default next payment date to next month
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            document.getElementById('next-payment-date').value = nextMonth.toISOString().split('T')[0];
-        };
+        // Core Financial calculation & Auto-Reset Strategy
+        function runFinanceAuditAndReset() {
+            const now = new Date();
+            const todayStr = now.toISOString().split('T')[0];
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth(); 
+            const currentDay = now.getDate();
+
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('current-month-label').innerText = monthNames[currentMonth];
+
+            let dailyTotal = 0;
+            let monthlyTotal = 0;
+
+            if (currentDay === 2) {
+                let wasUpdated = false;
+                for (let seat in libraryData) {
+                    if (libraryData[seat].receiptDate) {
+                        const rDate = new Date(libraryData[seat].receiptDate);
+                        if (rDate.getMonth() !== currentMonth || rDate.getFullYear() !== currentYear) {
+                            libraryData[seat].paidFee = 0; 
+                            wasUpdated = true;
+                        }
+                    }
+                }
+                if (wasUpdated) {
+                    localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+                }
+            }
+
+            for (let seat in libraryData) {
+                const student = libraryData[seat];
+                if(student.receiptDate) {
+                    const rDate = new Date(student.receiptDate);
+                    const paid = parseFloat(student.paidFee) || 0;
+
+                    if(student.receiptDate === todayStr) {
+                        dailyTotal += paid;
+                    }
+
+                    if(rDate.getMonth() === currentMonth && rDate.getFullYear() === currentYear) {
+                        monthlyTotal += paid;
+                    }
+                }
+            }
+
+            document.getElementById('daily-amount').innerText = dailyTotal;
+            document.getElementById('monthly-amount').innerText = monthlyTotal;
+        }
 
         function renderSeats() {
             gridContainer.innerHTML = '';
             let occupiedCount = 0;
+            const todayTime = new Date().setHours(0,0,0,0);
 
             for (let i = 1; i <= TOTAL_SEATS; i++) {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
-                seat.innerText = i;
+                
+                // Seat Number Text
+                const seatNumSpan = document.createElement('span');
+                seatNumSpan.innerText = i;
+                seat.appendChild(seatNumSpan);
+
+                // Indicator line placeholder matching screenshot
+                const indicatorLine = document.createElement('div');
+                indicatorLine.classList.add('seat-indicator-line');
+                seat.appendChild(indicatorLine);
 
                 if (libraryData[i]) {
                     seat.classList.add('occupied');
                     occupiedCount++;
                     
-                    const nameSpan = document.createElement('span');
-                    nameSpan.classList.add('seat-name');
-                    nameSpan.innerText = libraryData[i].name;
-                    seat.appendChild(nameSpan);
+                    // Visual elements injection
+                    if (libraryData[i].nextPaymentDate) {
+                        const dueDate = new Date(libraryData[i].nextPaymentDate).setHours(0,0,0,0);
+                        const diffTime = dueDate - todayTime;
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-                    const shiftSpan = document.createElement('span');
-                    shiftSpan.classList.add('seat-shift');
-                    shiftSpan.innerText = libraryData[i].shift;
-                    seat.appendChild(shiftSpan);
+                        if (diffDays <= 0) {
+                            // Month Expired -> Red Color Card & Border
+                            seat.classList.remove('occupied');
+                            seat.classList.add('expired-alert');
+                        } else if (diffDays <= 2) {
+                            // Warning state -> Yellow Border
+                            seat.classList.remove('occupied');
+                            seat.classList.add('warning-alert');
+                        }
+                    }
 
+                    // Dues logic -> Teer (↑) aur amount blink block at bottom
                     const dueAmt = parseFloat(libraryData[i].due) || 0;
                     if(dueAmt > 0) {
                         const dueTag = document.createElement('div');
-                        dueTag.classList.add('due-alert');
-                        dueTag.innerText = `➔ ₹${dueAmt}`;
+                        dueTag.classList.add('due-blink-tag');
+                        dueTag.innerText = `↑ ₹${dueAmt}`;
                         seat.appendChild(dueTag);
+                    } else {
+                        // Empty spacer name tag if no dues to maintain format stability
+                        const nameSpan = document.createElement('span');
+                        nameSpan.classList.add('seat-name');
+                        nameSpan.innerText = libraryData[i].name;
+                        seat.appendChild(nameSpan);
                     }
                     
                     seat.setAttribute('data-search-string', `${i} ${libraryData[i].name.toLowerCase()} ${libraryData[i].phone || ''} due:${dueAmt}`);
                 } else {
+                    // Placeholder for vacant layout balance
+                    const emptySpacer = document.createElement('span');
+                    emptySpacer.style.height = "14px";
+                    seat.appendChild(emptySpacer);
                     seat.setAttribute('data-search-string', `${i}`);
                 }
 
@@ -524,6 +632,8 @@
 
             document.getElementById('occupied-count').innerText = occupiedCount;
             document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedCount;
+            
+            runFinanceAuditAndReset();
             filterSeats();
         }
 
@@ -600,6 +710,7 @@
                 
                 const today = new Date().toISOString().split('T')[0];
                 document.getElementById('receipt-date').value = today;
+                
                 const nextMonth = new Date();
                 nextMonth.setMonth(nextMonth.getMonth() + 1);
                 document.getElementById('next-payment-date').value = nextMonth.toISOString().split('T')[0];
@@ -637,12 +748,10 @@
             canvas.width = video.videoWidth || 640;
             canvas.height = video.videoHeight || 480;
             canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            
             capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
             const imgPreview = document.getElementById('photo-preview');
             imgPreview.src = capturedImageBase64;
             imgPreview.style.display = 'block';
-            
             stopCamera();
             video.style.display = 'none';
             document.getElementById('snap-btn').style.display = 'none';
@@ -661,7 +770,6 @@
             document.getElementById('student-modal').style.display = 'none';
         }
 
-        // Action Trigger on Clicking Save
         function saveSeat() {
             const name = document.getElementById('student-name').value.trim();
             const address = document.getElementById('student-address').value.trim();
@@ -681,16 +789,12 @@
                 return;
             }
 
-            // 1. Save locally
             libraryData[currentSeatNumber] = { 
                 name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate, docImage: capturedImageBase64 
             };
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
 
-            // 2. Build template & download slip
             generateAndDownloadSlip(name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate);
-
-            // 3. Send WhatsApp API link
             sendWhatsAppMessage(name, phone, shift, paidFee, due, nextPaymentDate);
 
             closeModal();
@@ -698,26 +802,22 @@
         }
 
         function generateAndDownloadSlip(name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate) {
-            // Mapping values inside template elements
-            document.getElementById('slip-no-val').innerText = currentSeatNumber + 100; // auto numbering offset
+            document.getElementById('slip-no-val').innerText = currentSeatNumber + 100;
             document.getElementById('slip-date-val').innerText = receiptDate.split('-').reverse().join('/');
             document.getElementById('slip-name-val').innerText = name;
             document.getElementById('slip-address-val').innerText = address;
             document.getElementById('slip-seat-val').innerText = currentSeatNumber;
             document.getElementById('slip-shift-val').innerText = shift;
-            
             document.getElementById('table-monthly').innerText = `₹${monthlyFee}`;
             document.getElementById('table-reg').innerText = `₹${regFee}`;
             document.getElementById('table-locker').innerText = `₹${lockerFee}`;
             document.getElementById('table-validity').innerText = receiptDate.split('-').reverse().join('/');
             document.getElementById('table-next-date').innerText = nextPaymentDate.split('-').reverse().join('/');
             document.getElementById('table-dues').innerText = `₹${due}`;
-            
             document.getElementById('slip-mob-val').innerText = phone;
             document.getElementById('slip-total-val').innerText = paidFee;
             document.getElementById('slip-mode-val').innerText = payMode;
 
-            // Render hidden DOM to Image using html2canvas
             const target = document.getElementById('library-slip-element');
             html2canvas(target, {scale: 2}).then(canvas => {
                 const link = document.createElement('a');
@@ -729,8 +829,6 @@
 
         function sendWhatsAppMessage(name, phone, shift, paidFee, due, nextPaymentDate) {
             const formattedDate = nextPaymentDate.split('-').reverse().join('/');
-            
-            // Text Structure for WhatsApp Welcome Message
             let text = `*प्रवेश सूचना: तक्षशिला लाईब्रेरी, भागलपुर* 📚\n\n` +
                        `प्रिय *${name}*,\n` +
                        `तक्षशिला लाईब्रेरी में आपका स्वागत है। आपकी सीट सफलतापूर्वक बुक कर दी गई है।\n\n` +
@@ -742,12 +840,8 @@
                        `धन्यवाद!\n*तक्षशिला लाईब्रेरी*`;
 
             const encodedText = encodeURIComponent(text);
-            
-            // Standard formatting for Indian numbers if country code missing
             let finalPhone = phone.trim();
-            if (finalPhone.length === 10) {
-                finalPhone = "91" + finalPhone;
-            }
+            if (finalPhone.length === 10) finalPhone = "91" + finalPhone;
 
             const whatsappUrl = `https://api.whatsapp.com/send?phone=${finalPhone}&text=${encodedText}`;
             window.open(whatsappUrl, '_blank');
@@ -761,9 +855,7 @@
                     closeModal();
                     renderSeats();
                 }
-            } else {
-                closeModal();
-            }
+            } else { closeModal(); }
         }
 
         function filterSeats() {
