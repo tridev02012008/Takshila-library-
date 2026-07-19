@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V4</title>
+    <title>Takshila Smart Library PRO V5</title>
     <!-- html2canvas library for downloading receipts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
@@ -521,7 +521,7 @@
         </div>
     </div>
 
-    <!-- HIDDEN SLIP TEMPLATE FOR HTML2CANVAS -->
+    <!-- HIDDEN SLIP TEMPLATE -->
     <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
@@ -579,7 +579,6 @@
 
         const gridContainer = document.getElementById('seats-grid');
 
-        // Mutual exclusive logic for shifts checkboxes
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
                 const allBox = document.getElementById('shift-all-box');
@@ -628,7 +627,7 @@
                 for (let seat in libraryData) {
                     if (libraryData[seat].receiptDate) {
                         const rDate = new Date(libraryData[seat].receiptDate);
-                        if (rDate.getMonth() !== currentMonth || rDate.getFullYear() !== currentYear) {
+                        if (rDate.getMonth() !== currentMonth || rDate.getFullYear() !== now.getFullYear()) {
                             libraryData[seat].paidFee = 0; 
                             wasUpdated = true;
                         }
@@ -763,7 +762,6 @@
             document.getElementById('snap-btn').style.display = 'none';
             document.getElementById('start-cam-btn').style.display = 'inline-block';
             
-            // Clear checks
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
 
             const isOccupied = !!libraryData[seatNum];
@@ -798,7 +796,6 @@
                 document.getElementById('receipt-date').value = data.receiptDate || '';
                 document.getElementById('next-payment-date').value = data.nextPaymentDate || '';
                 
-                // restore checkbox view
                 const activeShifts = data.shift ? data.shift.split(', ') : [];
                 document.querySelectorAll('input[name="shifts"]').forEach(b => {
                     if(activeShifts.includes(b.value)) b.checked = true;
@@ -896,7 +893,6 @@
             const phone = document.getElementById('student-phone').value.trim();
             const nextDate = document.getElementById('next-payment-date').value;
             
-            // Collect checked shifts
             let selectedShifts = [];
             document.querySelectorAll('input[name="shifts"]:checked').forEach(cb => {
                 selectedShifts.push(cb.value);
@@ -933,15 +929,21 @@
             renderSeats();
             closeModal();
             
-            // PRIORITY FIXED: Open WhatsApp instantly first to completely bypass browser security blocker 
+            // EXECUTION PRIORITY FIXED:
+            // 1. WhatsApp native anchor simulation ensures popup blocker does not trigger
             const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
-            const encodedText = encodeURIComponent(welcomeMsg);
-            window.open(`https://wa.me/91${phone}?text=${encodedText}`, '_blank');
+            
+            const waLink = document.createElement('a');
+            waLink.href = `https://wa.me/91${phone}?text=${encodeURIComponent(welcomeMsg)}`;
+            waLink.target = '_blank';
+            document.body.appendChild(waLink);
+            waLink.click();
+            waLink.remove();
 
-            // Trigger silent high-quality image download to gallery right after opening WhatsApp window
+            // 2. High Priority canvas tracking blocks download simulation inside gallery sandbox
             setTimeout(() => {
                 downloadSlipImage(name, currentSeatNumber);
-            }, 300);
+            }, 350);
         }
 
         function clearSeat() {
@@ -987,19 +989,34 @@
         function downloadSlipImage(studentName, seatNum) {
             const slipElement = document.getElementById('library-slip-element');
             const container = document.getElementById('receipt-template-container');
+            
             container.style.left = "0px";
             container.style.top = "0px";
 
-            html2canvas(slipElement, { useCORS: true, scale: 2 }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
-                link.href = canvas.toDataURL();
-                link.click();
+            html2canvas(slipElement, { 
+                useCORS: true, 
+                scale: 3, // High definition crisp image
+                logging: false
+            }).then(canvas => {
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Forceful native attachment download method
+                const fileLink = document.createElement('a');
+                fileLink.setAttribute('download', `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`);
+                fileLink.setAttribute('href', dataUrl);
+                document.body.appendChild(fileLink);
+                
+                fileLink.click();
+                
+                // Cleanup context directly
+                setTimeout(() => {
+                    fileLink.remove();
+                    container.style.left = "-9999px";
+                    container.style.top = "-9999px";
+                }, 100);
 
-                container.style.left = "-9999px";
-                container.style.top = "-9999px";
             }).catch(err => {
-                console.error("Slip render failed", err);
+                console.error("Rendering canvas context trace broke:", err);
             });
         }
 
@@ -1008,8 +1025,13 @@
             if (!data) return;
 
             const message = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${data.name}*,\nआपकी Seat No: *${currentSeatNumber}* (${data.shift}) ka digital receipt confirm ho gaya hai.\n\n*Details:*\nPaid Amount: ₹${data.paidFee} (${data.payMode})\nDues Amount: ₹${data.due}\nNext Due Date: *${data.nextPaymentDate}*\n\nThank you for choosing Takshila Library!`;
-            const encodedText = encodeURIComponent(message);
-            window.open(`https://wa.me/91${data.phone}?text=${encodedText}`, '_blank');
+            
+            const waLink = document.createElement('a');
+            waLink.href = `https://wa.me/91${data.phone}?text=${encodeURIComponent(message)}`;
+            waLink.target = '_blank';
+            document.body.appendChild(waLink);
+            waLink.click();
+            waLink.remove();
         }
 
         function filterSeats() {
