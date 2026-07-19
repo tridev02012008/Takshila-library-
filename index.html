@@ -351,6 +351,16 @@
         .btn-cancel { background-color: #475569; color: white; }
         .btn-whatsapp { background-color: #25d366; color: white; display: none; }
         .btn-download-slip { background-color: #eab308; color: black; display: none; }
+        .backup-btns button {
+            background: #1e293b;
+            color: #fff;
+            border: 1px solid #334155;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 5px;
+        }
         .lock-msg {
             background: #3b2314;
             color: #f59e0b;
@@ -420,8 +430,8 @@
             <input type="text" id="search-input" class="search-box" placeholder="Search student..." oninput="filterSeats()">
             
             <div class="backup-btns">
-                <button class="btn-download" onclick="exportBackup()">Backup Data</button>
-                <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
+                <button onclick="exportBackup()">Backup Data</button>
+                <button onclick="document.getElementById('upload-file').click()">Restore</button>
                 <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
             </div>
         </div>
@@ -453,7 +463,7 @@
                     <input type="tel" id="student-phone" placeholder="Enter 10 digit number">
                 </div>
                 <div class="form-group">
-                    <label>Select Shifts * (Multiple selection allowed)</label>
+                    <label>Select Shifts *</label>
                     <div class="shift-checkbox-group" id="shift-checkboxes">
                         <label class="shift-checkbox-item"><input type="checkbox" value="Morning" name="shifts"> Morning (6AM-10AM)</label>
                         <label class="shift-checkbox-item"><input type="checkbox" value="Noon" name="shifts"> Noon (10AM-2PM)</label>
@@ -468,15 +478,15 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Monthly Fee (₹)</label>
-                    <input type="number" id="fee-monthly" value="700">
+                    <input type="number" id="fee-monthly" value="700" oninput="calculateDues()">
                 </div>
                 <div class="form-group">
                     <label>Total Paid (₹)</label>
-                    <input type="number" id="fee-paid" value="700">
+                    <input type="number" id="fee-paid" value="700" oninput="calculateDues()">
                 </div>
                 <div class="form-group">
                     <label>Dues (₹)</label>
-                    <input type="number" id="fee-due" value="0" style="background:#10192c; font-weight:bold; color:#ef4444; border-color: #7f1d1d;">
+                    <input type="number" id="fee-due" value="0" readonly style="background:#10192c; font-weight:bold; color:#ef4444; border-color: #7f1d1d;">
                 </div>
             </div>
 
@@ -498,7 +508,6 @@
                 </div>
             </div>
 
-            <!-- SIGNATURE EXTRA DROPDOWN CONFIG -->
             <div class="form-row">
                 <div class="form-group" style="width: 100%;">
                     <label style="color:#60a5fa; font-weight: bold;">Authorized Signature By *</label>
@@ -526,7 +535,7 @@
             </div>
 
             <div class="btn-group">
-                <button class="btn btn-save" id="save-btn" onclick="saveSeat()">Save & Send Slip</button>
+                <button class="btn btn-save" id="save-btn" onclick="saveSeat()">Save Asset</button>
                 <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()">Vacant</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
             </div>
@@ -563,7 +572,7 @@
                 </thead>
                 <tbody>
                     <tr><td>1.</td><td>Monthly Fee</td><td id="table-monthly">-</td></tr>
-                    <tr><td>2.</td><td>Receipt Validity Date</td><td id="table-validity">-</td></tr>
+                    <tr><td>2.</td><td>Receipt Date</td><td id="table-validity">-</td></tr>
                     <tr><td>3.</td><td>Next Payment Date</td><td id="table-next-date">-</td></tr>
                     <tr><td>4.</td><td>Dues</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
                 </tbody>
@@ -620,6 +629,13 @@
                 indicator.innerText = "✕ Locked";
                 indicator.style.color = "#ef4444";
             }
+            if (currentSeatNumber) toggleFormLock(!!libraryData[currentSeatNumber]);
+        }
+
+        function calculateDues() {
+            const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
+            const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
+            document.getElementById('fee-due').value = Math.max(0, monthly - paid);
         }
 
         function runFinanceAuditAndReset() {
@@ -633,22 +649,6 @@
 
             let dailyTotal = 0;
             let monthlyTotal = 0;
-
-            if (currentDay === 2) {
-                let wasUpdated = false;
-                for (let seat in libraryData) {
-                    if (libraryData[seat].receiptDate) {
-                        const rDate = new Date(libraryData[seat].receiptDate);
-                        if (rDate.getMonth() !== currentMonth || rDate.getFullYear() !== now.getFullYear()) {
-                            libraryData[seat].paidFee = 0; 
-                            wasUpdated = true;
-                        }
-                    }
-                }
-                if (wasUpdated) {
-                    localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-                }
-            }
 
             for (let seat in libraryData) {
                 const student = libraryData[seat];
@@ -762,7 +762,30 @@
             document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedCount;
             
             runFinanceAuditAndReset();
-            filterSeats();
+        }
+
+        function toggleFormLock(isOccupied) {
+            const shouldLock = isOccupied && !isSystemAdminUnlocked;
+            
+            document.getElementById('student-name').disabled = shouldLock;
+            document.getElementById('student-address').disabled = shouldLock;
+            document.getElementById('student-phone').disabled = shouldLock;
+            document.getElementById('fee-monthly').disabled = shouldLock;
+            document.getElementById('fee-paid').disabled = shouldLock;
+            document.getElementById('pay-mode').disabled = shouldLock;
+            document.getElementById('receipt-date').disabled = shouldLock;
+            document.getElementById('next-payment-date').disabled = shouldLock;
+            document.getElementById('slip-signature-picker').disabled = shouldLock;
+            
+            document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = shouldLock);
+            
+            document.getElementById('lock-notice').style.display = shouldLock ? 'block' : 'none';
+            document.getElementById('save-btn').style.display = shouldLock ? 'none' : 'inline-block';
+            document.getElementById('vacant-btn').style.display = isOccupied && isSystemAdminUnlocked ? 'inline-block' : 'none';
+            document.getElementById('camera-area').style.display = shouldLock ? 'none' : 'block';
+            
+            document.getElementById('whatsapp-btn').style.display = isOccupied ? 'inline-block' : 'none';
+            document.getElementById('download-slip-btn').style.display = isOccupied ? 'inline-block' : 'none';
         }
 
         function openModal(seatNum) {
@@ -776,61 +799,35 @@
             
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
 
-            const isOccupied = !!libraryData[seatNum];
-
-            document.getElementById('student-name').disabled = isOccupied;
-            document.getElementById('student-address').disabled = isOccupied;
-            document.getElementById('student-phone').disabled = isOccupied;
-            document.getElementById('fee-monthly').disabled = isOccupied;
-            document.getElementById('fee-paid').disabled = isOccupied;
-            document.getElementById('fee-due').disabled = isOccupied;
-            document.getElementById('pay-mode').disabled = isOccupied;
-            document.getElementById('receipt-date').disabled = isOccupied;
-            document.getElementById('next-payment-date').disabled = isOccupied;
-            document.getElementById('slip-signature-picker').disabled = isOccupied;
-            document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = isOccupied);
-            
-            if (isOccupied) {
-                document.getElementById('lock-notice').style.display = 'block';
-                document.getElementById('save-btn').style.display = 'none';
-                document.getElementById('camera-area').style.display = 'none';
+            const record = libraryData[seatNum];
+            if (record) {
+                document.getElementById('student-name').value = record.name || '';
+                document.getElementById('student-address').value = record.address || 'Bhagalpur';
+                document.getElementById('student-phone').value = record.phone || '';
+                document.getElementById('fee-monthly').value = record.monthlyFee || 700;
+                document.getElementById('fee-paid').value = record.paidFee || 700;
+                document.getElementById('fee-due').value = record.due || 0;
+                document.getElementById('pay-mode').value = record.payMode || 'UPI';
+                document.getElementById('receipt-date').value = record.receiptDate || '';
+                document.getElementById('next-payment-date').value = record.nextPaymentDate || '';
+                document.getElementById('slip-signature-picker').value = record.signature || 'Chandan';
                 
-                document.getElementById('whatsapp-btn').style.display = 'inline-block';
-                document.getElementById('download-slip-btn').style.display = 'inline-block';
-                
-                const data = libraryData[seatNum];
-                document.getElementById('student-name').value = data.name;
-                document.getElementById('student-address').value = data.address || 'Bhagalpur';
-                document.getElementById('student-phone').value = data.phone || '';
-                document.getElementById('fee-monthly').value = data.monthlyFee || 700;
-                document.getElementById('fee-paid').value = data.paidFee || 700;
-                document.getElementById('fee-due').value = data.due || 0;
-                document.getElementById('pay-mode').value = data.payMode || 'UPI';
-                document.getElementById('receipt-date').value = data.receiptDate || '';
-                document.getElementById('next-payment-date').value = data.nextPaymentDate || '';
-                document.getElementById('slip-signature-picker').value = data.signatureAuthority || 'Chandan';
-                
-                const activeShifts = data.shift ? data.shift.split(', ') : [];
-                document.querySelectorAll('input[name="shifts"]').forEach(b => {
-                    if(activeShifts.includes(b.value)) b.checked = true;
-                });
-
-                if(data.docImage) {
-                    capturedImageBase64 = data.docImage;
-                    const imgPreview = document.getElementById('photo-preview');
-                    imgPreview.src = capturedImageBase64;
-                    imgPreview.style.display = 'block';
-                } else {
-                    capturedImageBase64 = null;
-                    document.getElementById('photo-preview').style.display = 'none';
+                if(record.shift) {
+                    document.querySelectorAll('input[name="shifts"]').forEach(b => {
+                        if(record.shift.includes(b.value)) b.checked = true;
+                    });
                 }
-            } else {
-                document.getElementById('lock-notice').style.display = 'none';
-                document.getElementById('save-btn').style.display = 'inline-block';
-                document.getElementById('camera-area').style.display = 'block';
-                document.getElementById('whatsapp-btn').style.display = 'none';
-                document.getElementById('download-slip-btn').style.display = 'none';
                 
+                if (record.idProof) {
+                    document.getElementById('photo-preview').src = record.idProof;
+                    document.getElementById('photo-preview').style.display = 'block';
+                    capturedImageBase64 = record.idProof;
+                } else {
+                    document.getElementById('photo-preview').style.display = 'none';
+                    capturedImageBase64 = null;
+                }
+                toggleFormLock(true);
+            } else {
                 document.getElementById('student-name').value = '';
                 document.getElementById('student-address').value = 'Bhagalpur';
                 document.getElementById('student-phone').value = '';
@@ -838,20 +835,20 @@
                 document.getElementById('fee-paid').value = 700;
                 document.getElementById('fee-due').value = 0;
                 document.getElementById('pay-mode').value = 'UPI';
+                document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('next-payment-date').value = '';
                 document.getElementById('slip-signature-picker').value = 'Chandan';
-                
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('receipt-date').value = today;
-                
-                const nextMonth = new Date();
-                nextMonth.setMonth(nextMonth.getMonth() + 1);
-                document.getElementById('next-payment-date').value = nextMonth.toISOString().split('T')[0];
-                
-                capturedImageBase64 = null;
                 document.getElementById('photo-preview').style.display = 'none';
+                capturedImageBase64 = null;
+                toggleFormLock(false);
             }
-            
+
             document.getElementById('student-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            stopCamera();
+            document.getElementById('student-modal').style.display = 'none';
         }
 
         async function initiateCamera() {
@@ -863,7 +860,7 @@
                 document.getElementById('snap-btn').style.display = 'inline-block';
                 document.getElementById('start-cam-btn').style.display = 'none';
             } catch (err) {
-                alert("Camera access denied.");
+                alert("Camera capture access denied or unavailable.");
             }
         }
 
@@ -876,9 +873,9 @@
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             
             capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            const imgPreview = document.getElementById('photo-preview');
-            imgPreview.src = capturedImageBase64;
-            imgPreview.style.display = 'block';
+            const preview = document.getElementById('photo-preview');
+            preview.src = capturedImageBase64;
+            preview.style.display = 'block';
             
             stopCamera();
             document.getElementById('video-preview').style.display = 'none';
@@ -893,82 +890,52 @@
             }
         }
 
-        function closeModal() {
-            stopCamera();
-            document.getElementById('student-modal').style.display = 'none';
-        }
-
         function saveSeat() {
-            if (!isSystemAdminUnlocked) {
-                alert("Aapka Admin Status Locked hai! Kripya top screen control panel par sahi PIN dalkar pehle unlock karein.");
-                return;
-            }
-
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
-            const nextDate = document.getElementById('next-payment-date').value;
-            const chosenSig = document.getElementById('slip-signature-picker').value;
+            const nextPay = document.getElementById('next-payment-date').value;
             
+            if(!name || !phone || !nextPay) {
+                alert("Please fill all mandatory (*) fields.");
+                return;
+            }
+
             let selectedShifts = [];
-            document.querySelectorAll('input[name="shifts"]:checked').forEach(cb => {
-                selectedShifts.push(cb.value);
-            });
-
-            if (!name || !phone || !nextDate) {
-                alert("Student Name, Phone Number aur Next Payment Date mandatory hain!");
-                return;
-            }
-            if (selectedShifts.length === 0) {
-                alert("Kripya kam se kam ek ya do shift select karein!");
+            document.querySelectorAll('input[name="shifts"]:checked').forEach(b => selectedShifts.push(b.value));
+            if(selectedShifts.length === 0) {
+                alert("Please pick at least one Shift assignment.");
                 return;
             }
 
-            const shiftString = selectedShifts.join(', ');
+            calculateDues();
 
             libraryData[currentSeatNumber] = {
                 name: name,
-                address: document.getElementById('student-address').value || 'Bhagalpur',
+                address: document.getElementById('student-address').value.trim(),
                 phone: phone,
-                shift: shiftString,
+                shift: selectedShifts.join(', '),
                 monthlyFee: document.getElementById('fee-monthly').value,
                 paidFee: document.getElementById('fee-paid').value,
                 due: document.getElementById('fee-due').value,
                 payMode: document.getElementById('pay-mode').value,
                 receiptDate: document.getElementById('receipt-date').value,
-                nextPaymentDate: nextDate,
-                signatureAuthority: chosenSig,
-                docImage: capturedImageBase64
+                nextPaymentDate: nextPay,
+                signature: document.getElementById('slip-signature-picker').value,
+                idProof: capturedImageBase64
             };
 
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-            
-            generateDigitalSlipData(currentSeatNumber);
             renderSeats();
-            closeModal();
-            
-            // DOWNLOAD RE-ENGINEERED MECHANISM
-            downloadSlipImage(name, currentSeatNumber);
-
-            // WhatsApp triggers 1.2 seconds after download file stream finishes safely
-            setTimeout(() => {
-                const welcomeMsg = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${name}*,\nतक्षशिला लाइब्रेरी में आपका स्वागत है! आपकी Seat No: *${currentSeatNumber}* (${shiftString}) की बुकिंग और डिजिटल रसीद सफलतापूर्वक कन्फर्म हो गई है।\n\n*Details:*\nPaid Amount: ₹${document.getElementById('fee-paid').value} (${document.getElementById('pay-mode').value})\nDues Amount: ₹${document.getElementById('fee-due').value}\nNext Due Date: *${nextDate}*\n\nआपकी डिजिटल स्लिप आपके डिवाइस में डाउनलोड हो गई है, कृपया इसे गैलरी से अटैच करके भेजें।\n\nThank you for choosing Takshila Library!`;
-                
-                const waLink = document.createElement('a');
-                waLink.href = `https://wa.me/91${phone}?text=${encodeURIComponent(welcomeMsg)}`;
-                waLink.target = '_blank';
-                document.body.appendChild(waLink);
-                waLink.click();
-                waLink.remove();
-            }, 1200);
+            toggleFormLock(true);
+            alert("Record configured securely!");
         }
 
         function clearSeat() {
-            if (!libraryData[currentSeatNumber]) return;
-            if (!isSystemAdminUnlocked) {
-                alert("Seat vacant karne ke liye top dashboard control panel par authorization PIN daliye.");
+            if(!isSystemAdminUnlocked) {
+                alert("Vacating an active asset requires Admin Mode authentication authorization.");
                 return;
             }
-            if (confirm(`Kya aap Seat Number ${currentSeatNumber} ko vacant karna chahte hain?`)) {
+            if(confirm(`Are you certain you want to vacate Seat ${currentSeatNumber}?`)) {
                 delete libraryData[currentSeatNumber];
                 localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                 renderSeats();
@@ -976,89 +943,13 @@
             }
         }
 
-        function generateDigitalSlipData(seatNum) {
-            const data = libraryData[seatNum];
-            if (!data) return;
-
-            document.getElementById('slip-no-val').innerText = 'TL-' + (1000 + parseInt(seatNum));
-            document.getElementById('slip-date-val').innerText = data.receiptDate || '--/--/----';
-            document.getElementById('slip-name-val').innerText = data.name;
-            document.getElementById('slip-address-val').innerText = data.address;
-            document.getElementById('slip-seat-val').innerText = seatNum;
-            document.getElementById('slip-shift-val').innerText = data.shift;
-            document.getElementById('table-monthly').innerText = '₹' + data.monthlyFee;
-            document.getElementById('table-validity').innerText = data.receiptDate || '-';
-            document.getElementById('table-next-date').innerText = data.nextPaymentDate || '-';
-            document.getElementById('table-dues').innerText = '₹' + data.due;
-            document.getElementById('slip-mob-val').innerText = data.phone;
-            document.getElementById('slip-total-val').innerText = data.paidFee;
-            document.getElementById('slip-mode-val').innerText = data.payMode;
-            document.getElementById('slip-signature-renderer').innerText = data.signatureAuthority || 'Chandan';
-        }
-
-        function triggerSlipDownloadOnly() {
-            if (currentSeatNumber && libraryData[currentSeatNumber]) {
-                generateDigitalSlipData(currentSeatNumber);
-                downloadSlipImage(libraryData[currentSeatNumber].name, currentSeatNumber);
-            }
-        }
-
-        function downloadSlipImage(studentName, seatNum) {
-            const slipElement = document.getElementById('library-slip-element');
-            const container = document.getElementById('receipt-template-container');
-            
-            // Bring element to visible layout for capturing thread safely
-            container.style.left = "0px";
-            container.style.top = "0px";
-
-            html2canvas(slipElement, { 
-                useCORS: true, 
-                scale: 3, 
-                logging: false,
-                useOverflow: true
-            }).then(canvas => {
-                // FIXED GALLERY DOWNLOAD: Raw Base64 image data string directly pipe to link
-                const rawImageUri = canvas.toDataURL("image/png");
-                
-                const fileLink = document.createElement('a');
-                fileLink.download = `Slip_Seat_${seatNum}_${studentName.replace(/\s+/g, '_')}.png`;
-                fileLink.href = rawImageUri;
-                
-                document.body.appendChild(fileLink);
-                fileLink.click();
-                
-                setTimeout(() => {
-                    fileLink.remove();
-                    container.style.left = "-9999px";
-                    container.style.top = "-9999px";
-                }, 200);
-
-            }).catch(err => {
-                console.error("Canvas context generation error trace:", err);
-            });
-        }
-
-        function triggerWhatsAppOnly() {
-            const data = libraryData[currentSeatNumber];
-            if (!data) return;
-
-            const message = `*तक्षशिला स्मार्ट लाइब्रेरी*\n\nप्रिय *${data.name}*,\nआपकी Seat No: *${currentSeatNumber}* (${data.shift}) ka digital receipt confirm ho gaya hai.\n\n*Details:*\nPaid Amount: ₹${data.paidFee} (${data.payMode})\nDues Amount: ₹${data.due}\nNext Due Date: *${data.nextPaymentDate}*\n\nThank you for choosing Takshila Library!`;
-            
-            const waLink = document.createElement('a');
-            waLink.href = `https://wa.me/91${data.phone}?text=${encodeURIComponent(message)}`;
-            waLink.target = '_blank';
-            document.body.appendChild(waLink);
-            waLink.click();
-            waLink.remove();
-        }
-
         function filterSeats() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             const seats = document.querySelectorAll('.seat');
-
+            
             seats.forEach(seat => {
-                const searchStr = seat.getAttribute('data-search-string');
-                if (!query || (searchStr && searchStr.includes(query))) {
+                const searchStr = seat.getAttribute('data-search-string') || '';
+                if(searchStr.includes(query)) {
                     seat.classList.remove('hidden');
                 } else {
                     seat.classList.add('hidden');
@@ -1066,40 +957,78 @@
             });
         }
 
+        function fillSlipData() {
+            const record = libraryData[currentSeatNumber];
+            if(!record) return;
+
+            document.getElementById('slip-no-val').innerText = `TXL-${1000 + currentSeatNumber}`;
+            document.getElementById('slip-date-val').innerText = record.receiptDate || '--/--/----';
+            document.getElementById('slip-name-val').innerText = record.name;
+            document.getElementById('slip-address-val').innerText = record.address;
+            document.getElementById('slip-seat-val').innerText = currentSeatNumber;
+            document.getElementById('slip-shift-val').innerText = record.shift;
+            
+            document.getElementById('table-monthly').innerText = `₹${record.monthlyFee}`;
+            document.getElementById('table-validity').innerText = record.receiptDate || '-';
+            document.getElementById('table-next-date').innerText = record.nextPaymentDate || '-';
+            document.getElementById('table-dues').innerText = `₹${record.due}`;
+            
+            document.getElementById('slip-mob-val').innerText = record.phone;
+            document.getElementById('slip-total-val').innerText = record.paidFee;
+            document.getElementById('slip-mode-val').innerText = record.payMode;
+            document.getElementById('slip-signature-renderer').innerText = record.signature;
+        }
+
+        function triggerSlipDownloadOnly() {
+            fillSlipData();
+            const target = document.getElementById('library-slip-element');
+            
+            html2canvas(target, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Slip_Seat_${currentSeatNumber}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function triggerWhatsAppOnly() {
+            const record = libraryData[currentSeatNumber];
+            if(!record) return;
+
+            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nआपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
+            const encoded = encodeURIComponent(msg);
+            window.open(`https://wa.me/91${record.phone}?text=${encoded}`, '_blank');
+        }
+
         function exportBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(libraryData));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `Takshila_Library_Backup_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            const dlAnchor = document.createElement('a');
+            dlAnchor.setAttribute("href", dataStr);
+            dlAnchor.setAttribute("download", `Takshila_Backup_${new Date().toISOString().split('T')[0]}.json`);
+            dlAnchor.click();
         }
 
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-
+            
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const parsedData = JSON.parse(e.target.result);
-                    if (confirm("Kya aap data restore karna chahte hain? Purana local data overwrite ho jayega.")) {
-                        libraryData = parsedData;
-                        localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-                        renderSeats();
-                        alert("Data successfully restore ho gaya!");
-                    }
+                    const parsed = JSON.parse(e.target.result);
+                    libraryData = parsed;
+                    localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+                    renderSeats();
+                    alert("System configuration recovery absolute!");
                 } catch (err) {
-                    alert("Invalid JSON file!");
+                    alert("Faulty configuration architecture schema standard payload rejected.");
                 }
             };
             reader.readAsText(file);
         }
 
-        window.onload = function() {
-            renderSeats();
-        };
+        // Initialize App on load
+        renderSeats();
     </script>
 </body>
 </html>
