@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library</title>
+    <title>Takshila Smart Library PRO</title>
+    <!-- html2canvas library for downloading receipts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
+            background-color: #f0f4f8;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -15,15 +17,15 @@
             align-items: center;
         }
         h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
+            color: #1a2a3a;
+            margin-bottom: 5px;
         }
         .controls-panel {
             background: white;
             padding: 15px 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            max-width: 900px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            max-width: 1000px;
             width: 100%;
             margin-bottom: 20px;
             box-sizing: border-box;
@@ -34,149 +36,278 @@
             justify-content: space-between;
         }
         .stats {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             color: #34495e;
         }
         .search-box {
-            padding: 8px 12px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            width: 250px;
+            padding: 10px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            width: 280px;
             font-size: 14px;
         }
         .backup-btns button {
-            padding: 8px 12px;
+            padding: 9px 15px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
             margin-left: 5px;
         }
-        .btn-download { background-color: #3498db; color: white; }
-        .btn-upload { background-color: #9b59b6; color: white; }
+        .btn-download { background-color: #2563eb; color: white; }
+        .btn-upload { background-color: #7c3aed; color: white; }
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            gap: 12px;
-            max-width: 900px;
+            grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
+            gap: 15px;
+            max-width: 1000px;
             width: 100%;
             background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
             box-sizing: border-box;
         }
         .seat {
             aspect-ratio: 1;
-            background-color: #2ecc71;
+            background-color: #10b981;
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             font-weight: bold;
             transition: transform 0.2s, background-color 0.2s;
             font-size: 16px;
             position: relative;
+            padding: 5px;
+            box-sizing: border-box;
+            text-align: center;
         }
-        .seat:hover {
-            transform: scale(1.05);
-        }
-        .seat.occupied {
-            background-color: #e74c3c;
-        }
-        .seat.hidden {
-            display: none !important;
-        }
+        .seat:hover { transform: scale(1.05); }
+        .seat.occupied { background-color: #ef4444; }
+        .seat.hidden { display: none !important; }
+        
         .seat-name {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: normal;
-            margin-top: 4px;
-            max-width: 70px;
+            margin-top: 3px;
+            max-width: 85px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
         .seat-shift {
             font-size: 8px;
-            background: rgba(0,0,0,0.2);
-            padding: 1px 4px;
-            border-radius: 3px;
-            margin-top: 2px;
+            background: rgba(0,0,0,0.25);
+            padding: 2px 5px;
+            border-radius: 4px;
+            margin-top: 3px;
+            font-weight: normal;
+        }
+        
+        .due-alert {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #f59e0b;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 9px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            animation: arrow-blink 1s infinite alternate;
+        }
+        @keyframes arrow-blink {
+            0% { transform: scale(0.9); background-color: #d97706; }
+            100% { transform: scale(1.1); background-color: #ef4444; }
         }
 
-        /* Modal Style */
+        /* Modal Layout */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0,0,0,0.5);
+            background-color: rgba(15, 23, 42, 0.6);
             justify-content: center;
             align-items: center;
             z-index: 1000;
+            overflow-y: auto;
         }
         .modal-content {
             background: white;
             padding: 25px;
-            border-radius: 10px;
-            width: 320px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            border-radius: 12px;
+            width: 460px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            box-sizing: border-box;
         }
         .modal-content h3 {
             margin-top: 0;
-            color: #2c3e50;
-            border-bottom: 2px solid #f4f7f6;
+            color: #1e293b;
+            border-bottom: 2px solid #f1f5f9;
             padding-bottom: 10px;
         }
-        .modal-content label {
-            font-size: 12px;
-            color: #7f8c8d;
-            font-weight: bold;
-            display: block;
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        .form-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
             margin-top: 10px;
         }
-        .modal-content input, .modal-content select {
-            width: 100%;
-            padding: 8px;
-            margin: 5px 0 10px 0;
-            box-sizing: border-box;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 14px;
+        .modal-content label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+            margin-bottom: 4px;
         }
+        .modal-content input, .modal-content select {
+            padding: 7px 10px;
+            box-sizing: border-box;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 13px;
+        }
+        
+        .camera-section {
+            margin-top: 15px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed #cbd5e1;
+            text-align: center;
+        }
+        #video-preview {
+            width: 100%;
+            max-height: 140px;
+            background: #000;
+            border-radius: 6px;
+            display: none;
+            object-fit: cover;
+        }
+        #photo-preview {
+            width: 100%;
+            max-height: 140px;
+            border-radius: 6px;
+            display: none;
+            object-fit: contain;
+            margin-top: 5px;
+        }
+        .cam-btn {
+            background: #475569;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 5px 2px;
+        }
+
         .btn-group {
             display: flex;
             justify-content: space-between;
             margin-top: 20px;
-            gap: 5px;
+            gap: 8px;
         }
         .btn {
-            padding: 10px 15px;
+            padding: 10px 12px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
             flex: 1;
-            font-size: 13px;
+            font-size: 12px;
         }
-        .btn-save { background-color: #2ecc71; color: white; }
-        .btn-clear { background-color: #e74c3c; color: white; }
-        .btn-cancel { background-color: #95a5a6; color: white; }
+        .btn-save { background-color: #10b981; color: white; }
+        .btn-clear { background-color: #ef4444; color: white; }
+        .btn-cancel { background-color: #64748b; color: white; }
+
+        /* Hidden Receipt Style for Generation (Matching Yellow Slip image) */
+        #receipt-template-container {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
+        .library-slip {
+            width: 450px;
+            background: #fff7c2;
+            color: #000;
+            padding: 25px;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+            border: 2px dashed #555;
+        }
+        .slip-header {
+            text-align: center;
+            border-bottom: 2px solid #000;
+            padding-bottom: 8px;
+        }
+        .slip-header h2 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: bold;
+        }
+        .slip-header p {
+            margin: 3px 0;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .slip-meta {
+            display: flex;
+            justify-content: space-between;
+            margin: 12px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .slip-field {
+            margin: 6px 0;
+            font-size: 14px;
+            border-bottom: 1px dotted #000;
+            padding-bottom: 2px;
+        }
+        .slip-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .slip-table th, .slip-table td {
+            border: 1px solid #000;
+            padding: 6px;
+            font-size: 13px;
+            text-align: left;
+        }
+        .slip-table th {
+            background-color: rgba(0,0,0,0.05);
+        }
+        .slip-footer {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            font-weight: bold;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
 
-    <h1>Takshila Smart Library</h1>
+    <h1>Takshila Smart Library PRO</h1>
     
-    <!-- Controls & Search Panel -->
     <div class="controls-panel">
         <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
-        <input type="text" id="search-input" class="search-box" placeholder="Search Name, Phone or Seat..." oninput="filterSeats()">
+        <input type="text" id="search-input" class="search-box" placeholder="Search Student, Phone or Due..." oninput="filterSeats()">
         <div class="backup-btns">
             <button class="btn-download" onclick="exportBackup()">Backup Data</button>
             <button class="btn-upload" onclick="document.getElementById('upload-file').click()">Restore</button>
@@ -184,32 +315,149 @@
         </div>
     </div>
 
-    <!-- Grid Layout -->
     <div class="grid-container" id="seats-grid"></div>
 
-    <!-- Student Detail Modal -->
+    <!-- Main Entry/Edit Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
             
-            <label>Student Name *</label>
-            <input type="text" id="student-name" placeholder="Enter Full Name">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Student Name *</label>
+                    <input type="text" id="student-name" placeholder="Enter Full Name">
+                </div>
+                <div class="form-group">
+                    <label>Address / City</label>
+                    <input type="text" id="student-address" placeholder="e.g. Bhagalpur" value="Bhagalpur">
+                </div>
+            </div>
             
-            <label>Phone Number</label>
-            <input type="tel" id="student-phone" placeholder="Enter 10-digit Mobile">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone Number (WhatsApp) *</label>
+                    <input type="tel" id="student-phone" placeholder="Enter 10 digit number">
+                </div>
+                <div class="form-group">
+                    <label>Select Shift</label>
+                    <select id="student-shift" onchange="handleShiftLogic()">
+                        <option value="Morning">Morning (6 AM - 10 AM)</option>
+                        <option value="Noon">Noon (10 AM - 2 PM)</option>
+                        <option value="Afternoon">Afternoon (2 PM - 6 PM)</option>
+                        <option value="Evening">Evening (6 PM - 10 PM)</option>
+                        <option value="All Shift">All Shift (6 AM - 10 PM)</option>
+                        <option value="Night">Night (10 PM - 6 AM)</option>
+                    </select>
+                </div>
+            </div>
 
-            <label>Select Shift</label>
-            <select id="student-shift">
-                <option value="Full Day">Full Day</option>
-                <option value="Morning">Morning (6 AM - 12 PM)</option>
-                <option value="Evening">Evening (1 PM - 7 PM)</option>
-                <option value="Night">Night (8 PM - 6 AM)</option>
-            </select>
+            <!-- Fee Breaking Structure As Per Yellow Slip Receipt -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Monthly Fee (₹)</label>
+                    <input type="number" id="fee-monthly" value="700" oninput="calculateReceiptValues()">
+                </div>
+                <div class="form-group">
+                    <label>Reg. Fee (₹)</label>
+                    <input type="number" id="fee-reg" value="0" oninput="calculateReceiptValues()">
+                </div>
+                <div class="form-group">
+                    <label>Locker Fee (₹)</label>
+                    <input type="number" id="fee-locker" value="0" oninput="calculateReceiptValues()">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Total Paid (₹)</label>
+                    <input type="number" id="fee-paid" value="700" oninput="calculateReceiptValues()">
+                </div>
+                <div class="form-group">
+                    <label>Dues (₹)</label>
+                    <input type="number" id="fee-due" value="0" readonly style="background:#e2e8f0; font-weight:bold; color:#b91c1c;">
+                </div>
+                <div class="form-group">
+                    <label>Payment Mode</label>
+                    <select id="pay-mode">
+                        <option value="UPI">UPI</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Receipt Date</label>
+                    <input type="date" id="receipt-date">
+                </div>
+                <div class="form-group">
+                    <label>Next Payment Due Date</label>
+                    <input type="date" id="next-payment-date">
+                </div>
+            </div>
+
+            <div class="camera-section">
+                <label style="display:block; margin-bottom:5px; font-size:12px;">Document Verification (ID Proof)</label>
+                <video id="video-preview" autoplay playsinline></video>
+                <img id="photo-preview" alt="Verified Document Docs">
+                <div>
+                    <button type="button" class="cam-btn" id="start-cam-btn" onclick="initiateCamera()">Open Camera</button>
+                    <button type="button" class="cam-btn" id="snap-btn" onclick="captureSnapshot()" style="display:none; background:#10b981;">Take Photo</button>
+                </div>
+            </div>
 
             <div class="btn-group">
-                <button class="btn btn-save" onclick="saveSeat()">Save</button>
+                <button class="btn btn-save" onclick="saveSeat()">Save & Send Slip</button>
                 <button class="btn btn-clear" onclick="clearSeat()">Vacant</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN DIGITAL YELLOW RECEIPT GENERATOR CONTAINER -->
+    <div id="receipt-template-container">
+        <div class="library-slip" id="library-slip-element">
+            <div class="slip-header">
+                <h2>तक्षशिला लाईब्रेरी</h2>
+                <p>पता - मनाली चौक, छोटी खंजरपुर, भागलपुर</p>
+                <p>Mob.- 6207479929, 7634993778</p>
+            </div>
+            <div class="slip-meta">
+                <div>No. <span id="slip-no-val">---</span></div>
+                <div>Date: <span id="slip-date-val">--/--/----</span></div>
+            </div>
+            <div class="slip-field"><strong>Name:</strong> <span id="slip-name-val"></span></div>
+            <div class="slip-field"><strong>Address:</strong> <span id="slip-address-val"></span></div>
+            
+            <div style="display:flex; justify-content:space-between; margin:6px 0;">
+                <div style="flex:1;" class="slip-field"><strong>Seat No:</strong> <span id="slip-seat-val"></span></div>
+                <div style="flex:1; margin-left:10px;" class="slip-field"><strong>Shift:</strong> <span id="slip-shift-val"></span></div>
+            </div>
+
+            <table class="slip-table">
+                <thead>
+                    <tr>
+                        <th style="width:10%">S.No.</th>
+                        <th style="width:65%">Particular</th>
+                        <th style="width:25%">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>1.</td><td>Monthly Fee</td><td id="table-monthly">-</td></tr>
+                    <tr><td>2.</td><td>Reg. Fee</td><td id="table-reg">-</td></tr>
+                    <tr><td>3.</td><td>Locker Fee</td><td id="table-locker">-</td></tr>
+                    <tr><td>4.</td><td>Receipt Validity Date</td><td id="table-validity">-</td></tr>
+                    <tr><td>5.</td><td>Next Payment Date</td><td id="table-next-date">-</td></tr>
+                    <tr><td>6.</td><td>Dues</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
+                </tbody>
+            </table>
+
+            <div class="slip-footer">
+                <div>Mob. No: <span id="slip-mob-val"></span></div>
+                <div style="text-align:right;">
+                    <div style="font-size:16px; margin-bottom:15px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
+                    <div style="border-top:1px dashed #000; width:120px; padding-top:5px; font-style:italic;">Chandan<br><span style="font-size:10px;">Signature</span></div>
+                </div>
             </div>
         </div>
     </div>
@@ -218,10 +466,22 @@
         const TOTAL_SEATS = 89;
         let libraryData = JSON.parse(localStorage.getItem('takshila_library_data')) || {};
         let currentSeatNumber = null;
+        let localStream = null;
+        let capturedImageBase64 = null;
 
         const gridContainer = document.getElementById('seats-grid');
 
-        // Render All Seats
+        // Set Default Dates on Load
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('receipt-date').value = today;
+            
+            // Default next payment date to next month
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            document.getElementById('next-payment-date').value = nextMonth.toISOString().split('T')[0];
+        };
+
         function renderSeats() {
             gridContainer.innerHTML = '';
             let occupiedCount = 0;
@@ -229,29 +489,31 @@
             for (let i = 1; i <= TOTAL_SEATS; i++) {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
-                seat.setAttribute('data-seat-num', i);
                 seat.innerText = i;
 
                 if (libraryData[i]) {
                     seat.classList.add('occupied');
                     occupiedCount++;
                     
-                    // Add Name
                     const nameSpan = document.createElement('span');
                     nameSpan.classList.add('seat-name');
                     nameSpan.innerText = libraryData[i].name;
                     seat.appendChild(nameSpan);
 
-                    // Add Shift Badge
-                    if(libraryData[i].shift) {
-                        const shiftSpan = document.createElement('span');
-                        shiftSpan.classList.add('seat-shift');
-                        shiftSpan.innerText = libraryData[i].shift;
-                        seat.appendChild(shiftSpan);
+                    const shiftSpan = document.createElement('span');
+                    shiftSpan.classList.add('seat-shift');
+                    shiftSpan.innerText = libraryData[i].shift;
+                    seat.appendChild(shiftSpan);
+
+                    const dueAmt = parseFloat(libraryData[i].due) || 0;
+                    if(dueAmt > 0) {
+                        const dueTag = document.createElement('div');
+                        dueTag.classList.add('due-alert');
+                        dueTag.innerText = `➔ ₹${dueAmt}`;
+                        seat.appendChild(dueTag);
                     }
                     
-                    // For searching
-                    seat.setAttribute('data-search-string', `${i} ${libraryData[i].name.toLowerCase()} ${libraryData[i].phone || ''}`);
+                    seat.setAttribute('data-search-string', `${i} ${libraryData[i].name.toLowerCase()} ${libraryData[i].phone || ''} due:${dueAmt}`);
                 } else {
                     seat.setAttribute('data-search-string', `${i}`);
                 }
@@ -262,54 +524,238 @@
 
             document.getElementById('occupied-count').innerText = occupiedCount;
             document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedCount;
-            
-            // Re-apply filter if user is currently searching
             filterSeats();
         }
 
-        // Open Booking Modal
+        function handleShiftLogic() {
+            const shiftSelect = document.getElementById('student-shift');
+            const selectedValue = shiftSelect.value;
+            Array.from(shiftSelect.options).forEach(opt => opt.style.display = 'block');
+
+            if (selectedValue === "All Shift") {
+                Array.from(shiftSelect.options).forEach(opt => {
+                    if(opt.value !== "All Shift" && opt.value !== "Night") {
+                        opt.style.display = 'none';
+                    }
+                });
+            }
+        }
+
+        function calculateReceiptValues() {
+            const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
+            const reg = parseFloat(document.getElementById('fee-reg').value) || 0;
+            const locker = parseFloat(document.getElementById('fee-locker').value) || 0;
+            const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
+            
+            const totalGross = monthly + reg + locker;
+            document.getElementById('fee-due').value = Math.max(0, totalGross - paid);
+        }
+
         function openModal(seatNum) {
             currentSeatNumber = seatNum;
             document.getElementById('modal-title').innerText = `Seat Number ${seatNum}`;
+            stopCamera();
             
+            document.getElementById('video-preview').style.display = 'none';
+            document.getElementById('snap-btn').style.display = 'none';
+            document.getElementById('start-cam-btn').style.display = 'inline-block';
+            
+            const shiftSelect = document.getElementById('student-shift');
+            Array.from(shiftSelect.options).forEach(opt => opt.style.display = 'block');
+
             if (libraryData[seatNum]) {
                 document.getElementById('student-name').value = libraryData[seatNum].name;
+                document.getElementById('student-address').value = libraryData[seatNum].address || 'Bhagalpur';
                 document.getElementById('student-phone').value = libraryData[seatNum].phone || '';
-                document.getElementById('student-shift').value = libraryData[seatNum].shift || 'Full Day';
+                document.getElementById('student-shift').value = libraryData[seatNum].shift || 'Morning';
+                document.getElementById('fee-monthly').value = libraryData[seatNum].monthlyFee || 700;
+                document.getElementById('fee-reg').value = libraryData[seatNum].regFee || 0;
+                document.getElementById('fee-locker').value = libraryData[seatNum].lockerFee || 0;
+                document.getElementById('fee-paid').value = libraryData[seatNum].paidFee || 700;
+                document.getElementById('fee-due').value = libraryData[seatNum].due || 0;
+                document.getElementById('pay-mode').value = libraryData[seatNum].payMode || 'UPI';
+                document.getElementById('receipt-date').value = libraryData[seatNum].receiptDate || new Date().toISOString().split('T')[0];
+                document.getElementById('next-payment-date').value = libraryData[seatNum].nextPaymentDate || '';
+                
+                if(libraryData[seatNum].docImage) {
+                    capturedImageBase64 = libraryData[seatNum].docImage;
+                    const imgPreview = document.getElementById('photo-preview');
+                    imgPreview.src = capturedImageBase64;
+                    imgPreview.style.display = 'block';
+                } else {
+                    capturedImageBase64 = null;
+                    document.getElementById('photo-preview').style.display = 'none';
+                }
             } else {
                 document.getElementById('student-name').value = '';
+                document.getElementById('student-address').value = 'Bhagalpur';
                 document.getElementById('student-phone').value = '';
-                document.getElementById('student-shift').value = 'Full Day';
+                document.getElementById('student-shift').value = 'Morning';
+                document.getElementById('fee-monthly').value = 700;
+                document.getElementById('fee-reg').value = 0;
+                document.getElementById('fee-locker').value = 0;
+                document.getElementById('fee-paid').value = 700;
+                document.getElementById('fee-due').value = 0;
+                document.getElementById('pay-mode').value = 'UPI';
+                
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('receipt-date').value = today;
+                const nextMonth = new Date();
+                nextMonth.setMonth(nextMonth.getMonth() + 1);
+                document.getElementById('next-payment-date').value = nextMonth.toISOString().split('T')[0];
+                
+                capturedImageBase64 = null;
+                document.getElementById('photo-preview').style.display = 'none';
             }
             
+            handleShiftLogic();
             document.getElementById('student-modal').style.display = 'flex';
         }
 
+        async function initiateCamera() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { exact: "environment" } } });
+            } catch (err) {
+                try {
+                    localStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                } catch(e) {
+                    alert("Camera unaccessible.");
+                    return;
+                }
+            }
+            const video = document.getElementById('video-preview');
+            video.srcObject = localStream;
+            video.style.display = 'block';
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('start-cam-btn').style.display = 'none';
+            document.getElementById('snap-btn').style.display = 'inline-block';
+        }
+
+        function captureSnapshot() {
+            const video = document.getElementById('video-preview');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 640;
+            canvas.height = video.videoHeight || 480;
+            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+            
+            capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            const imgPreview = document.getElementById('photo-preview');
+            imgPreview.src = capturedImageBase64;
+            imgPreview.style.display = 'block';
+            
+            stopCamera();
+            video.style.display = 'none';
+            document.getElementById('snap-btn').style.display = 'none';
+            document.getElementById('start-cam-btn').style.display = 'inline-block';
+        }
+
+        function stopCamera() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+        }
+
         function closeModal() {
+            stopCamera();
             document.getElementById('student-modal').style.display = 'none';
         }
 
-        // Save Data
+        // Action Trigger on Clicking Save
         function saveSeat() {
             const name = document.getElementById('student-name').value.trim();
+            const address = document.getElementById('student-address').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             const shift = document.getElementById('student-shift').value;
+            const monthlyFee = document.getElementById('fee-monthly').value;
+            const regFee = document.getElementById('fee-reg').value;
+            const lockerFee = document.getElementById('fee-locker').value;
+            const paidFee = document.getElementById('fee-paid').value;
+            const due = document.getElementById('fee-due').value;
+            const payMode = document.getElementById('pay-mode').value;
+            const receiptDate = document.getElementById('receipt-date').value;
+            const nextPaymentDate = document.getElementById('next-payment-date').value;
 
-            if (name === "") {
-                alert("Please enter student name");
+            if (name === "" || phone === "") {
+                alert("Please enter both Student Name and Phone Number");
                 return;
             }
 
-            libraryData[currentSeatNumber] = { name, phone, shift };
+            // 1. Save locally
+            libraryData[currentSeatNumber] = { 
+                name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate, docImage: capturedImageBase64 
+            };
             localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+
+            // 2. Build template & download slip
+            generateAndDownloadSlip(name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate);
+
+            // 3. Send WhatsApp API link
+            sendWhatsAppMessage(name, phone, shift, paidFee, due, nextPaymentDate);
+
             closeModal();
             renderSeats();
         }
 
-        // Make Seat Vacant
+        function generateAndDownloadSlip(name, address, phone, shift, monthlyFee, regFee, lockerFee, paidFee, due, payMode, receiptDate, nextPaymentDate) {
+            // Mapping values inside template elements
+            document.getElementById('slip-no-val').innerText = currentSeatNumber + 100; // auto numbering offset
+            document.getElementById('slip-date-val').innerText = receiptDate.split('-').reverse().join('/');
+            document.getElementById('slip-name-val').innerText = name;
+            document.getElementById('slip-address-val').innerText = address;
+            document.getElementById('slip-seat-val').innerText = currentSeatNumber;
+            document.getElementById('slip-shift-val').innerText = shift;
+            
+            document.getElementById('table-monthly').innerText = `₹${monthlyFee}`;
+            document.getElementById('table-reg').innerText = `₹${regFee}`;
+            document.getElementById('table-locker').innerText = `₹${lockerFee}`;
+            document.getElementById('table-validity').innerText = receiptDate.split('-').reverse().join('/');
+            document.getElementById('table-next-date').innerText = nextPaymentDate.split('-').reverse().join('/');
+            document.getElementById('table-dues').innerText = `₹${due}`;
+            
+            document.getElementById('slip-mob-val').innerText = phone;
+            document.getElementById('slip-total-val').innerText = paidFee;
+            document.getElementById('slip-mode-val').innerText = payMode;
+
+            // Render hidden DOM to Image using html2canvas
+            const target = document.getElementById('library-slip-element');
+            html2canvas(target, {scale: 2}).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function sendWhatsAppMessage(name, phone, shift, paidFee, due, nextPaymentDate) {
+            const formattedDate = nextPaymentDate.split('-').reverse().join('/');
+            
+            // Text Structure for WhatsApp Welcome Message
+            let text = `*प्रवेश सूचना: तक्षशिला लाईब्रेरी, भागलपुर* 📚\n\n` +
+                       `प्रिय *${name}*,\n` +
+                       `तक्षशिला लाईब्रेरी में आपका स्वागत है। आपकी सीट सफलतापूर्वक बुक कर दी गई है।\n\n` +
+                       `• *सीट नंबर:* ${currentSeatNumber}\n` +
+                       `• *शिफ्ट:* ${shift}\n` +
+                       `• *जमा राशि:* ₹${paidFee}\n` +
+                       `• *बकाया राशि (Due):* ₹${due}\n` +
+                       `• *अगली भुगतान तिथि:* ${formattedDate}\n\n` +
+                       `धन्यवाद!\n*तक्षशिला लाईब्रेरी*`;
+
+            const encodedText = encodeURIComponent(text);
+            
+            // Standard formatting for Indian numbers if country code missing
+            let finalPhone = phone.trim();
+            if (finalPhone.length === 10) {
+                finalPhone = "91" + finalPhone;
+            }
+
+            const whatsappUrl = `https://api.whatsapp.com/send?phone=${finalPhone}&text=${encodedText}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
         function clearSeat() {
             if (libraryData[currentSeatNumber]) {
-                if(confirm(`Are you sure you want to vacant Seat ${currentSeatNumber}?`)) {
+                if(confirm(`Are you sure you want to release Seat ${currentSeatNumber}?`)) {
                     delete libraryData[currentSeatNumber];
                     localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                     closeModal();
@@ -320,37 +766,29 @@
             }
         }
 
-        // Search Filter Logic
         function filterSeats() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             const seats = document.querySelectorAll('.seat');
-
             seats.forEach(seat => {
                 const searchStr = seat.getAttribute('data-search-string');
-                if (searchStr.includes(query)) {
-                    seat.classList.remove('hidden');
-                } else {
-                    seat.classList.add('hidden');
-                }
+                if (searchStr.includes(query)) seat.classList.remove('hidden');
+                else seat.classList.add('hidden');
             });
         }
 
-        // Backup Data Download Feature
         function exportBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(libraryData));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `takshila_library_backup_${new Date().toISOString().slice(0,10)}.json`);
+            downloadAnchor.setAttribute("download", `takshila_pro_backup_${new Date().toISOString().slice(0,10)}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
         }
 
-        // Restore Data Feature
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
@@ -359,18 +797,13 @@
                         libraryData = parsedData;
                         localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                         renderSeats();
-                        alert("Data successfully restored!");
-                    } else {
-                        alert("Invalid backup file format.");
+                        alert("Backup Restored Successfully!");
                     }
-                } catch (err) {
-                    alert("Error reading backup file.");
-                }
+                } catch (err) { alert("Invalid backup file."); }
             };
             reader.readAsText(file);
         }
 
-        // Initial System Boot
         renderSeats();
     </script>
 </body>
