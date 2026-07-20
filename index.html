@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V10</title>
-    <!-- Updated html2canvas library CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <title>Takshila Smart Library PRO V11</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -371,11 +369,6 @@
             display: none;
         }
 
-        #receipt-template-container {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
         .library-slip {
             width: 450px;
             background: #fff7c2;
@@ -540,7 +533,8 @@
         </div>
     </div>
 
-    <div id="receipt-template-container">
+    <!-- Hidden Template for rendering downloadable receipt -->
+    <div id="receipt-template-container" style="position: absolute; left: -9999px; top: -9999px;">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
                 <h2>तक्षशिला लाईब्रेरी</h2>
@@ -897,7 +891,7 @@
             stopCamera();
             document.getElementById('video-preview').style.display = 'none';
             document.getElementById('snap-btn').style.display = 'none';
-            document.getElementById('start-cam-btn').style.display = 'inline-block';
+            document.getElementById('start-cam-btn').style.display = 'block';
         }
 
         function stopCamera() {
@@ -1010,32 +1004,113 @@
                 prepareWhatsAppAndSlipData(libraryData[currentSeatNumber]);
             }
 
-            const target = document.getElementById('library-slip-element');
+            const record = libraryData[currentSeatNumber];
             
-            if (typeof html2canvas === "undefined") {
-                alert("इंतजार करें, लाइब्रेरी लोड हो रही है...");
-                return;
-            }
+            // Native Canvas Generation (No external library dependency)
+            const canvas = document.createElement('canvas');
+            canvas.width = 900;
+            canvas.height = 700;
+            const ctx = canvas.getContext('2d');
 
-            html2canvas(target, { 
-                useCORS: true, 
-                scale: 2, 
-                logging: false, 
-                allowTaint: true,
-                backgroundColor: "#fff7c2"
-            }).then(canvas => {
-                const dataUrl = canvas.toDataURL('image/png');
-                const link = document.createElement('a');
-                link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
-                link.href = dataUrl;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                alert("रसीद डाउनलोड हो गई है और आपके फोन की गैलरी में सेव हो जाएगी!");
-            }).catch(err => {
-                console.error("Canvas error", err);
-                alert("Slip generation failed.");
-            });
+            // Background
+            ctx.fillStyle = "#fff7c2";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Border
+            ctx.strokeStyle = "#555555";
+            ctx.lineWidth = 4;
+            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+
+            // Header
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 32px 'Courier New', monospace";
+            ctx.textAlign = "center";
+            ctx.fillText("तक्षशिला लाईब्रेरी", canvas.width / 2, 70);
+
+            ctx.font = "bold 16px 'Courier New', monospace";
+            ctx.fillText("पता - मनाली चौक, छोटी खंजरपुर, भागलपुर", canvas.width / 2, 105);
+            ctx.fillText("Mob.- 6207479929, 7634993778", canvas.width / 2, 130);
+
+            // Divider Line
+            ctx.beginPath();
+            ctx.moveTo(40, 150);
+            ctx.lineTo(canvas.width - 40, 150);
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // Meta Info
+            ctx.font = "bold 18px 'Courier New', monospace";
+            ctx.textAlign = "left";
+            ctx.fillText(`No. TXL-${1000 + currentSeatNumber}`, 50, 190);
+            ctx.textAlign = "right";
+            ctx.fillText(`Date: ${record.receiptDate || '--/--/----'}`, canvas.width - 50, 190);
+
+            // Fields
+            ctx.textAlign = "left";
+            ctx.fillText(`Name: ${record.name}`, 50, 235);
+            ctx.fillText(`Seat No: ${currentSeatNumber}`, 50, 275);
+            ctx.fillText(`Shift: ${record.shift}`, 350, 275);
+
+            // Table Border & Header
+            ctx.strokeRect(50, 315, 800, 200);
+            ctx.fillStyle = "rgba(0,0,0,0.08)";
+            ctx.fillRect(50, 315, 800, 45);
+            
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 16px 'Courier New', monospace";
+            ctx.fillText("S.No.", 70, 343);
+            ctx.fillText("Particular", 160, 343);
+            ctx.fillText("Amount", 680, 343);
+
+            // Table Rows
+            ctx.font = "16px 'Courier New', monospace";
+            // Row 1
+            ctx.fillText("1.", 70, 395);
+            ctx.fillText("Monthly Fee", 160, 395);
+            ctx.fillText(`₹${record.monthlyFee}`, 680, 395);
+            
+            // Row 2
+            ctx.fillText("2.", 70, 435);
+            ctx.fillText(`Receipt Date: ${record.receiptDate || '-'}`, 160, 435);
+            
+            // Row 3
+            ctx.fillText("3.", 70, 475);
+            ctx.fillText(`Next Payment Date: ${record.nextPaymentDate || '-'}`, 160, 475);
+
+            // Row 4
+            ctx.fillStyle = "red";
+            ctx.fillText("4.", 70, 510);
+            ctx.fillText(`Dues: ₹${record.due}`, 160, 510);
+
+            // Footer
+            ctx.fillStyle = "#000000";
+            ctx.font = "bold 16px 'Courier New', monospace";
+            ctx.fillText(`Mob. No: ${record.phone}`, 50, 580);
+
+            ctx.textAlign = "right";
+            ctx.fillText(`Total Paid: ₹${record.paidFee} (${record.payMode})`, canvas.width - 50, 565);
+            
+            ctx.font = "italic 16px 'Courier New', monospace";
+            ctx.fillText(record.signature, canvas.width - 120, 615);
+            ctx.font = "12px 'Courier New', monospace";
+            ctx.fillText("Signature", canvas.width - 120, 635);
+            
+            ctx.beginPath();
+            ctx.moveTo(canvas.width - 230, 600);
+            ctx.lineTo(canvas.width - 50, 600);
+            ctx.setLineDash([4, 2]);
+            ctx.stroke();
+
+            // Trigger Download
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert("रसीद तुरंत डाउनलोड होकर आपके फोन की गैलरी में सेव हो गई है!");
         }
 
         function openWhatsAppChat() {
