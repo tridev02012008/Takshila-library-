@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Takshila Smart Library PRO V10</title>
-    <!-- html2canvas library for downloading receipts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
+    <!-- html2canvas library for downloading receipts with backup CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js" onerror="loadBackupScript()"></script>
+    <script>
+        function loadBackupScript() {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.41.1/dist/html2canvas.min.js";
+            document.head.appendChild(script);
+        }
+    </script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -95,7 +102,7 @@
             color: #fff;
         }
         
-        /* Cahnge grid columns to 4 for bigger, clearer view */
+        /* Grid columns set to 4 for larger, clearer view */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -957,7 +964,6 @@
             renderSeats();
             toggleFormLock(true);
             prepareWhatsAppAndSlipData(recordData);
-            alert(`Seat Number ${currentSeatNumber} saved successfully! Now download the slip.`);
             return true;
         }
 
@@ -1020,7 +1026,7 @@
             const target = document.getElementById('library-slip-element');
             
             if (typeof html2canvas === "undefined") {
-                alert("Library script loading issue.");
+                alert("इंतजार करें, लाइब्रेरी लोड हो रही है...");
                 return;
             }
 
