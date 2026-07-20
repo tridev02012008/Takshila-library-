@@ -4,15 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Takshila Smart Library PRO V10</title>
-    <!-- html2canvas library for downloading receipts with backup CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js" onerror="loadBackupScript()"></script>
-    <script>
-        function loadBackupScript() {
-            const script = document.createElement('script');
-            script.src = "https://cdn.jsdelivr.net/npm/html2canvas@1.41.1/dist/html2canvas.min.js";
-            document.head.appendChild(script);
-        }
-    </script>
+    <!-- Updated html2canvas library CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -102,7 +95,6 @@
             color: #fff;
         }
         
-        /* Grid columns set to 4 for larger, clearer view */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -216,7 +208,6 @@
             font-weight: bold;
         }
 
-        /* Modal Layout */
         .modal {
             display: none;
             position: fixed;
@@ -380,7 +371,6 @@
             display: none;
         }
 
-        /* Hidden Template for Receipt generation */
         #receipt-template-container {
             position: absolute;
             left: -9999px;
@@ -447,7 +437,6 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
-    <!-- Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
@@ -538,7 +527,6 @@
                 </div>
             </div>
 
-            <!-- ACTION BUTTONS -->
             <div class="action-buttons-stack">
                 <button class="btn btn-save" id="save-btn" onclick="saveSeatRecord()">1. Save Seat Booking</button>
                 <button class="btn btn-download-slip" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
@@ -552,7 +540,6 @@
         </div>
     </div>
 
-    <!-- Hidden Template for rendering downloadable receipt -->
     <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
