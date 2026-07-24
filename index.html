@@ -3,110 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V11</title>
+    <title>Takshila Smart Library PRO V8</title>
+    <!-- html2canvas library for downloading receipts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.41.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #0d1321; 
             color: #ffffff;
             margin: 0;
-            padding: 10px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
         }
         h1 {
             color: #ffffff;
-            margin-bottom: 8px;
-            font-size: 20px;
-            text-align: center;
+            margin-bottom: 15px;
+            font-size: 24px;
         }
         
         .dashboard-container {
-            max-width: 600px;
+            max-width: 1000px;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         .finance-panel {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
             width: 100%;
         }
         .fin-card {
             background: #1e293b;
-            padding: 10px;
-            border-radius: 8px;
+            padding: 15px;
+            border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.2);
             text-align: center;
-            border-left: 4px solid #2563eb;
+            border-left: 5px solid #2563eb;
         }
         .fin-card.daily { border-left-color: #10b981; }
         .fin-card.month { border-left-color: #eab308; }
-        .fin-card h4 { margin: 0; color: #94a3b8; font-size: 11px; text-transform: uppercase; }
-        .fin-card p { margin: 3px 0 0 0; font-size: 18px; font-weight: bold; color: #ffffff; }
+        .fin-card h4 { margin: 0; color: #94a3b8; font-size: 13px; text-transform: uppercase; }
+        .fin-card p { margin: 5px 0 0 0; font-size: 22px; font-weight: bold; color: #ffffff; }
 
         .controls-panel {
             background: #172237;
-            padding: 10px 12px;
-            border-radius: 8px;
+            padding: 15px 20px;
+            border-radius: 12px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-sizing: border-box;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 15px;
             align-items: center;
             justify-content: space-between;
         }
         .admin-global-auth {
             background: #1a2333;
             border: 1px solid #3b82f6;
-            padding: 5px 8px;
-            border-radius: 6px;
+            padding: 8px 12px;
+            border-radius: 8px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
         .admin-global-auth input {
             background: #0d1321;
             color: #fff;
             border: 1px solid #2a3b5c;
-            padding: 4px;
+            padding: 6px;
             border-radius: 4px;
-            font-size: 11px;
-            width: 90px;
+            font-size: 12px;
+            width: 130px;
         }
         .stats {
-            font-size: 12px;
+            font-size: 14px;
             font-weight: bold;
             color: #94a3b8;
         }
         .search-box {
-            padding: 8px 10px;
+            padding: 12px 15px;
             border: 1px solid #2a3b5c;
-            border-radius: 6px;
+            border-radius: 8px;
             width: 100%;
-            font-size: 12px;
+            max-width: 250px;
+            font-size: 14px;
             background-color: #10192c;
             color: #fff;
+            box-sizing: border-box;
         }
         
         .grid-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 12px;
             width: 100%;
-            max-width: 600px;
             background: #10192c;
-            padding: 12px;
-            border-radius: 12px;
+            padding: 20px;
+            border-radius: 16px;
             box-shadow: 0 6px 15px rgba(0,0,0,0.4);
             box-sizing: border-box;
         }
         .seat {
-            aspect-ratio: 0.82;
+            aspect-ratio: 0.78;
             background-color: #1b2640;
             border: 1.5px solid #2e3f64;
             color: #ffffff;
@@ -114,45 +117,41 @@
             flex-direction: column;
             justify-content: space-between;
             align-items: center;
-            border-radius: 10px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            transition: transform 0.15s;
+            transition: transform 0.2s, border-color 0.2s;
+            font-size: 18px;
             position: relative;
-            padding: 8px 4px 4px 4px;
+            padding: 10px 6px 6px 6px;
             box-sizing: border-box;
             text-align: center;
         }
-        .seat:hover { transform: scale(1.03); }
-        .seat.occupied { background-color: #1c2342; border-color: #4350aa; }
-        .seat.warning-alert { background-color: #2c2518; border-color: #eab308; }
+        .seat:hover { transform: scale(1.04); }
+        .seat.occupied { background-color: #1c1d42; border-color: #3f4294; }
+        .seat.warning-alert { background-color: #242223; border-color: #d4a327; }
         .seat.expired-alert { 
             background-color: #2c161a !important; 
-            border: 2px dashed #ef4444 !important;
+            border: 2px dashed #e53e3e !important;
             animation: seat-blink-glow 1.2s infinite ease-in-out;
         }
         
         @keyframes seat-blink-glow {
-            0% { opacity: 0.6; border-color: #ef4444; }
-            50% { opacity: 1; border-color: #f87171; box-shadow: 0 0 8px #ef4444; }
-            100% { opacity: 0.6; border-color: #ef4444; }
+            0% { opacity: 0.5; border-color: #b91c1c; box-shadow: 0 0 2px #ef4444; }
+            50% { opacity: 1; border-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
+            100% { opacity: 0.5; border-color: #b91c1c; box-shadow: 0 0 2px #ef4444; }
         }
         .seat.hidden { display: none !important; }
         
-        .seat-number-tag {
-            font-size: 16px;
-            font-weight: 700;
-            color: #38bdf8;
-        }
-
         .seat-name {
             font-size: 10px;
             font-weight: normal;
-            color: #cbd5e1;
+            color: #94a3b8;
             max-width: 75px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            margin-top: 2px;
         }
         
         .indicators-area {
@@ -161,33 +160,34 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            margin: auto 0;
         }
         .all-shift-line {
-            width: 35px;
+            width: 50px;
             height: 4px;
             background-color: #38bdf8;
             border-radius: 2px;
-            margin: 2px 0;
+            margin: 4px 0;
         }
         .single-night-dot {
-            width: 5px;
-            height: 5px;
+            width: 6px;
+            height: 6px;
             background-color: #4a5d7e;
             border-radius: 50%;
-            margin-top: 1px;
+            margin-top: 2px;
         }
         .single-night-dot.active { background-color: #a855f7; }
 
         .four-dots-container {
             display: flex;
-            gap: 3px;
+            gap: 4px;
             justify-content: center;
             align-items: center;
-            margin: 2px 0;
+            margin: 6px 0;
         }
         .shift-dot {
-            width: 6px;
-            height: 6px;
+            width: 7px;
+            height: 7px;
             border-radius: 50%;
             background-color: #334155;
         }
@@ -196,68 +196,108 @@
         .shift-dot.active-afternoon { background-color: #3b82f6; }
         .shift-dot.active-evening { background-color: #ec4899; }
 
-        .due-tag-badge {
+        .due-blink-tag {
             background: #3a1c24;
             color: #f87171;
             border: 1px solid #7f1d1d;
-            padding: 1px 3px;
-            border-radius: 4px;
-            font-size: 9px;
+            padding: 2px 6px;
+            border-radius: 6px;
+            font-size: 10px;
             font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            margin-top: auto;
+            animation: text-pulse 1s infinite alternate;
+        }
+        @keyframes text-pulse {
+            0% { opacity: 0.4; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
 
+        /* Modal Layout */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.75);
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 10px;
-            box-sizing: border-box;
         }
         .modal-content {
             background: #172237;
             color: white;
-            padding: 18px;
-            border-radius: 12px;
-            width: 100%;
-            max-width: 440px;
+            padding: 25px;
+            border-radius: 16px;
+            width: 480px;
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            box-sizing: border-box;
             border: 1px solid #2a3b5c;
         }
+        
+        /* POPUP FOR MOBILE SLIP PREVIEW */
+        .slip-preview-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .slip-preview-content {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            max-width: 460px;
+            width: 100%;
+        }
+        .slip-preview-content img {
+            width: 100%;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
         .modal-content h3 {
             margin-top: 0;
             color: #ffffff;
             border-bottom: 1px solid #2a3b5c;
-            padding-bottom: 8px;
-            font-size: 16px;
+            padding-bottom: 10px;
         }
         .form-row {
             display: flex;
-            gap: 8px;
+            gap: 10px;
+        }
+        .form-row.button-flex {
+            margin-top: 15px;
+            flex-direction: column;
+            gap: 10px;
         }
         .form-group {
             flex: 1;
             display: flex;
             flex-direction: column;
-            margin-top: 7px;
+            margin-top: 10px;
         }
         .modal-content label {
             font-size: 11px;
             color: #94a3b8;
             font-weight: 600;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
         .modal-content input, .modal-content select {
-            padding: 6px 8px;
+            padding: 8px 10px;
             box-sizing: border-box;
             border: 1px solid #2a3b5c;
             border-radius: 6px;
-            font-size: 12px;
+            font-size: 13px;
             background: #10192c;
             color: white;
         }
@@ -266,16 +306,16 @@
             background: #10192c;
             border: 1px solid #2a3b5c;
             border-radius: 6px;
-            padding: 5px;
+            padding: 8px;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 4px;
+            gap: 6px;
         }
         .shift-checkbox-item {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: 11px;
+            gap: 6px;
+            font-size: 12px;
             color: #e2e8f0;
             cursor: pointer;
         }
@@ -286,94 +326,118 @@
         }
 
         .camera-section {
-            margin-top: 8px;
+            margin-top: 15px;
             background: #10192c;
-            padding: 6px;
-            border-radius: 6px;
+            padding: 10px;
+            border-radius: 8px;
             border: 1px dashed #2a3b5c;
             text-align: center;
         }
         #video-preview {
             width: 100%;
-            max-height: 100px;
+            max-height: 140px;
             background: #000;
-            border-radius: 4px;
+            border-radius: 6px;
             display: none;
             object-fit: cover;
         }
         #photo-preview {
             width: 100%;
-            max-height: 100px;
-            border-radius: 4px;
+            max-height: 140px;
+            border-radius: 6px;
             display: none;
             object-fit: contain;
-            margin-top: 4px;
+            margin-top: 5px;
         }
         .cam-btn {
             background: #334155;
             color: white;
             border: none;
-            padding: 4px 8px;
+            padding: 6px 12px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 10px;
-            margin: 2px;
+            font-size: 11px;
+            margin: 5px 2px;
         }
 
-        .action-buttons-stack {
+        .btn-group {
             display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-top: 12px;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 8px;
         }
         .btn {
-            padding: 9px;
+            padding: 10px 12px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            flex: 1;
             font-size: 12px;
-            text-align: center;
         }
-        .btn-save { background-color: #10b981; color: white; width: 100%; }
-        .btn-download-slip { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; width: 100%; }
-        .btn-whatsapp { background-color: #25d366; color: #000; font-weight: 800; width: 100%; }
+        .btn-save { background-color: #10b981; color: white; }
         .btn-clear { background-color: #ef4444; color: white; }
         .btn-cancel { background-color: #475569; color: white; }
-
-        .btn-row-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 7px;
+        
+        .btn-combined {
+            background: linear-gradient(135deg, #eab308 0%, #3b82f6 100%);
+            color: #ffffff;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s;
+            width: 100%;
         }
-        .btn-row-group .btn { flex: 1; }
+        
+        /* WHATSAPP TRIGGER BUTTON */
+        .btn-whatsapp-trigger {
+            background: #25d366;
+            color: #000000;
+            font-weight: 800;
+            text-transform: uppercase;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+            display: none; 
+            width: 100%;
+            animation: bounce-glow 1s infinite alternate;
+        }
+
+        @keyframes bounce-glow {
+            0% { transform: scale(1); box-shadow: 0 4px 10px rgba(37, 211, 102, 0.4); }
+            100% { transform: scale(1.02); box-shadow: 0 6px 20px rgba(37, 211, 102, 0.7); }
+        }
 
         .backup-btns button {
             background: #1e293b;
             color: #fff;
             border: 1px solid #334155;
-            padding: 5px 8px;
+            padding: 8px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
+            margin-left: 5px;
         }
         .lock-msg {
             background: #3b2314;
             color: #f59e0b;
-            padding: 5px;
+            padding: 8px;
             border-radius: 6px;
-            font-size: 11px;
-            margin-top: 6px;
+            font-size: 12px;
+            margin-top: 10px;
             text-align: center;
             border: 1px solid #78350f;
             display: none;
         }
 
+        #receipt-template-container {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+        }
         .library-slip {
             width: 450px;
             background: #fff7c2;
             color: #000;
-            padding: 22px;
+            padding: 25px;
             box-sizing: border-box;
             font-family: 'Courier New', Courier, monospace;
             border: 2px dashed #555;
@@ -381,16 +445,16 @@
         .slip-header {
             text-align: center;
             border-bottom: 2px solid #000;
-            padding-bottom: 6px;
+            padding-bottom: 8px;
         }
-        .slip-header h2 { margin: 0; font-size: 24px; font-weight: bold; }
-        .slip-header p { margin: 2px 0; font-size: 11px; font-weight: bold; }
-        .slip-meta { display: flex; justify-content: space-between; margin: 10px 0; font-size: 13px; font-weight: bold; }
-        .slip-field { margin: 5px 0; font-size: 13px; border-bottom: 1px dotted #000; padding-bottom: 2px; }
-        .slip-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        .slip-table th, .slip-table td { border: 1px solid #000; padding: 5px; font-size: 12px; text-align: left; }
+        .slip-header h2 { margin: 0; font-size: 26px; font-weight: bold; }
+        .slip-header p { margin: 3px 0; font-size: 11px; font-weight: bold; }
+        .slip-meta { display: flex; justify-content: space-between; margin: 12px 0; font-size: 14px; font-weight: bold; }
+        .slip-field { margin: 6px 0; font-size: 14px; border-bottom: 1px dotted #000; padding-bottom: 2px; }
+        .slip-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .slip-table th, .slip-table td { border: 1px solid #000; padding: 6px; font-size: 13px; text-align: left; }
         .slip-table th { background-color: rgba(0,0,0,0.05); }
-        .slip-footer { margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 13px; }
+        .slip-footer { margin-top: 20px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -400,28 +464,28 @@
     <div class="dashboard-container">
         <div class="finance-panel">
             <div class="fin-card daily">
-                <h4>Daily Collection</h4>
+                <h4>Daily Collection Today</h4>
                 <p>₹<span id="daily-amount">0</span></p>
             </div>
             <div class="fin-card month">
-                <h4>Monthly (<span id="current-month-label">Month</span>)</h4>
+                <h4>Monthly Collection (<span id="current-month-label">Month</span>)</h4>
                 <p>₹<span id="monthly-amount">0</span></p>
             </div>
         </div>
 
         <div class="controls-panel">
-            <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Free: <span id="available-count">89</span></div>
+            <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Available: <span id="available-count">89</span></div>
             
             <div class="admin-global-auth">
-                <label style="font-size: 10px; font-weight: bold; color: #60a5fa;">PIN:</label>
-                <input type="password" id="global-admin-pin" placeholder="Admin PIN" oninput="validateGlobalAdminPin()">
-                <span id="auth-status-indicator" style="font-size: 10px; color: #ef4444; font-weight: bold;">✕</span>
+                <label style="font-size: 12px; font-weight: bold; color: #60a5fa;">Admin PIN:</label>
+                <input type="password" id="global-admin-pin" placeholder="Enter System PIN" oninput="validateGlobalAdminPin()">
+                <span id="auth-status-indicator" style="font-size: 11px; color: #ef4444; font-weight: bold;">✕ Locked</span>
             </div>
 
-            <input type="text" id="search-input" class="search-box" placeholder="Search student name / phone / seat..." oninput="filterSeats()">
+            <input type="text" id="search-input" class="search-box" placeholder="Search student..." oninput="filterSeats()">
             
             <div class="backup-btns">
-                <button onclick="exportBackup()">Backup</button>
+                <button onclick="exportBackup()">Backup Data</button>
                 <button onclick="document.getElementById('upload-file').click()">Restore</button>
                 <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
             </div>
@@ -430,35 +494,36 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
+    <!-- Registration / Viewer Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
             <h3 id="modal-title">Seat Details</h3>
             
-            <div id="lock-notice" class="lock-msg">Seat is locked. Unlock via Admin PIN to modify or vacate.</div>
+            <div id="lock-notice" class="lock-msg">This seat is locked. To modify, system admin must vacate/delete it first.</div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Student Name *</label>
-                    <input type="text" id="student-name" placeholder="Full Name">
+                    <input type="text" id="student-name" placeholder="Enter Full Name">
                 </div>
                 <div class="form-group">
-                    <label>Address</label>
-                    <input type="text" id="student-address" placeholder="Address" value="Bhagalpur">
+                    <label>Address / City</label>
+                    <input type="text" id="student-address" placeholder="e.g. Bhagalpur" value="Bhagalpur">
                 </div>
             </div>
             
             <div class="form-row">
                 <div class="form-group">
-                    <label>WhatsApp Number *</label>
-                    <input type="tel" id="student-phone" placeholder="10-digit number">
+                    <label>Phone Number (WhatsApp) *</label>
+                    <input type="tel" id="student-phone" placeholder="Enter 10 digit number">
                 </div>
                 <div class="form-group">
                     <label>Select Shifts *</label>
                     <div class="shift-checkbox-group" id="shift-checkboxes">
-                        <label class="shift-checkbox-item"><input type="checkbox" value="Morning" name="shifts"> Morning</label>
-                        <label class="shift-checkbox-item"><input type="checkbox" value="Noon" name="shifts"> Noon</label>
-                        <label class="shift-checkbox-item"><input type="checkbox" value="Afternoon" name="shifts"> Afternoon</label>
-                        <label class="shift-checkbox-item"><input type="checkbox" value="Evening" name="shifts"> Evening</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Morning" name="shifts"> Morning (6AM-10AM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Noon" name="shifts"> Noon (10AM-2PM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Afternoon" name="shifts"> Afternoon (2PM-6PM)</label>
+                        <label class="shift-checkbox-item"><input type="checkbox" value="Evening" name="shifts"> Evening (6PM-10PM)</label>
                         <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="All Shift" name="shifts" id="shift-all-box"> All Shift (6AM-10PM)</label>
                         <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="Night" name="shifts" id="shift-night-box"> Night (10PM-6AM)</label>
                     </div>
@@ -476,7 +541,7 @@
                 </div>
                 <div class="form-group">
                     <label>Dues (₹)</label>
-                    <input type="number" id="fee-due" value="0" readonly style="background:#10192c; font-weight:bold; color:#ef4444;">
+                    <input type="number" id="fee-due" value="0" readonly style="background:#10192c; font-weight:bold; color:#ef4444; border-color: #7f1d1d;">
                 </div>
             </div>
 
@@ -493,14 +558,14 @@
                     <input type="date" id="receipt-date">
                 </div>
                 <div class="form-group">
-                    <label>Due Date *</label>
+                    <label>Next Payment Due Date *</label>
                     <input type="date" id="next-payment-date">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group" style="width: 100%;">
-                    <label style="color:#60a5fa; font-weight: bold;">Authorized Signature *</label>
+                    <label style="color:#60a5fa; font-weight: bold;">Authorized Signature By *</label>
                     <select id="slip-signature-picker">
                         <option value="Chandan">Chandan</option>
                         <option value="Tridev">Tridev</option>
@@ -511,30 +576,43 @@
             </div>
 
             <div class="camera-section" id="camera-area">
-                <label style="display:block; margin-bottom:3px; font-size:10px; color:#94a3b8;">ID Proof Verification</label>
+                <label style="display:block; margin-bottom:5px; font-size:12px; color:#94a3b8;">Document Verification (ID Proof)</label>
                 <video id="video-preview" autoplay playsinline></video>
-                <img id="photo-preview" alt="ID Proof">
+                <img id="photo-preview" alt="Verified Document Docs">
                 <div>
                     <button type="button" class="cam-btn" id="start-cam-btn" onclick="initiateCamera()">Open Camera</button>
                     <button type="button" class="cam-btn" id="snap-btn" onclick="captureSnapshot()" style="display:none; background:#10b981;">Take Photo</button>
                 </div>
             </div>
 
-            <div class="action-buttons-stack">
-                <button class="btn btn-save" id="save-btn" onclick="saveSeatRecord()">1. Save Seat Booking</button>
-                <button class="btn btn-download-slip" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
-                <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="openWhatsAppChat()">3. Open WhatsApp Message</button>
+            <!-- BUTTON ACTIONS GROUP -->
+            <div class="form-row button-flex">
+                <button class="btn btn-combined" id="combined-action-btn" onclick="executeSaveAndDownloadSlipOnly()">📥 Save & Generate Slip Image</button>
+                <button class="btn btn-whatsapp-trigger" id="whatsapp-direct-btn" onclick="openWhatsAppChatDirectly()">✅ Open WhatsApp Chat</button>
             </div>
 
-            <div class="btn-row-group">
-                <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()" style="display:none;">Vacant Seat</button>
+            <div class="btn-group">
+                <button class="btn btn-save" id="save-btn" onclick="saveSeatAutomaticOnly()">Save Asset Only</button>
+                <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()">Vacant</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Template for rendering downloadable receipt -->
-    <div id="receipt-template-container" style="position: absolute; left: -9999px; top: -9999px;">
+    <!-- NEW POPUP FOR MOBILE SLIP SAVING -->
+    <div class="slip-preview-modal" id="slip-preview-popup">
+        <div class="slip-preview-content">
+            <h3 style="color: #f59e0b; margin-top:0;">रसीद तैयार है!</h3>
+            <p style="font-size: 12px; color: #cbd5e1; margin-bottom: 10px;">
+                नीचे दी गई रसीद पर <b>1 सेकंड के लिए उंगली दबाकर रखें (Long Press)</b> और फिर <b>Download/Save Image</b> पर क्लिक करें।
+            </p>
+            <img id="generated-slip-img" src="" alt="Library Receipt">
+            <button class="btn btn-cancel" onclick="closeSlipPreviewPopup()" style="width:100%;">बंद करें (Close)</button>
+        </div>
+    </div>
+
+    <!-- HIDDEN SLIP TEMPLATE -->
+    <div id="receipt-template-container">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
                 <h2>तक्षशिला लाईब्रेरी</h2>
@@ -546,10 +624,11 @@
                 <div>Date: <span id="slip-date-val">--/--/----</span></div>
             </div>
             <div class="slip-field"><strong>Name:</strong> <span id="slip-name-val"></span></div>
+            <div class="slip-address" style="display:none;"><span id="slip-address-val"></span></div>
             
-            <div style="display:flex; justify-content:space-between; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin:6px 0;">
                 <div style="flex:1;" class="slip-field"><strong>Seat No:</strong> <span id="slip-seat-val"></span></div>
-                <div style="flex:1; margin-left:8px;" class="slip-field"><strong>Shift:</strong> <span id="slip-shift-val"></span></div>
+                <div style="flex:1; margin-left:10px;" class="slip-field"><strong>Shift:</strong> <span id="slip-shift-val"></span></div>
             </div>
 
             <table class="slip-table">
@@ -571,8 +650,8 @@
             <div class="slip-footer">
                 <div>Mob. No: <span id="slip-mob-val"></span></div>
                 <div style="text-align:right;">
-                    <div style="font-size:15px; margin-bottom:10px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
-                    <div style="border-top:1px dashed #000; width:110px; padding-top:4px; font-style:italic;"><span id="slip-signature-renderer">Chandan</span><br><span style="font-size:9px;">Signature</span></div>
+                    <div style="font-size:16px; margin-bottom:15px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
+                    <div style="border-top:1px dashed #000; width:120px; padding-top:5px; font-style:italic;"><span id="slip-signature-renderer">Chandan</span><br><span style="font-size:10px;">Signature</span></div>
                 </div>
             </div>
         </div>
@@ -585,6 +664,7 @@
         try {
             libraryData = JSON.parse(localStorage.getItem('takshila_library_data')) || {};
         } catch(e) {
+            console.error("Localstorage failed, initializing blank object", e);
             libraryData = {};
         }
 
@@ -595,18 +675,6 @@
         
         let isSystemAdminUnlocked = false;
         const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedPin = localStorage.getItem('takshila_admin_pin');
-            if (savedPin && ALLOWED_ADMIN_PINS.includes(savedPin)) {
-                document.getElementById('global-admin-pin').value = savedPin;
-                isSystemAdminUnlocked = true;
-                const indicator = document.getElementById('auth-status-indicator');
-                indicator.innerText = "✓";
-                indicator.style.color = "#10b981";
-            }
-            renderSeats();
-        });
 
         const gridContainer = document.getElementById('seats-grid');
 
@@ -627,18 +695,16 @@
         });
 
         function validateGlobalAdminPin() {
-            const inputPin = document.getElementById('global-admin-pin').value.trim();
+            const inputPin = document.getElementById('global-admin-pin').value;
             const indicator = document.getElementById('auth-status-indicator');
             
             if (ALLOWED_ADMIN_PINS.includes(inputPin)) {
                 isSystemAdminUnlocked = true;
-                localStorage.setItem('takshila_admin_pin', inputPin);
-                indicator.innerText = "✓";
+                indicator.innerText = "✓ Unlocked";
                 indicator.style.color = "#10b981";
             } else {
                 isSystemAdminUnlocked = false;
-                localStorage.removeItem('takshila_admin_pin');
-                indicator.innerText = "✕";
+                indicator.innerText = "✕ Locked";
                 indicator.style.color = "#ef4444";
             }
             if (currentSeatNumber) toggleFormLock(!!libraryData[currentSeatNumber]);
@@ -691,7 +757,6 @@
                 seat.classList.add('seat');
                 
                 const seatNumSpan = document.createElement('span');
-                seatNumSpan.classList.add('seat-number-tag');
                 seatNumSpan.innerText = i;
                 seat.appendChild(seatNumSpan);
 
@@ -749,8 +814,8 @@
                     const dueAmt = parseFloat(libraryData[i].due) || 0;
                     if(dueAmt > 0) {
                         const dueTag = document.createElement('div');
-                        dueTag.classList.add('due-tag-badge');
-                        dueTag.innerText = `₹${dueAmt} Due`;
+                        dueTag.classList.add('due-blink-tag');
+                        dueTag.innerText = `↑ ₹${dueAmt}`;
                         seat.appendChild(dueTag);
                     } else {
                         const nameSpan = document.createElement('span');
@@ -759,10 +824,10 @@
                         seat.appendChild(nameSpan);
                     }
                     
-                    seat.setAttribute('data-search-string', `${i} ${(libraryData[i].name || '').toLowerCase()} ${libraryData[i].phone || ''}`);
+                    seat.setAttribute('data-search-string', `${i} ${(libraryData[i].name || '').toLowerCase()} ${libraryData[i].phone || ''} due:${dueAmt}`);
                 } else {
                     const emptySpacer = document.createElement('span');
-                    emptySpacer.style.height = "12px";
+                    emptySpacer.style.height = "14px";
                     seat.appendChild(emptySpacer);
                     seat.setAttribute('data-search-string', `${i}`);
                 }
@@ -793,9 +858,11 @@
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = shouldLock);
             
             document.getElementById('lock-notice').style.display = shouldLock ? 'block' : 'none';
-            document.getElementById('save-btn').style.display = shouldLock ? 'none' : 'block';
-            document.getElementById('vacant-btn').style.display = isOccupied && isSystemAdminUnlocked ? 'block' : 'none';
+            document.getElementById('save-btn').style.display = shouldLock ? 'none' : 'inline-block';
+            document.getElementById('vacant-btn').style.display = isOccupied && isSystemAdminUnlocked ? 'inline-block' : 'none';
             document.getElementById('camera-area').style.display = shouldLock ? 'none' : 'block';
+            
+            document.getElementById('combined-action-btn').style.display = 'inline-block';
         }
 
         function openModal(seatNum) {
@@ -805,7 +872,10 @@
             
             document.getElementById('video-preview').style.display = 'none';
             document.getElementById('snap-btn').style.display = 'none';
-            document.getElementById('start-cam-btn').style.display = 'block';
+            document.getElementById('start-cam-btn').style.display = 'inline-block';
+            
+            document.getElementById('whatsapp-direct-btn').style.display = 'none'; 
+            cachedWhatsAppUrl = "";
 
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
 
@@ -837,7 +907,6 @@
                     capturedImageBase64 = null;
                 }
                 toggleFormLock(true);
-                prepareWhatsAppAndSlipData(record);
             } else {
                 document.getElementById('student-name').value = '';
                 document.getElementById('student-address').value = 'Bhagalpur';
@@ -871,7 +940,7 @@
                 document.getElementById('snap-btn').style.display = 'inline-block';
                 document.getElementById('start-cam-btn').style.display = 'none';
             } catch (err) {
-                alert("Camera access denied or unavailable.");
+                alert("Camera capture access denied or unavailable.");
             }
         }
 
@@ -891,7 +960,7 @@
             stopCamera();
             document.getElementById('video-preview').style.display = 'none';
             document.getElementById('snap-btn').style.display = 'none';
-            document.getElementById('start-cam-btn').style.display = 'block';
+            document.getElementById('start-cam-btn').style.display = 'inline-block';
         }
 
         function stopCamera() {
@@ -936,24 +1005,27 @@
             };
         }
 
-        function saveSeatRecord() {
+        function saveSeatAutomaticOnly() {
             const recordData = validateAndParseData();
             if(!recordData) return false;
 
             libraryData[currentSeatNumber] = recordData;
-            localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+            try {
+                localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
+            } catch(e) {
+                alert("Storage error, but data updated locally.");
+            }
             renderSeats();
             toggleFormLock(true);
-            prepareWhatsAppAndSlipData(recordData);
             return true;
         }
 
         function clearSeat() {
             if(!isSystemAdminUnlocked) {
-                alert("Admin verification required to vacate seats.");
+                alert("Vacating an active asset requires Admin Mode authentication authorization.");
                 return;
             }
-            if(confirm(`Are you sure you want to vacate Seat ${currentSeatNumber}?`)) {
+            if(confirm(`Are you certain you want to vacate Seat ${currentSeatNumber}?`)) {
                 delete libraryData[currentSeatNumber];
                 localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                 renderSeats();
@@ -975,10 +1047,11 @@
             });
         }
 
-        function prepareWhatsAppAndSlipData(record) {
+        function fillSlipData(record) {
             document.getElementById('slip-no-val').innerText = `TXL-${1000 + currentSeatNumber}`;
             document.getElementById('slip-date-val').innerText = record.receiptDate || '--/--/----';
             document.getElementById('slip-name-val').innerText = record.name;
+            document.getElementById('slip-address-val').innerText = record.address;
             document.getElementById('slip-seat-val').innerText = currentSeatNumber;
             document.getElementById('slip-shift-val').innerText = record.shift;
             
@@ -991,133 +1064,73 @@
             document.getElementById('slip-total-val').innerText = record.paidFee;
             document.getElementById('slip-mode-val').innerText = record.payMode;
             document.getElementById('slip-signature-renderer').innerText = record.signature;
-
-            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) कंफर्म हो गई है।\n\nकुल शुल्क: ₹${record.monthlyFee}\n जमा राशि: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षर: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
-            cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
         }
 
-        function downloadReceiptImage() {
-            if (!libraryData[currentSeatNumber]) {
-                const saved = saveSeatRecord();
-                if (!saved) return;
-            } else {
-                prepareWhatsAppAndSlipData(libraryData[currentSeatNumber]);
+        // IMPROVED MOBILE FALLBACK GENERATION FOR EASY SAVING
+        function executeSaveAndDownloadSlipOnly() {
+            if (!document.getElementById('student-name').disabled || isSystemAdminUnlocked || !libraryData[currentSeatNumber]) {
+                const isSaved = saveSeatAutomaticOnly();
+                if (!isSaved) return;
             }
 
             const record = libraryData[currentSeatNumber];
+            if (!record) return;
+
+            fillSlipData(record);
             
-            // Native Canvas Generation (No external library dependency)
-            const canvas = document.createElement('canvas');
-            canvas.width = 900;
-            canvas.height = 700;
-            const ctx = canvas.getContext('2d');
+            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपका स्वागत है। आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) का भुगतान विवरण:\n\nकुल शुल्क: ₹${record.monthlyFee}\nप्राप्त जमा: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\nरसीद दिनांक: ${record.receiptDate}\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षरकर्ता: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
+            cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
 
-            // Background
-            ctx.fillStyle = "#fff7c2";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Border
-            ctx.strokeStyle = "#555555";
-            ctx.lineWidth = 4;
-            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
-
-            // Header
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 32px 'Courier New', monospace";
-            ctx.textAlign = "center";
-            ctx.fillText("तक्षशिला लाईब्रेरी", canvas.width / 2, 70);
-
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText("पता - मनाली चौक, छोटी खंजरपुर, भागलपुर", canvas.width / 2, 105);
-            ctx.fillText("Mob.- 6207479929, 7634993778", canvas.width / 2, 130);
-
-            // Divider Line
-            ctx.beginPath();
-            ctx.moveTo(40, 150);
-            ctx.lineTo(canvas.width - 40, 150);
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Meta Info
-            ctx.font = "bold 18px 'Courier New', monospace";
-            ctx.textAlign = "left";
-            ctx.fillText(`No. TXL-${1000 + currentSeatNumber}`, 50, 190);
-            ctx.textAlign = "right";
-            ctx.fillText(`Date: ${record.receiptDate || '--/--/----'}`, canvas.width - 50, 190);
-
-            // Fields
-            ctx.textAlign = "left";
-            ctx.fillText(`Name: ${record.name}`, 50, 235);
-            ctx.fillText(`Seat No: ${currentSeatNumber}`, 50, 275);
-            ctx.fillText(`Shift: ${record.shift}`, 350, 275);
-
-            // Table Border & Header
-            ctx.strokeRect(50, 315, 800, 200);
-            ctx.fillStyle = "rgba(0,0,0,0.08)";
-            ctx.fillRect(50, 315, 800, 45);
+            const target = document.getElementById('library-slip-element');
             
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText("S.No.", 70, 343);
-            ctx.fillText("Particular", 160, 343);
-            ctx.fillText("Amount", 680, 343);
+            if (typeof html2canvas === "undefined") {
+                alert("रेंडर लाइब्रेरी लोड नहीं हो सकी, पर आप वॉट्सऐप मैसेज भेज सकते हैं।");
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
+                return;
+            }
 
-            // Table Rows
-            ctx.font = "16px 'Courier New', monospace";
-            // Row 1
-            ctx.fillText("1.", 70, 395);
-            ctx.fillText("Monthly Fee", 160, 395);
-            ctx.fillText(`₹${record.monthlyFee}`, 680, 395);
-            
-            // Row 2
-            ctx.fillText("2.", 70, 435);
-            ctx.fillText(`Receipt Date: ${record.receiptDate || '-'}`, 160, 435);
-            
-            // Row 3
-            ctx.fillText("3.", 70, 475);
-            ctx.fillText(`Next Payment Date: ${record.nextPaymentDate || '-'}`, 160, 475);
+            html2canvas(target, { 
+                useCORS: true, 
+                scale: 2, 
+                logging: false, 
+                allowTaint: true,
+                backgroundColor: "#fff7c2"
+            }).then(canvas => {
+                const dataUrl = canvas.toDataURL('image/png');
+                
+                // Show in Popup for Long Press Save
+                const previewImg = document.getElementById('generated-slip-img');
+                previewImg.src = dataUrl;
+                document.getElementById('slip-preview-popup').style.display = 'flex';
 
-            // Row 4
-            ctx.fillStyle = "red";
-            ctx.fillText("4.", 70, 510);
-            ctx.fillText(`Dues: ₹${record.due}`, 160, 510);
-
-            // Footer
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText(`Mob. No: ${record.phone}`, 50, 580);
-
-            ctx.textAlign = "right";
-            ctx.fillText(`Total Paid: ₹${record.paidFee} (${record.payMode})`, canvas.width - 50, 565);
-            
-            ctx.font = "italic 16px 'Courier New', monospace";
-            ctx.fillText(record.signature, canvas.width - 120, 615);
-            ctx.font = "12px 'Courier New', monospace";
-            ctx.fillText("Signature", canvas.width - 120, 635);
-            
-            ctx.beginPath();
-            ctx.moveTo(canvas.width - 230, 600);
-            ctx.lineTo(canvas.width - 50, 600);
-            ctx.setLineDash([4, 2]);
-            ctx.stroke();
-
-            // Trigger Download
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert("रसीद तुरंत डाउनलोड होकर आपके फोन की गैलरी में सेव हो गई है!");
+                // Try auto-download just in case browser supports it
+                try {
+                    const link = document.createElement('a');
+                    link.download = `Slip_Seat_${currentSeatNumber}.png`;
+                    link.href = dataUrl;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch(e) {
+                    console.log("Auto-download blocked, relying on manual long-press.");
+                }
+                
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
+            }).catch(err => {
+                console.error("Canvas parsing failed.", err);
+                document.getElementById('whatsapp-direct-btn').style.display = 'block';
+            });
         }
 
-        function openWhatsAppChat() {
+        function closeSlipPreviewPopup() {
+            document.getElementById('slip-preview-popup').style.display = 'none';
+        }
+
+        function openWhatsAppChatDirectly() {
             if(cachedWhatsAppUrl) {
                 window.open(cachedWhatsAppUrl, '_blank');
             } else {
-                alert("Please save the seat details first.");
+                alert("विवरण तैयार नहीं है।");
             }
         }
 
@@ -1140,13 +1153,17 @@
                     libraryData = parsed;
                     localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
                     renderSeats();
-                    alert("Backup restored successfully!");
+                    alert("System configuration recovery absolute!");
                 } catch (err) {
-                    alert("Invalid backup file.");
+                    alert("Faulty configuration payload rejected.");
                 }
             };
             reader.readAsText(file);
         }
+
+        window.onload = function() {
+            renderSeats();
+        };
     </script>
 </body>
 </html>
