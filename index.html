@@ -1,115 +1,212 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V11</title>
+    <title>Takshila Smart Library PRO V14 SUPREME</title>
     <style>
+        :root {
+            --bg-color: #0d1321;
+            --panel-bg: #172237;
+            --card-bg: #1e293b;
+            --border-color: #2a3b5c;
+            --text-color: #ffffff;
+            --subtext-color: #94a3b8;
+            --accent-blue: #38bdf8;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #a855f7;
+        }
+
+        body.light-theme {
+            --bg-color: #f1f5f9;
+            --panel-bg: #ffffff;
+            --card-bg: #e2e8f0;
+            --border-color: #cbd5e1;
+            --text-color: #0f172a;
+            --subtext-color: #475569;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0d1321; 
-            color: #ffffff;
+            background-color: var(--bg-color);
+            color: var(--text-color);
             margin: 0;
-            padding: 10px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            transition: background-color 0.3s;
         }
+
         h1 {
-            color: #ffffff;
-            margin-bottom: 8px;
-            font-size: 20px;
+            color: var(--text-color);
+            margin: 0 0 10px 0;
+            font-size: 22px;
             text-align: center;
         }
         
         .dashboard-container {
-            max-width: 600px;
+            max-width: 680px;
             width: 100%;
             display: flex;
             flex-direction: column;
             gap: 10px;
             margin-bottom: 12px;
         }
+
         .finance-panel {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
             width: 100%;
         }
+
         .fin-card {
-            background: #1e293b;
+            background: var(--card-bg);
             padding: 10px;
             border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
             border-left: 4px solid #2563eb;
         }
-        .fin-card.daily { border-left-color: #10b981; }
-        .fin-card.month { border-left-color: #eab308; }
-        .fin-card h4 { margin: 0; color: #94a3b8; font-size: 11px; text-transform: uppercase; }
-        .fin-card p { margin: 3px 0 0 0; font-size: 18px; font-weight: bold; color: #ffffff; }
+        .fin-card.daily { border-left-color: var(--accent-green); }
+        .fin-card.month { border-left-color: var(--accent-yellow); }
+        .fin-card.members { border-left-color: var(--accent-blue); }
+        .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 10px; text-transform: uppercase; }
+        .fin-card p { margin: 3px 0 0 0; font-size: 16px; font-weight: bold; color: var(--text-color); }
+
+        /* Shift Counts Dashboard */
+        .shift-stats-bar {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            justify-content: space-around;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .shift-stat-item { text-align: center; }
+        .shift-stat-item span { display: block; font-size: 13px; color: var(--accent-blue); }
+
+        .occupancy-bar-wrapper {
+            background: var(--panel-bg);
+            border-radius: 8px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+        }
+        .occupancy-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--subtext-color);
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        .progress-outer {
+            width: 100%;
+            height: 8px;
+            background: #10192c;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .progress-inner {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #3b82f6, #10b981);
+            transition: width 0.3s ease;
+        }
 
         .controls-panel {
-            background: #172237;
+            background: var(--panel-bg);
             padding: 10px 12px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
             justify-content: space-between;
         }
+
         .admin-global-auth {
-            background: #1a2333;
+            background: var(--card-bg);
             border: 1px solid #3b82f6;
-            padding: 5px 8px;
+            padding: 4px 8px;
             border-radius: 6px;
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
         }
         .admin-global-auth input {
-            background: #0d1321;
-            color: #fff;
-            border: 1px solid #2a3b5c;
+            background: var(--bg-color);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
             padding: 4px;
             border-radius: 4px;
             font-size: 11px;
-            width: 90px;
+            width: 85px;
         }
-        .stats {
-            font-size: 12px;
-            font-weight: bold;
-            color: #94a3b8;
+
+        .filter-btn-group {
+            display: flex;
+            gap: 4px;
+            width: 100%;
+            margin-top: 4px;
         }
+        .filter-chip {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--subtext-color);
+            padding: 5px;
+            font-size: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+        }
+        .filter-chip.active {
+            background: var(--accent-blue);
+            color: #000;
+            border-color: var(--accent-blue);
+        }
+        .filter-chip.expired-chip {
+            border-color: var(--accent-red);
+            color: #f87171;
+        }
+
         .search-box {
             padding: 8px 10px;
-            border: 1px solid #2a3b5c;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             width: 100%;
             font-size: 12px;
-            background-color: #10192c;
-            color: #fff;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
         }
-        
+
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
             width: 100%;
-            max-width: 600px;
-            background: #10192c;
+            max-width: 680px;
+            background: var(--panel-bg);
             padding: 12px;
             border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
             box-sizing: border-box;
         }
+
         .seat {
             aspect-ratio: 0.82;
-            background-color: #1b2640;
-            border: 1.5px solid #2e3f64;
-            color: #ffffff;
+            background-color: var(--card-bg);
+            border: 1.5px solid var(--border-color);
+            color: var(--text-color);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -119,250 +216,257 @@
             font-weight: 600;
             transition: transform 0.15s;
             position: relative;
-            padding: 8px 4px 4px 4px;
+            padding: 6px 4px;
             box-sizing: border-box;
             text-align: center;
         }
         .seat:hover { transform: scale(1.03); }
-        .seat.occupied { background-color: #1c2342; border-color: #4350aa; }
-        .seat.warning-alert { background-color: #2c2518; border-color: #eab308; }
+        .seat.occupied { border-color: #4350aa; }
+        .seat.warning-alert { border-color: var(--accent-yellow); }
+        
         .seat.expired-alert { 
             background-color: #2c161a !important; 
-            border: 2px dashed #ef4444 !important;
-            animation: seat-blink-glow 1.2s infinite ease-in-out;
+            border: 2px solid var(--accent-red) !important;
+            animation: seat-red-blink 1.2s infinite ease-in-out;
         }
         
-        @keyframes seat-blink-glow {
-            0% { opacity: 0.6; border-color: #ef4444; }
-            50% { opacity: 1; border-color: #f87171; box-shadow: 0 0 8px #ef4444; }
-            100% { opacity: 0.6; border-color: #ef4444; }
-        }
-        .seat.hidden { display: none !important; }
-        
-        .seat-number-tag {
-            font-size: 16px;
-            font-weight: 700;
-            color: #38bdf8;
+        @keyframes seat-red-blink {
+            0% { opacity: 0.6; border-color: var(--accent-red); box-shadow: 0 0 2px var(--accent-red); }
+            50% { opacity: 1; border-color: #f87171; box-shadow: 0 0 10px var(--accent-red); }
+            100% { opacity: 0.6; border-color: var(--accent-red); box-shadow: 0 0 2px var(--accent-red); }
         }
 
-        .seat-name {
-            font-size: 10px;
-            font-weight: normal;
-            color: #cbd5e1;
-            max-width: 75px;
+        .seat.hidden { display: none !important; }
+
+        .seat-number-tag {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .seat-occupants-count {
+            font-size: 9px;
+            color: var(--subtext-color);
+            max-width: 80px;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
-        
+
         .indicators-area {
             width: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 14px;
         }
+
         .all-shift-line {
-            width: 35px;
+            width: 36px;
             height: 4px;
-            background-color: #38bdf8;
+            background-color: var(--accent-blue);
             border-radius: 2px;
             margin: 2px 0;
         }
-        .single-night-dot {
-            width: 5px;
-            height: 5px;
-            background-color: #4a5d7e;
-            border-radius: 50%;
-            margin-top: 1px;
-        }
-        .single-night-dot.active { background-color: #a855f7; }
 
         .four-dots-container {
             display: flex;
             gap: 3px;
             justify-content: center;
             align-items: center;
-            margin: 2px 0;
         }
+
         .shift-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
             background-color: #334155;
         }
-        .shift-dot.active-morning { background-color: #f59e0b; }
-        .shift-dot.active-noon { background-color: #10b981; }
-        .shift-dot.active-afternoon { background-color: #3b82f6; }
-        .shift-dot.active-evening { background-color: #ec4899; }
+        .shift-dot.active-m { background-color: #f59e0b; }
+        .shift-dot.active-n { background-color: #10b981; }
+        .shift-dot.active-a { background-color: #3b82f6; }
+        .shift-dot.active-e { background-color: #ec4899; }
+        .shift-dot.active-night { background-color: #a855f7; }
 
-        .due-tag-badge {
+        .due-badge {
             background: #3a1c24;
             color: #f87171;
             border: 1px solid #7f1d1d;
             padding: 1px 3px;
             border-radius: 4px;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: bold;
         }
 
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.85);
             justify-content: center;
             align-items: center;
             z-index: 1000;
             padding: 10px;
             box-sizing: border-box;
         }
+
         .modal-content {
-            background: #172237;
-            color: white;
-            padding: 18px;
+            background: var(--panel-bg);
+            color: var(--text-color);
+            padding: 16px;
             border-radius: 12px;
             width: 100%;
-            max-width: 440px;
-            max-height: 90vh;
+            max-width: 480px;
+            max-height: 92vh;
             overflow-y: auto;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid #2a3b5c;
+            border: 1px solid var(--border-color);
         }
-        .modal-content h3 {
-            margin-top: 0;
-            color: #ffffff;
-            border-bottom: 1px solid #2a3b5c;
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
             padding-bottom: 8px;
-            font-size: 16px;
+            margin-bottom: 10px;
         }
-        .form-row {
+
+        .modal-header h3 { margin: 0; font-size: 16px; color: var(--text-color); }
+
+        .occupants-tabs {
             display: flex;
-            gap: 8px;
+            gap: 4px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+            padding-bottom: 4px;
         }
-        .form-group {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            margin-top: 7px;
-        }
-        .modal-content label {
+
+        .tab-btn {
+            background: var(--card-bg);
+            color: var(--subtext-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
             font-size: 11px;
-            color: #94a3b8;
-            font-weight: 600;
-            margin-bottom: 2px;
+            white-space: nowrap;
         }
-        .modal-content input, .modal-content select {
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #000;
+            font-weight: bold;
+            border-color: var(--accent-blue);
+        }
+
+        .tab-btn.add-new {
+            background: #10b981;
+            color: #fff;
+            border-color: #10b981;
+        }
+
+        .form-row { display: flex; gap: 8px; }
+        .form-group { flex: 1; display: flex; flex-direction: column; margin-top: 6px; }
+
+        label { font-size: 10px; color: var(--subtext-color); font-weight: 600; margin-bottom: 2px; }
+        input, select {
             padding: 6px 8px;
-            box-sizing: border-box;
-            border: 1px solid #2a3b5c;
+            border: 1px solid var(--border-color);
             border-radius: 6px;
             font-size: 12px;
-            background: #10192c;
-            color: white;
+            background: var(--card-bg);
+            color: var(--text-color);
+            box-sizing: border-box;
         }
-        
+
         .shift-checkbox-group {
-            background: #10192c;
-            border: 1px solid #2a3b5c;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             border-radius: 6px;
-            padding: 5px;
+            padding: 6px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 4px;
         }
+
         .shift-checkbox-item {
             display: flex;
             align-items: center;
             gap: 5px;
-            font-size: 11px;
-            color: #e2e8f0;
+            font-size: 10px;
+            color: var(--text-color);
             cursor: pointer;
         }
-        .shift-checkbox-item input {
-            cursor: pointer;
-            width: auto;
-            margin: 0;
+
+        /* UPI QR Box */
+        .upi-qr-box {
+            margin-top: 10px;
+            background: var(--card-bg);
+            border: 1px solid var(--accent-blue);
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
         }
 
         .camera-section {
             margin-top: 8px;
-            background: #10192c;
+            background: var(--card-bg);
             padding: 6px;
             border-radius: 6px;
-            border: 1px dashed #2a3b5c;
+            border: 1px dashed var(--border-color);
             text-align: center;
         }
-        #video-preview {
+
+        #video-preview, #photo-preview {
             width: 100%;
             max-height: 100px;
-            background: #000;
             border-radius: 4px;
-            display: none;
             object-fit: cover;
-        }
-        #photo-preview {
-            width: 100%;
-            max-height: 100px;
-            border-radius: 4px;
             display: none;
-            object-fit: contain;
             margin-top: 4px;
         }
-        .cam-btn {
-            background: #334155;
-            color: white;
-            border: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 10px;
-            margin: 2px;
-        }
 
-        .action-buttons-stack {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-top: 12px;
-        }
         .btn {
-            padding: 9px;
+            padding: 8px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 11px;
             text-align: center;
         }
-        .btn-save { background-color: #10b981; color: white; width: 100%; }
-        .btn-download-slip { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; width: 100%; }
-        .btn-whatsapp { background-color: #25d366; color: #000; font-weight: 800; width: 100%; }
-        .btn-clear { background-color: #ef4444; color: white; }
-        .btn-cancel { background-color: #475569; color: white; }
 
-        .btn-row-group {
-            display: flex;
-            gap: 8px;
-            margin-top: 7px;
-        }
-        .btn-row-group .btn { flex: 1; }
+        .btn-renew { background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); color: white; width: 100%; margin-top: 8px; }
+        .btn-save { background: var(--accent-green); color: white; width: 100%; margin-top: 6px; }
+        .btn-download { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; width: 100%; margin-top: 6px; }
+        .btn-idcard { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; width: 100%; margin-top: 6px; }
+        .btn-whatsapp { background: #25d366; color: #000; font-weight: 800; width: 100%; margin-top: 6px; }
+        .btn-reminder { background: #ef4444; color: #fff; width: 100%; margin-top: 6px; }
+        .btn-clear { background: var(--accent-red); color: white; }
+        .btn-cancel { background: #475569; color: white; }
+
+        .btn-row { display: flex; gap: 8px; margin-top: 8px; }
+        .btn-row .btn { flex: 1; }
 
         .backup-btns button {
-            background: #1e293b;
-            color: #fff;
-            border: 1px solid #334155;
-            padding: 5px 8px;
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
         }
+
         .lock-msg {
             background: #3b2314;
             color: #f59e0b;
             padding: 5px;
             border-radius: 6px;
-            font-size: 11px;
+            font-size: 10px;
             margin-top: 6px;
             text-align: center;
             border: 1px solid #78350f;
@@ -370,32 +474,63 @@
         }
 
         .library-slip {
-            width: 450px;
+            width: 420px;
             background: #fff7c2;
             color: #000;
-            padding: 22px;
+            padding: 18px;
             box-sizing: border-box;
             font-family: 'Courier New', Courier, monospace;
-            border: 2px dashed #555;
+            border: 2px dashed #333;
         }
-        .slip-header {
-            text-align: center;
-            border-bottom: 2px solid #000;
+        .slip-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 4px; }
+        .slip-header h2 { margin: 0; font-size: 22px; font-weight: bold; }
+        .slip-header p { margin: 2px 0; font-size: 10px; font-weight: bold; }
+        .slip-meta { display: flex; justify-content: space-between; margin: 8px 0; font-size: 11px; font-weight: bold; }
+        .slip-field { margin: 4px 0; font-size: 12px; border-bottom: 1px dotted #000; padding-bottom: 2px; }
+        .slip-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .slip-table th, .slip-table td { border: 1px solid #000; padding: 4px; font-size: 11px; text-align: left; }
+        .slip-footer { margin-top: 12px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 11px; }
+
+        .student-id-card {
+            width: 380px;
+            height: 230px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 14px;
+            box-sizing: border-box;
+            border: 2px solid #38bdf8;
+            position: relative;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .id-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
             padding-bottom: 6px;
         }
-        .slip-header h2 { margin: 0; font-size: 24px; font-weight: bold; }
-        .slip-header p { margin: 2px 0; font-size: 11px; font-weight: bold; }
-        .slip-meta { display: flex; justify-content: space-between; margin: 10px 0; font-size: 13px; font-weight: bold; }
-        .slip-field { margin: 5px 0; font-size: 13px; border-bottom: 1px dotted #000; padding-bottom: 2px; }
-        .slip-table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-        .slip-table th, .slip-table td { border: 1px solid #000; padding: 5px; font-size: 12px; text-align: left; }
-        .slip-table th { background-color: rgba(0,0,0,0.05); }
-        .slip-footer { margin-top: 15px; display: flex; justify-content: space-between; align-items: flex-end; font-weight: bold; font-size: 13px; }
+        .id-card-header h3 { margin: 0; font-size: 16px; color: #38bdf8; }
+        .id-card-body { display: flex; gap: 12px; margin-top: 12px; }
+        .id-photo-box {
+            width: 80px;
+            height: 90px;
+            border: 1px solid #38bdf8;
+            border-radius: 6px;
+            background: #000;
+            object-fit: cover;
+        }
+        .id-details { font-size: 11px; display: flex; flex-direction: column; gap: 3px; }
+        .id-details strong { color: #94a3b8; }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
-    <h1>Takshila Smart Library PRO</h1>
+    <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:680px;">
+        <h1>Takshila Smart Library PRO SUPREME</h1>
+        <button onclick="toggleTheme()" style="background:var(--card-bg); color:var(--text-color); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:10px;">🌓 Theme Switch</button>
+    </div>
     
     <div class="dashboard-container">
         <div class="finance-panel">
@@ -404,25 +539,58 @@
                 <p>₹<span id="daily-amount">0</span></p>
             </div>
             <div class="fin-card month">
-                <h4>Monthly (<span id="current-month-label">Month</span>)</h4>
+                <h4>Monthly (<span id="month-label">Month</span>)</h4>
                 <p>₹<span id="monthly-amount">0</span></p>
+            </div>
+            <div class="fin-card members">
+                <h4>Active Students</h4>
+                <p><span id="active-students-count">0</span></p>
+            </div>
+        </div>
+
+        <div class="shift-stats-bar">
+            <div class="shift-stat-item">Morning <span id="cnt-m">0</span></div>
+            <div class="shift-stat-item">Noon <span id="cnt-n">0</span></div>
+            <div class="shift-stat-item">Afternoon <span id="cnt-a">0</span></div>
+            <div class="shift-stat-item">Evening <span id="cnt-e">0</span></div>
+            <div class="shift-stat-item">Night <span id="cnt-night">0</span></div>
+            <div class="shift-stat-item">All Shift <span id="cnt-all">0</span></div>
+        </div>
+
+        <div class="occupancy-bar-wrapper">
+            <div class="occupancy-info">
+                <span>Library Seat Occupancy</span>
+                <span id="occupancy-percent-text">0% Full</span>
+            </div>
+            <div class="progress-outer">
+                <div class="progress-inner" id="occupancy-progress-bar"></div>
             </div>
         </div>
 
         <div class="controls-panel">
-            <div class="stats">Total: 89 | Occupied: <span id="occupied-count">0</span> | Free: <span id="available-count">89</span></div>
-            
-            <div class="admin-global-auth">
-                <label style="font-size: 10px; font-weight: bold; color: #60a5fa;">PIN:</label>
-                <input type="password" id="global-admin-pin" placeholder="Admin PIN" oninput="validateGlobalAdminPin()">
-                <span id="auth-status-indicator" style="font-size: 10px; color: #ef4444; font-weight: bold;">✕</span>
+            <div style="display:flex; justify-content:space-between; width:100%; align-items:center;">
+                <div class="stats" style="font-size:11px; color:var(--subtext-color);">Total: 89 | Occupied: <span id="occupied-count">0</span> | Free: <span id="available-count">89</span></div>
+                
+                <div class="admin-global-auth">
+                    <label style="font-size: 9px; font-weight: bold; color: #60a5fa;">PIN:</label>
+                    <input type="password" id="global-admin-pin" placeholder="Admin PIN" oninput="validateAdminPin()">
+                    <button type="button" id="admin-lock-btn" onclick="toggleAdminLockManual()" style="background:#ef4444; color:#fff; border:none; padding:2px 6px; border-radius:4px; font-size:9px; cursor:pointer;">Lock</button>
+                    <span id="auth-status-indicator" style="font-size: 10px; color: #ef4444; font-weight: bold;">✕</span>
+                </div>
             </div>
 
-            <input type="text" id="search-input" class="search-box" placeholder="Search student name / phone / seat..." oninput="filterSeats()">
+            <input type="text" id="search-input" class="search-box" placeholder="Search student name / phone / seat / shift..." oninput="filterSeats()">
             
-            <div class="backup-btns">
-                <button onclick="exportBackup()">Backup</button>
-                <button onclick="document.getElementById('upload-file').click()">Restore</button>
+            <div class="filter-btn-group">
+                <button class="filter-chip active" id="filter-all" onclick="setSeatFilter('all')">All Seats</button>
+                <button class="filter-chip" id="filter-occupied" onclick="setSeatFilter('occupied')">Occupied</button>
+                <button class="filter-chip" id="filter-free" onclick="setSeatFilter('free')">Free Seats</button>
+                <button class="filter-chip expired-chip" id="filter-expired" onclick="setSeatFilter('expired')">🚨 Overdue / Expired</button>
+            </div>
+
+            <div class="backup-btns" style="margin-top:4px; width:100%; display:flex; justify-content:flex-end; gap:6px;">
+                <button onclick="exportBackup()">Export Backup</button>
+                <button onclick="document.getElementById('upload-file').click()">Import Restore</button>
                 <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
             </div>
         </div>
@@ -430,11 +598,17 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
+    <!-- Student Detail Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
-            <h3 id="modal-title">Seat Details</h3>
-            
-            <div id="lock-notice" class="lock-msg">Seat is locked. Unlock via Admin PIN to modify or vacate.</div>
+            <div class="modal-header">
+                <h3 id="modal-title">Seat Details</h3>
+                <span style="cursor:pointer; font-size:18px;" onclick="closeModal()">✕</span>
+            </div>
+
+            <div id="lock-notice" class="lock-msg">Admin PIN Required to Edit/Vacate.</div>
+
+            <div class="occupants-tabs" id="occupants-tabs-container"></div>
 
             <div class="form-row">
                 <div class="form-group">
@@ -446,20 +620,20 @@
                     <input type="text" id="student-address" placeholder="Address" value="Bhagalpur">
                 </div>
             </div>
-            
+
             <div class="form-row">
                 <div class="form-group">
-                    <label>WhatsApp Number *</label>
-                    <input type="tel" id="student-phone" placeholder="10-digit number">
+                    <label>WhatsApp Phone *</label>
+                    <input type="tel" id="student-phone" placeholder="10-digit phone">
                 </div>
                 <div class="form-group">
-                    <label>Select Shifts *</label>
+                    <label>Assigned Shift *</label>
                     <div class="shift-checkbox-group" id="shift-checkboxes">
                         <label class="shift-checkbox-item"><input type="checkbox" value="Morning" name="shifts"> Morning</label>
                         <label class="shift-checkbox-item"><input type="checkbox" value="Noon" name="shifts"> Noon</label>
                         <label class="shift-checkbox-item"><input type="checkbox" value="Afternoon" name="shifts"> Afternoon</label>
                         <label class="shift-checkbox-item"><input type="checkbox" value="Evening" name="shifts"> Evening</label>
-                        <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="All Shift" name="shifts" id="shift-all-box"> All Shift (6AM-10PM)</label>
+                        <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="All Shift" name="shifts" id="shift-all-box"> All Shift (Full Day)</label>
                         <label class="shift-checkbox-item" style="grid-column: span 2;"><input type="checkbox" value="Night" name="shifts" id="shift-night-box"> Night (10PM-6AM)</label>
                     </div>
                 </div>
@@ -468,16 +642,25 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Monthly Fee (₹)</label>
-                    <input type="number" id="fee-monthly" value="700" oninput="calculateDues()">
+                    <input type="number" id="fee-monthly" value="700" oninput="calculateDues(); updateUpiQr();">
                 </div>
                 <div class="form-group">
-                    <label>Total Paid (₹)</label>
-                    <input type="number" id="fee-paid" value="700" oninput="calculateDues()">
+                    <label>Paid Amount (₹)</label>
+                    <input type="number" id="fee-paid" value="700" oninput="calculateDues(); updateUpiQr();">
                 </div>
                 <div class="form-group">
                     <label>Dues (₹)</label>
-                    <input type="number" id="fee-due" value="0" readonly style="background:#10192c; font-weight:bold; color:#ef4444;">
+                    <input type="number" id="fee-due" value="0" readonly style="background:var(--card-bg); font-weight:bold; color:#ef4444;">
                 </div>
+            </div>
+
+            <!-- Dynamic UPI QR Display Box -->
+            <div class="upi-qr-box" id="upi-qr-wrapper">
+                <span style="font-size:10px; color:var(--accent-blue); font-weight:bold;">📲 SCAN TO PAY VIA UPI</span>
+                <div style="margin-top:4px;">
+                    <img id="upi-qr-img" src="" alt="UPI QR" style="width:110px; height:110px; border-radius:6px; background:#fff; padding:3px;">
+                </div>
+                <div style="font-size:9px; color:var(--subtext-color); margin-top:2px;">Scan with PhonePe, GPay, Paytm</div>
             </div>
 
             <div class="form-row">
@@ -493,41 +676,40 @@
                     <input type="date" id="receipt-date">
                 </div>
                 <div class="form-group">
-                    <label>Due Date *</label>
+                    <label>Next Due Date *</label>
                     <input type="date" id="next-payment-date">
                 </div>
             </div>
 
-            <div class="form-row">
-                <div class="form-group" style="width: 100%;">
-                    <label style="color:#60a5fa; font-weight: bold;">Authorized Signature *</label>
-                    <select id="slip-signature-picker">
-                        <option value="Chandan">Chandan</option>
-                        <option value="Tridev">Tridev</option>
-                        <option value="Ravi">Ravi</option>
-                        <option value="Asha">Asha</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label style="color:#60a5fa; font-weight: bold;">Authorized Signature</label>
+                <select id="slip-signature-picker">
+                    <option value="Chandan">Chandan</option>
+                    <option value="Tridev">Tridev</option>
+                    <option value="Ravi">Ravi</option>
+                    <option value="Asha">Asha</option>
+                </select>
             </div>
 
-            <div class="camera-section" id="camera-area">
-                <label style="display:block; margin-bottom:3px; font-size:10px; color:#94a3b8;">ID Proof Verification</label>
+            <div class="camera-section">
+                <label style="display:block; margin-bottom:3px; font-size:10px; color:var(--subtext-color);">ID Proof Photo</label>
                 <video id="video-preview" autoplay playsinline></video>
                 <img id="photo-preview" alt="ID Proof">
-                <div>
-                    <button type="button" class="cam-btn" id="start-cam-btn" onclick="initiateCamera()">Open Camera</button>
-                    <button type="button" class="cam-btn" id="snap-btn" onclick="captureSnapshot()" style="display:none; background:#10b981;">Take Photo</button>
+                <div style="margin-top: 4px;">
+                    <button type="button" class="tab-btn" id="start-cam-btn" onclick="initiateCamera()">Open Camera</button>
+                    <button type="button" class="tab-btn" id="snap-btn" onclick="captureSnapshot()" style="display:none; background:#10b981; color:#fff;">Capture</button>
                 </div>
             </div>
 
-            <div class="action-buttons-stack">
-                <button class="btn btn-save" id="save-btn" onclick="saveSeatRecord()">1. Save Seat Booking</button>
-                <button class="btn btn-download-slip" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
-                <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="openWhatsAppChat()">3. Open WhatsApp Message</button>
-            </div>
+            <button class="btn btn-renew" id="quick-renew-btn" onclick="quickRenewOneMonth()" style="display:none;">⚡ Quick 1-Month Renew (+30 Days)</button>
+            <button class="btn btn-save" id="save-btn" onclick="saveActiveOccupant()">1. Save / Update Student</button>
+            <button class="btn btn-download" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
+            <button class="btn btn-idcard" id="download-idcard-btn" onclick="downloadStudentIDCard()">3. Download Student ID Card</button>
+            <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="openWhatsAppChat()">4. Send WhatsApp Welcome Message</button>
+            <button class="btn btn-reminder" id="reminder-btn" onclick="sendWhatsAppReminder()" style="display:none;">🚨 Send Fee Overdue Reminder</button>
 
-            <div class="btn-row-group">
-                <button class="btn btn-clear" id="vacant-btn" onclick="clearSeat()" style="display:none;">Vacant Seat</button>
+            <div class="btn-row">
+                <button class="btn btn-clear" id="vacant-btn" onclick="vacantActiveOccupant()" style="display:none;">Vacant Selected Student</button>
                 <button class="btn btn-cancel" onclick="closeModal()">Close</button>
             </div>
         </div>
@@ -547,7 +729,7 @@
             </div>
             <div class="slip-field"><strong>Name:</strong> <span id="slip-name-val"></span></div>
             
-            <div style="display:flex; justify-content:space-between; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin:4px 0;">
                 <div style="flex:1;" class="slip-field"><strong>Seat No:</strong> <span id="slip-seat-val"></span></div>
                 <div style="flex:1; margin-left:8px;" class="slip-field"><strong>Shift:</strong> <span id="slip-shift-val"></span></div>
             </div>
@@ -555,7 +737,7 @@
             <table class="slip-table">
                 <thead>
                     <tr>
-                        <th style="width:10%">S.No.</th>
+                        <th style="width:10%">S.N.</th>
                         <th style="width:65%">Particular</th>
                         <th style="width:25%">Amount</th>
                     </tr>
@@ -569,46 +751,70 @@
             </table>
 
             <div class="slip-footer">
-                <div>Mob. No: <span id="slip-mob-val"></span></div>
+                <div>Mob: <span id="slip-mob-val"></span></div>
                 <div style="text-align:right;">
-                    <div style="font-size:15px; margin-bottom:10px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
-                    <div style="border-top:1px dashed #000; width:110px; padding-top:4px; font-style:italic;"><span id="slip-signature-renderer">Chandan</span><br><span style="font-size:9px;">Signature</span></div>
+                    <div style="font-size:13px; margin-bottom:8px;">Total Paid: ₹<span id="slip-total-val">0</span> (<span id="slip-mode-val">UPI</span>)</div>
+                    <div style="border-top:1px dashed #000; width:100px; padding-top:3px; font-style:italic;"><span id="slip-signature-renderer">Chandan</span><br><span style="font-size:8px;">Authorized Sig.</span></div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Printable Student ID Card -->
+    <div id="idcard-template-container" style="position: absolute; left: -9999px; top: -9999px;">
+        <div class="student-id-card" id="student-idcard-element">
+            <div class="id-card-header">
+                <h3>TAKSHILA LIBRARY</h3>
+                <span style="font-size:10px; color:#10b981; font-weight:bold;">MEMBERSHIP CARD</span>
+            </div>
+            <div class="id-card-body">
+                <img id="id-card-photo-img" class="id-photo-box" alt="Photo">
+                <div class="id-details">
+                    <div><strong>Name:</strong> <span id="id-card-name" style="color:#fff; font-weight:bold;"></span></div>
+                    <div><strong>Seat No:</strong> <span id="id-card-seat" style="color:#38bdf8; font-weight:bold;"></span></div>
+                    <div><strong>Shift:</strong> <span id="id-card-shift"></span></div>
+                    <div><strong>Mob:</strong> <span id="id-card-phone"></span></div>
+                    <div><strong>Valid Till:</strong> <span id="id-card-validity" style="color:#f59e0b;"></span></div>
+                </div>
+            </div>
+            <div style="position:absolute; bottom:8px; right:14px; font-size:8px; color:#64748b; font-style:italic;">Manali Chowk, Bhagalpur</div>
+        </div>
+    </div>
+
     <script>
         const TOTAL_SEATS = 89;
-        let libraryData = {};
+        const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
+        const LIBRARY_UPI_ID = "6207479929@ybl";
         
+        let libraryData = {};
         try {
-            libraryData = JSON.parse(localStorage.getItem('takshila_library_data')) || {};
-        } catch(e) {
-            libraryData = {};
-        }
+            libraryData = JSON.parse(localStorage.getItem('takshila_v14_data')) || {};
+        } catch(e) { libraryData = {}; }
 
         let currentSeatNumber = null;
+        let activeOccupantIndex = 0;
         let localStream = null;
         let capturedImageBase64 = null;
-        let cachedWhatsAppUrl = ""; 
-        
         let isSystemAdminUnlocked = false;
-        const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
+        let activeFilter = 'all';
 
         window.addEventListener('DOMContentLoaded', () => {
-            const savedPin = localStorage.getItem('takshila_admin_pin');
-            if (savedPin && ALLOWED_ADMIN_PINS.includes(savedPin)) {
-                document.getElementById('global-admin-pin').value = savedPin;
+            const savedUnlock = localStorage.getItem('takshila_admin_unlocked');
+            if (savedUnlock === 'true') {
                 isSystemAdminUnlocked = true;
                 const indicator = document.getElementById('auth-status-indicator');
                 indicator.innerText = "✓";
                 indicator.style.color = "#10b981";
+                document.getElementById('global-admin-pin').value = "••••••••";
             }
+            
+            document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             renderSeats();
         });
 
-        const gridContainer = document.getElementById('seats-grid');
+        function toggleTheme() {
+            document.body.classList.toggle('light-theme');
+        }
 
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
@@ -626,22 +832,40 @@
             });
         });
 
-        function validateGlobalAdminPin() {
+        function updateUpiQr() {
+            const amt = document.getElementById('fee-paid').value || '0';
+            const name = encodeURIComponent(document.getElementById('student-name').value || 'Takshila Library');
+            const upiUrl = `upi://pay?pa=${LIBRARY_UPI_ID}&pn=TakshilaLibrary&am=${amt}&cu=INR&tn=Fee_Seat_${currentSeatNumber}`;
+            const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
+            document.getElementById('upi-qr-img').src = qrApi;
+        }
+
+        function validateAdminPin() {
             const inputPin = document.getElementById('global-admin-pin').value.trim();
             const indicator = document.getElementById('auth-status-indicator');
             
             if (ALLOWED_ADMIN_PINS.includes(inputPin)) {
                 isSystemAdminUnlocked = true;
-                localStorage.setItem('takshila_admin_pin', inputPin);
+                localStorage.setItem('takshila_admin_unlocked', 'true');
                 indicator.innerText = "✓";
                 indicator.style.color = "#10b981";
             } else {
                 isSystemAdminUnlocked = false;
-                localStorage.removeItem('takshila_admin_pin');
+                localStorage.removeItem('takshila_admin_unlocked');
                 indicator.innerText = "✕";
                 indicator.style.color = "#ef4444";
             }
-            if (currentSeatNumber) toggleFormLock(!!libraryData[currentSeatNumber]);
+            if (currentSeatNumber) toggleFormLock();
+        }
+
+        function toggleAdminLockManual() {
+            isSystemAdminUnlocked = false;
+            localStorage.removeItem('takshila_admin_unlocked');
+            document.getElementById('global-admin-pin').value = "";
+            document.getElementById('auth-status-indicator').innerText = "✕";
+            document.getElementById('auth-status-indicator').style.color = "#ef4444";
+            if (currentSeatNumber) toggleFormLock();
+            alert("Admin Access Locked.");
         }
 
         function calculateDues() {
@@ -650,136 +874,321 @@
             document.getElementById('fee-due').value = Math.max(0, monthly - paid);
         }
 
-        function runFinanceAuditAndReset() {
+        function runFinancialAudit() {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
-            const currentMonth = now.getMonth(); 
+            const currentMonth = now.getMonth();
 
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthLabel = document.getElementById('current-month-label');
-            if(monthLabel) monthLabel.innerText = monthNames[currentMonth];
+            document.getElementById('month-label').innerText = monthNames[currentMonth];
 
             let dailyTotal = 0;
             let monthlyTotal = 0;
+            let activeStudents = 0;
+
+            let cntM = 0, cntN = 0, cntA = 0, cntE = 0, cntNight = 0, cntAll = 0;
 
             for (let seat in libraryData) {
-                const student = libraryData[seat];
-                if(student && student.receiptDate) {
-                    const rDate = new Date(student.receiptDate);
-                    const paid = parseFloat(student.paidFee) || 0;
+                const occupants = libraryData[seat] || [];
+                occupants.forEach(student => {
+                    if (student) {
+                        activeStudents++;
+                        const rDate = new Date(student.receiptDate);
+                        const paid = parseFloat(student.paidFee) || 0;
 
-                    if(student.receiptDate === todayStr) {
-                        dailyTotal += paid;
+                        if (student.receiptDate === todayStr) {
+                            dailyTotal += paid;
+                        }
+                        if (rDate.getMonth() === currentMonth && rDate.getFullYear() === now.getFullYear()) {
+                            monthlyTotal += paid;
+                        }
+
+                        const sh = student.shift || '';
+                        if (sh.includes('Morning')) cntM++;
+                        if (sh.includes('Noon')) cntN++;
+                        if (sh.includes('Afternoon')) cntA++;
+                        if (sh.includes('Evening')) cntE++;
+                        if (sh.includes('Night')) cntNight++;
+                        if (sh.includes('All Shift')) cntAll++;
                     }
-                    if(rDate.getMonth() === currentMonth && rDate.getFullYear() === now.getFullYear()) {
-                        monthlyTotal += paid;
-                    }
-                }
+                });
             }
 
             document.getElementById('daily-amount').innerText = dailyTotal;
             document.getElementById('monthly-amount').innerText = monthlyTotal;
+            document.getElementById('active-students-count').innerText = activeStudents;
+
+            document.getElementById('cnt-m').innerText = cntM;
+            document.getElementById('cnt-n').innerText = cntN;
+            document.getElementById('cnt-a').innerText = cntA;
+            document.getElementById('cnt-e').innerText = cntE;
+            document.getElementById('cnt-night').innerText = cntNight;
+            document.getElementById('cnt-all').innerText = cntAll;
+        }
+
+        function setSeatFilter(filterType) {
+            activeFilter = filterType;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            if (filterType === 'all') document.getElementById('filter-all').classList.add('active');
+            if (filterType === 'occupied') document.getElementById('filter-occupied').classList.add('active');
+            if (filterType === 'free') document.getElementById('filter-free').classList.add('active');
+            if (filterType === 'expired') document.getElementById('filter-expired').classList.add('active');
+            filterSeats();
         }
 
         function renderSeats() {
-            gridContainer.innerHTML = '';
-            let occupiedCount = 0;
+            const grid = document.getElementById('seats-grid');
+            grid.innerHTML = '';
+            let occupiedSeatsCount = 0;
             const todayTime = new Date().setHours(0,0,0,0);
 
             for (let i = 1; i <= TOTAL_SEATS; i++) {
                 const seat = document.createElement('div');
                 seat.classList.add('seat');
                 
-                const seatNumSpan = document.createElement('span');
-                seatNumSpan.classList.add('seat-number-tag');
-                seatNumSpan.innerText = i;
-                seat.appendChild(seatNumSpan);
+                const seatNum = document.createElement('span');
+                seatNum.classList.add('seat-number-tag');
+                seatNum.innerText = i;
+                seat.appendChild(seatNum);
 
                 const indicatorsArea = document.createElement('div');
                 indicatorsArea.classList.add('indicators-area');
 
-                if (libraryData[i]) {
-                    seat.classList.add('occupied');
-                    occupiedCount++;
-                    
-                    if (libraryData[i].nextPaymentDate) {
-                        const dueDate = new Date(libraryData[i].nextPaymentDate).setHours(0,0,0,0);
-                        const diffTime = dueDate - todayTime;
-                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                const occupants = libraryData[i] || [];
+                let isExpired = false;
+                let isWarning = false;
+                let activeShiftsCombined = [];
 
-                        if (diffDays <= 0) {
-                            seat.classList.remove('occupied');
-                            seat.classList.add('expired-alert'); 
-                        } else if (diffDays <= 2) {
-                            seat.classList.remove('occupied');
-                            seat.classList.add('warning-alert');
+                if (occupants.length > 0) {
+                    occupiedSeatsCount++;
+                    seat.classList.add('occupied');
+
+                    let namesList = [];
+                    let totalDuesOnSeat = 0;
+
+                    occupants.forEach(occ => {
+                        namesList.push(occ.name);
+                        totalDuesOnSeat += (parseFloat(occ.due) || 0);
+                        if (occ.shift) activeShiftsCombined.push(occ.shift);
+
+                        if (occ.nextPaymentDate) {
+                            const dueDate = new Date(occ.nextPaymentDate).setHours(0,0,0,0);
+                            const diffDays = Math.ceil((dueDate - todayTime) / (1000 * 60 * 60 * 24));
+                            if (diffDays <= 0) isExpired = true;
+                            else if (diffDays <= 2) isWarning = true;
                         }
+                    });
+
+                    if (isExpired) {
+                        seat.classList.remove('occupied');
+                        seat.classList.add('expired-alert');
+                    } else if (isWarning) {
+                        seat.classList.remove('occupied');
+                        seat.classList.add('warning-alert');
                     }
 
-                    const activeShift = libraryData[i].shift || '';
-                    if(activeShift.includes("All Shift") || activeShift.includes("Night")) {
+                    const combinedShiftStr = activeShiftsCombined.join(' ');
+                    if (combinedShiftStr.includes('All Shift')) {
                         const line = document.createElement('div');
                         line.classList.add('all-shift-line');
                         indicatorsArea.appendChild(line);
-
-                        const nightDot = document.createElement('div');
-                        nightDot.classList.add('single-night-dot');
-                        if(activeShift.includes("Night")) {
-                            line.style.backgroundColor = "#334155"; 
-                            nightDot.classList.add('active');
-                        }
-                        indicatorsArea.appendChild(nightDot);
                     } else {
-                        const fourDotsContainer = document.createElement('div');
-                        fourDotsContainer.classList.add('four-dots-container');
-                        
-                        const shiftsList = ["Morning", "Noon", "Afternoon", "Evening"];
-                        shiftsList.forEach(shft => {
-                            const d = document.createElement('div');
-                            d.classList.add('shift-dot');
-                            if(activeShift.includes(shft)) {
-                                d.classList.add(`active-${shft.toLowerCase()}`);
-                            }
-                            fourDotsContainer.appendChild(d);
+                        const dotsContainer = document.createElement('div');
+                        dotsContainer.classList.add('four-dots-container');
+
+                        const shiftMap = [
+                            { key: 'Morning', cls: 'active-m' },
+                            { key: 'Noon', cls: 'active-n' },
+                            { key: 'Afternoon', cls: 'active-a' },
+                            { key: 'Evening', cls: 'active-e' },
+                            { key: 'Night', cls: 'active-night' }
+                        ];
+
+                        shiftMap.forEach(s => {
+                            const dot = document.createElement('div');
+                            dot.classList.add('shift-dot');
+                            if (combinedShiftStr.includes(s.key)) dot.classList.add(s.cls);
+                            dotsContainer.appendChild(dot);
                         });
-                        indicatorsArea.appendChild(fourDotsContainer);
+                        indicatorsArea.appendChild(dotsContainer);
                     }
+
                     seat.appendChild(indicatorsArea);
 
-                    const dueAmt = parseFloat(libraryData[i].due) || 0;
-                    if(dueAmt > 0) {
-                        const dueTag = document.createElement('div');
-                        dueTag.classList.add('due-tag-badge');
-                        dueTag.innerText = `₹${dueAmt} Due`;
-                        seat.appendChild(dueTag);
+                    if (totalDuesOnSeat > 0) {
+                        const dueBadge = document.createElement('div');
+                        dueBadge.classList.add('due-badge');
+                        dueBadge.innerText = `₹${totalDuesOnSeat} Due`;
+                        seat.appendChild(dueBadge);
                     } else {
-                        const nameSpan = document.createElement('span');
-                        nameSpan.classList.add('seat-name');
-                        nameSpan.innerText = libraryData[i].name || '';
-                        seat.appendChild(nameSpan);
+                        const nameTag = document.createElement('span');
+                        nameTag.classList.add('seat-occupants-count');
+                        nameTag.innerText = namesList.join(', ');
+                        seat.appendChild(nameTag);
                     }
-                    
-                    seat.setAttribute('data-search-string', `${i} ${(libraryData[i].name || '').toLowerCase()} ${libraryData[i].phone || ''}`);
+
+                    seat.setAttribute('data-search', `${i} ${namesList.join(' ')} ${combinedShiftStr}`.toLowerCase());
+                    seat.setAttribute('data-status', isExpired ? 'expired' : 'occupied');
                 } else {
-                    const emptySpacer = document.createElement('span');
-                    emptySpacer.style.height = "12px";
-                    seat.appendChild(emptySpacer);
-                    seat.setAttribute('data-search-string', `${i}`);
+                    const spacer = document.createElement('div');
+                    spacer.style.height = "10px";
+                    seat.appendChild(spacer);
+                    seat.setAttribute('data-search', `${i}`);
+                    seat.setAttribute('data-status', 'free');
                 }
 
                 seat.onclick = () => openModal(i);
-                gridContainer.appendChild(seat);
+                grid.appendChild(seat);
             }
 
-            document.getElementById('occupied-count').innerText = occupiedCount;
-            document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedCount;
-            
-            runFinanceAuditAndReset();
+            document.getElementById('occupied-count').innerText = occupiedSeatsCount;
+            document.getElementById('available-count').innerText = TOTAL_SEATS - occupiedSeatsCount;
+
+            const percent = Math.round((occupiedSeatsCount / TOTAL_SEATS) * 100);
+            document.getElementById('occupancy-progress-bar').style.width = `${percent}%`;
+            document.getElementById('occupancy-percent-text').innerText = `${percent}% Full (${occupiedSeatsCount}/${TOTAL_SEATS})`;
+
+            runFinancialAudit();
+            filterSeats();
         }
 
-        function toggleFormLock(isOccupied) {
-            const shouldLock = isOccupied && !isSystemAdminUnlocked;
+        function openModal(seatNum) {
+            currentSeatNumber = seatNum;
+            activeOccupantIndex = 0;
+            document.getElementById('modal-title').innerText = `Seat #${seatNum} Management`;
             
+            renderOccupantTabs();
+            loadOccupantDataIntoForm();
+            
+            document.getElementById('student-modal').style.display = 'flex';
+        }
+
+        function renderOccupantTabs() {
+            const tabsContainer = document.getElementById('occupants-tabs-container');
+            tabsContainer.innerHTML = '';
+
+            const occupants = libraryData[currentSeatNumber] || [];
+
+            occupants.forEach((occ, idx) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.classList.add('tab-btn');
+                if (idx === activeOccupantIndex) btn.classList.add('active');
+                btn.innerText = `${occ.name || 'Student'} (${occ.shift || 'Shift'})`;
+                btn.onclick = () => {
+                    activeOccupantIndex = idx;
+                    renderOccupantTabs();
+                    loadOccupantDataIntoForm();
+                };
+                tabsContainer.appendChild(btn);
+            });
+
+            const addBtn = document.createElement('button');
+            addBtn.type = 'button';
+            addBtn.classList.add('tab-btn', 'add-new');
+            addBtn.innerText = '+ Add Student to New Shift';
+            addBtn.onclick = () => {
+                activeOccupantIndex = occupants.length;
+                renderOccupantTabs();
+                resetFormInputs();
+            };
+            tabsContainer.appendChild(addBtn);
+        }
+
+        function loadOccupantDataIntoForm() {
+            const occupants = libraryData[currentSeatNumber] || [];
+            const data = occupants[activeOccupantIndex];
+
+            if (data) {
+                document.getElementById('student-name').value = data.name || '';
+                document.getElementById('student-address').value = data.address || 'Bhagalpur';
+                document.getElementById('student-phone').value = data.phone || '';
+                document.getElementById('fee-monthly').value = data.monthlyFee || '700';
+                document.getElementById('fee-paid').value = data.paidFee || '700';
+                document.getElementById('fee-due').value = data.due || '0';
+                document.getElementById('pay-mode').value = data.payMode || 'UPI';
+                document.getElementById('receipt-date').value = data.receiptDate || new Date().toISOString().split('T')[0];
+                document.getElementById('next-payment-date').value = data.nextPaymentDate || '';
+                document.getElementById('slip-signature-picker').value = data.signature || 'Chandan';
+
+                document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
+                if (data.shift) {
+                    const shiftsArr = data.shift.split(', ');
+                    document.querySelectorAll('input[name="shifts"]').forEach(b => {
+                        if (shiftsArr.includes(b.value)) b.checked = true;
+                    });
+                }
+
+                capturedImageBase64 = data.idProof || null;
+                const photoPreview = document.getElementById('photo-preview');
+                if (capturedImageBase64) {
+                    photoPreview.src = capturedImageBase64;
+                    photoPreview.style.display = 'block';
+                } else { photoPreview.style.display = 'none'; }
+
+                document.getElementById('vacant-btn').style.display = 'block';
+                document.getElementById('quick-renew-btn').style.display = 'block';
+                
+                // Show Overdue reminder button if due date passed
+                if (data.nextPaymentDate) {
+                    const dueDate = new Date(data.nextPaymentDate).setHours(0,0,0,0);
+                    const todayTime = new Date().setHours(0,0,0,0);
+                    if (dueDate <= todayTime) {
+                        document.getElementById('reminder-btn').style.display = 'block';
+                    } else {
+                        document.getElementById('reminder-btn').style.display = 'none';
+                    }
+                }
+            } else {
+                resetFormInputs();
+            }
+
+            updateUpiQr();
+            toggleFormLock();
+        }
+
+        function resetFormInputs() {
+            document.getElementById('student-name').value = '';
+            document.getElementById('student-address').value = 'Bhagalpur';
+            document.getElementById('student-phone').value = '';
+            document.getElementById('fee-monthly').value = '700';
+            document.getElementById('fee-paid').value = '700';
+            document.getElementById('fee-due').value = '0';
+            document.getElementById('pay-mode').value = 'UPI';
+            document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('next-payment-date').value = '';
+            document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
+            capturedImageBase64 = null;
+            document.getElementById('photo-preview').style.display = 'none';
+            document.getElementById('vacant-btn').style.display = 'none';
+            document.getElementById('quick-renew-btn').style.display = 'none';
+            document.getElementById('reminder-btn').style.display = 'none';
+            updateUpiQr();
+            toggleFormLock();
+        }
+
+        function quickRenewOneMonth() {
+            const today = new Date();
+            const todayStr = today.toISOString().split('T')[0];
+            
+            const next30Days = new Date();
+            next30Days.setDate(today.getDate() + 30);
+            const nextDueStr = next30Days.toISOString().split('T')[0];
+
+            document.getElementById('receipt-date').value = todayStr;
+            document.getElementById('next-payment-date').value = nextDueStr;
+            document.getElementById('fee-paid').value = document.getElementById('fee-monthly').value;
+            document.getElementById('fee-due').value = '0';
+
+            saveActiveOccupant();
+            alert("✨ Quick Renewal Completed! Month extended by 30 days.");
+        }
+
+        function toggleFormLock() {
+            const occupants = libraryData[currentSeatNumber] || [];
+            const isOccupied = occupants.length > 0 && occupants[activeOccupantIndex];
+            const shouldLock = isOccupied && !isSystemAdminUnlocked;
+
             document.getElementById('student-name').disabled = shouldLock;
             document.getElementById('student-address').disabled = shouldLock;
             document.getElementById('student-phone').disabled = shouldLock;
@@ -789,72 +1198,62 @@
             document.getElementById('receipt-date').disabled = shouldLock;
             document.getElementById('next-payment-date').disabled = shouldLock;
             document.getElementById('slip-signature-picker').disabled = shouldLock;
-            
+            document.getElementById('save-btn').disabled = shouldLock;
+            document.getElementById('quick-renew-btn').disabled = shouldLock;
+
             document.querySelectorAll('input[name="shifts"]').forEach(b => b.disabled = shouldLock);
-            
             document.getElementById('lock-notice').style.display = shouldLock ? 'block' : 'none';
-            document.getElementById('save-btn').style.display = shouldLock ? 'none' : 'block';
-            document.getElementById('vacant-btn').style.display = isOccupied && isSystemAdminUnlocked ? 'block' : 'none';
-            document.getElementById('camera-area').style.display = shouldLock ? 'none' : 'block';
+            if (shouldLock) document.getElementById('vacant-btn').style.display = 'none';
         }
 
-        function openModal(seatNum) {
-            currentSeatNumber = seatNum;
-            document.getElementById('modal-title').innerText = `Seat Number ${seatNum}`;
-            stopCamera();
-            
-            document.getElementById('video-preview').style.display = 'none';
-            document.getElementById('snap-btn').style.display = 'none';
-            document.getElementById('start-cam-btn').style.display = 'block';
+        function saveActiveOccupant() {
+            const name = document.getElementById('student-name').value.trim();
+            const phone = document.getElementById('student-phone').value.trim();
+            const dueDate = document.getElementById('next-payment-date').value;
+            const selectedShifts = Array.from(document.querySelectorAll('input[name="shifts"]:checked')).map(b => b.value);
 
-            document.querySelectorAll('input[name="shifts"]').forEach(b => b.checked = false);
-
-            const record = libraryData[seatNum];
-            if (record) {
-                document.getElementById('student-name').value = record.name || '';
-                document.getElementById('student-address').value = record.address || 'Bhagalpur';
-                document.getElementById('student-phone').value = record.phone || '';
-                document.getElementById('fee-monthly').value = record.monthlyFee || 700;
-                document.getElementById('fee-paid').value = record.paidFee || 700;
-                document.getElementById('fee-due').value = record.due || 0;
-                document.getElementById('pay-mode').value = record.payMode || 'UPI';
-                document.getElementById('receipt-date').value = record.receiptDate || '';
-                document.getElementById('next-payment-date').value = record.nextPaymentDate || '';
-                document.getElementById('slip-signature-picker').value = record.signature || 'Chandan';
-                
-                if(record.shift) {
-                    document.querySelectorAll('input[name="shifts"]').forEach(b => {
-                        if(record.shift.includes(b.value)) b.checked = true;
-                    });
-                }
-                
-                if (record.idProof) {
-                    document.getElementById('photo-preview').src = record.idProof;
-                    document.getElementById('photo-preview').style.display = 'block';
-                    capturedImageBase64 = record.idProof;
-                } else {
-                    document.getElementById('photo-preview').style.display = 'none';
-                    capturedImageBase64 = null;
-                }
-                toggleFormLock(true);
-                prepareWhatsAppAndSlipData(record);
-            } else {
-                document.getElementById('student-name').value = '';
-                document.getElementById('student-address').value = 'Bhagalpur';
-                document.getElementById('student-phone').value = '';
-                document.getElementById('fee-monthly').value = 700;
-                document.getElementById('fee-paid').value = 700;
-                document.getElementById('fee-due').value = 0;
-                document.getElementById('pay-mode').value = 'UPI';
-                document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('next-payment-date').value = '';
-                document.getElementById('slip-signature-picker').value = 'Chandan';
-                document.getElementById('photo-preview').style.display = 'none';
-                capturedImageBase64 = null;
-                toggleFormLock(false);
+            if (!name || !phone || !dueDate || selectedShifts.length === 0) {
+                alert("Please fill required fields: Name, WhatsApp Phone, Shift, and Next Due Date.");
+                return;
             }
 
-            document.getElementById('student-modal').style.display = 'flex';
+            if (!libraryData[currentSeatNumber]) libraryData[currentSeatNumber] = [];
+
+            const studentRecord = {
+                name,
+                address: document.getElementById('student-address').value.trim(),
+                phone,
+                shift: selectedShifts.join(', '),
+                monthlyFee: document.getElementById('fee-monthly').value,
+                paidFee: document.getElementById('fee-paid').value,
+                due: document.getElementById('fee-due').value,
+                payMode: document.getElementById('pay-mode').value,
+                receiptDate: document.getElementById('receipt-date').value,
+                nextPaymentDate: dueDate,
+                signature: document.getElementById('slip-signature-picker').value,
+                idProof: capturedImageBase64
+            };
+
+            libraryData[currentSeatNumber][activeOccupantIndex] = studentRecord;
+            localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+
+            renderSeats();
+            alert(`Student record saved successfully for Seat #${currentSeatNumber}!`);
+            closeModal();
+        }
+
+        function vacantActiveOccupant() {
+            if (confirm("Are you sure you want to remove this student from the seat?")) {
+                if (libraryData[currentSeatNumber]) {
+                    libraryData[currentSeatNumber].splice(activeOccupantIndex, 1);
+                    if (libraryData[currentSeatNumber].length === 0) {
+                        delete libraryData[currentSeatNumber];
+                    }
+                    localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                }
+                renderSeats();
+                closeModal();
+            }
         }
 
         function closeModal() {
@@ -862,36 +1261,17 @@
             document.getElementById('student-modal').style.display = 'none';
         }
 
-        async function initiateCamera() {
-            try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                const video = document.getElementById('video-preview');
-                video.srcObject = localStream;
-                video.style.display = 'block';
-                document.getElementById('snap-btn').style.display = 'inline-block';
-                document.getElementById('start-cam-btn').style.display = 'none';
-            } catch (err) {
-                alert("Camera access denied or unavailable.");
-            }
-        }
-
-        function captureSnapshot() {
+        function initiateCamera() {
             const video = document.getElementById('video-preview');
-            const canvas = document.createElement('canvas');
-            canvas.width = video.videoWidth || 640;
-            canvas.height = video.videoHeight || 480;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.7);
-            const preview = document.getElementById('photo-preview');
-            preview.src = capturedImageBase64;
-            preview.style.display = 'block';
-            
-            stopCamera();
-            document.getElementById('video-preview').style.display = 'none';
-            document.getElementById('snap-btn').style.display = 'none';
-            document.getElementById('start-cam-btn').style.display = 'block';
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                .then(stream => {
+                    localStream = stream;
+                    video.srcObject = stream;
+                    video.style.display = 'block';
+                    document.getElementById('snap-btn').style.display = 'inline-block';
+                    document.getElementById('start-cam-btn').style.display = 'none';
+                })
+                .catch(err => alert("Camera error: " + err.message));
         }
 
         function stopCamera() {
@@ -899,250 +1279,146 @@
                 localStream.getTracks().forEach(track => track.stop());
                 localStream = null;
             }
+            document.getElementById('video-preview').style.display = 'none';
+            document.getElementById('snap-btn').style.display = 'none';
+            document.getElementById('start-cam-btn').style.display = 'inline-block';
         }
 
-        function validateAndParseData() {
-            const name = document.getElementById('student-name').value.trim();
-            const phone = document.getElementById('student-phone').value.trim();
-            const nextPay = document.getElementById('next-payment-date').value;
+        function captureSnapshot() {
+            const video = document.getElementById('video-preview');
+            const canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            canvas.getContext('2d').drawImage(video, 0, 0);
             
-            if(!name || !phone || !nextPay) {
-                alert("Please fill all mandatory (*) fields.");
-                return null;
-            }
-
-            let selectedShifts = [];
-            document.querySelectorAll('input[name="shifts"]:checked').forEach(b => selectedShifts.push(b.value));
-            if(selectedShifts.length === 0) {
-                alert("Please pick at least one Shift assignment.");
-                return null;
-            }
-
-            calculateDues();
-
-            return {
-                name: name,
-                address: document.getElementById('student-address').value.trim(),
-                phone: phone,
-                shift: selectedShifts.join(', '),
-                monthlyFee: document.getElementById('fee-monthly').value,
-                paidFee: document.getElementById('fee-paid').value,
-                due: document.getElementById('fee-due').value,
-                payMode: document.getElementById('pay-mode').value,
-                receiptDate: document.getElementById('receipt-date').value,
-                nextPaymentDate: nextPay,
-                signature: document.getElementById('slip-signature-picker').value,
-                idProof: capturedImageBase64
-            };
+            capturedImageBase64 = canvas.toDataURL('image/jpeg', 0.6);
+            const photoPreview = document.getElementById('photo-preview');
+            photoPreview.src = capturedImageBase64;
+            photoPreview.style.display = 'block';
+            stopCamera();
         }
 
-        function saveSeatRecord() {
-            const recordData = validateAndParseData();
-            if(!recordData) return false;
+        function prepareSlipDOM() {
+            const name = document.getElementById('student-name').value || '---';
+            const phone = document.getElementById('student-phone').value || '---';
+            const shifts = Array.from(document.querySelectorAll('input[name="shifts"]:checked')).map(b => b.value).join(', ') || '---';
 
-            libraryData[currentSeatNumber] = recordData;
-            localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-            renderSeats();
-            toggleFormLock(true);
-            prepareWhatsAppAndSlipData(recordData);
-            return true;
+            document.getElementById('slip-no-val').innerText = `TSL-${currentSeatNumber}-${Date.now().toString().slice(-4)}`;
+            document.getElementById('slip-date-val').innerText = document.getElementById('receipt-date').value || '--/--/----';
+            document.getElementById('slip-name-val').innerText = name;
+            document.getElementById('slip-seat-val').innerText = `#${currentSeatNumber}`;
+            document.getElementById('slip-shift-val').innerText = shifts;
+            
+            document.getElementById('table-monthly').innerText = `₹${document.getElementById('fee-monthly').value || 0}`;
+            document.getElementById('table-validity').innerText = document.getElementById('receipt-date').value || '-';
+            document.getElementById('table-next-date').innerText = document.getElementById('next-payment-date').value || '-';
+            document.getElementById('table-dues').innerText = `₹${document.getElementById('fee-due').value || 0}`;
+            
+            document.getElementById('slip-mob-val').innerText = phone;
+            document.getElementById('slip-total-val').innerText = document.getElementById('fee-paid').value || '0';
+            document.getElementById('slip-mode-val').innerText = document.getElementById('pay-mode').value || 'UPI';
+            document.getElementById('slip-signature-renderer').innerText = document.getElementById('slip-signature-picker').value;
         }
 
-        function clearSeat() {
-            if(!isSystemAdminUnlocked) {
-                alert("Admin verification required to vacate seats.");
+        function downloadReceiptImage() {
+            prepareSlipDOM();
+            const elem = document.getElementById('library-slip-element');
+            html2canvas(elem, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Takshila_Receipt_Seat_${currentSeatNumber}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function downloadStudentIDCard() {
+            document.getElementById('id-card-name').innerText = document.getElementById('student-name').value || 'Student';
+            document.getElementById('id-card-seat').innerText = `#${currentSeatNumber}`;
+            document.getElementById('id-card-shift').innerText = Array.from(document.querySelectorAll('input[name="shifts"]:checked')).map(b => b.value).join(', ') || 'Regular';
+            document.getElementById('id-card-phone').innerText = document.getElementById('student-phone').value || '---';
+            document.getElementById('id-card-validity').innerText = document.getElementById('next-payment-date').value || '---';
+            
+            const photoImg = document.getElementById('id-card-photo-img');
+            photoImg.src = capturedImageBase64 || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23cbd5e1"><rect width="100" height="100"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12" fill="%23000">No Photo</text></svg>';
+
+            const elem = document.getElementById('student-idcard-element');
+            html2canvas(elem, { scale: 2 }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Takshila_ID_Card_${document.getElementById('student-name').value.replace(/\s+/g, '_')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function openWhatsAppChat() {
+            const phone = document.getElementById('student-phone').value.trim();
+            const name = document.getElementById('student-name').value.trim();
+            const dueDate = document.getElementById('next-payment-date').value;
+            const dueAmt = document.getElementById('fee-due').value;
+
+            if (!phone) {
+                alert("Please enter a valid WhatsApp phone number.");
                 return;
             }
-            if(confirm(`Are you sure you want to vacate Seat ${currentSeatNumber}?`)) {
-                delete libraryData[currentSeatNumber];
-                localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-                renderSeats();
-                closeModal();
-            }
+
+            const message = `Hello ${name},\nWelcome to *Takshila Smart Library*!\nYour booking for Seat #${currentSeatNumber} is confirmed.\n\nNext Due Date: *${dueDate}*\nRemaining Dues: *₹${dueAmt}*\n\nThank you!`;
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
+        }
+
+        function sendWhatsAppReminder() {
+            const phone = document.getElementById('student-phone').value.trim();
+            const name = document.getElementById('student-name').value.trim();
+            const dueDate = document.getElementById('next-payment-date').value;
+
+            if (!phone) return;
+
+            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
         function filterSeats() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
-            const seats = document.querySelectorAll('.seat');
-            
-            seats.forEach(seat => {
-                const searchStr = seat.getAttribute('data-search-string') || '';
-                if(searchStr.includes(query)) {
-                    seat.classList.remove('hidden');
-                } else {
-                    seat.classList.add('hidden');
-                }
+            document.querySelectorAll('.seat').forEach(seat => {
+                const searchData = seat.getAttribute('data-search') || '';
+                const status = seat.getAttribute('data-status') || '';
+
+                let matchesSearch = searchData.includes(query);
+                let matchesFilter = true;
+
+                if (activeFilter === 'occupied') matchesFilter = (status === 'occupied' || status === 'expired');
+                else if (activeFilter === 'free') matchesFilter = (status === 'free');
+                else if (activeFilter === 'expired') matchesFilter = (status === 'expired');
+
+                if (matchesSearch && matchesFilter) seat.classList.remove('hidden');
+                else seat.classList.add('hidden');
             });
         }
 
-        function prepareWhatsAppAndSlipData(record) {
-            document.getElementById('slip-no-val').innerText = `TXL-${1000 + currentSeatNumber}`;
-            document.getElementById('slip-date-val').innerText = record.receiptDate || '--/--/----';
-            document.getElementById('slip-name-val').innerText = record.name;
-            document.getElementById('slip-seat-val').innerText = currentSeatNumber;
-            document.getElementById('slip-shift-val').innerText = record.shift;
-            
-            document.getElementById('table-monthly').innerText = `₹${record.monthlyFee}`;
-            document.getElementById('table-validity').innerText = record.receiptDate || '-';
-            document.getElementById('table-next-date').innerText = record.nextPaymentDate || '-';
-            document.getElementById('table-dues').innerText = `₹${record.due}`;
-            
-            document.getElementById('slip-mob-val').innerText = record.phone;
-            document.getElementById('slip-total-val').innerText = record.paidFee;
-            document.getElementById('slip-mode-val').innerText = record.payMode;
-            document.getElementById('slip-signature-renderer').innerText = record.signature;
-
-            const msg = `*तक्षशिला लाईब्रेरी, भागलपुर*\n\nनमस्ते *${record.name}*,\nतक्षशिला स्मार्ट लाइब्रेरी में आपकी सीट संख्या *${currentSeatNumber}* (${record.shift}) कंफर्म हो गई है।\n\nकुल शुल्क: ₹${record.monthlyFee}\n जमा राशि: ₹${record.paidFee} (${record.payMode})\nशेष बकाया: ₹${record.due}\n\n*अगली देय तिथि: ${record.nextPaymentDate}*\n\nहस्ताक्षर: ${record.signature}\n\nधन्यवाद!\nतक्षशिला लाईब्रेरी प्रबंधन`;
-            cachedWhatsAppUrl = `https://api.whatsapp.com/send?phone=91${record.phone}&text=${encodeURIComponent(msg)}`;
-        }
-
-        function downloadReceiptImage() {
-            if (!libraryData[currentSeatNumber]) {
-                const saved = saveSeatRecord();
-                if (!saved) return;
-            } else {
-                prepareWhatsAppAndSlipData(libraryData[currentSeatNumber]);
-            }
-
-            const record = libraryData[currentSeatNumber];
-            
-            // Native Canvas Generation (No external library dependency)
-            const canvas = document.createElement('canvas');
-            canvas.width = 900;
-            canvas.height = 700;
-            const ctx = canvas.getContext('2d');
-
-            // Background
-            ctx.fillStyle = "#fff7c2";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Border
-            ctx.strokeStyle = "#555555";
-            ctx.lineWidth = 4;
-            ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
-
-            // Header
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 32px 'Courier New', monospace";
-            ctx.textAlign = "center";
-            ctx.fillText("तक्षशिला लाईब्रेरी", canvas.width / 2, 70);
-
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText("पता - मनाली चौक, छोटी खंजरपुर, भागलपुर", canvas.width / 2, 105);
-            ctx.fillText("Mob.- 6207479929, 7634993778", canvas.width / 2, 130);
-
-            // Divider Line
-            ctx.beginPath();
-            ctx.moveTo(40, 150);
-            ctx.lineTo(canvas.width - 40, 150);
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            // Meta Info
-            ctx.font = "bold 18px 'Courier New', monospace";
-            ctx.textAlign = "left";
-            ctx.fillText(`No. TXL-${1000 + currentSeatNumber}`, 50, 190);
-            ctx.textAlign = "right";
-            ctx.fillText(`Date: ${record.receiptDate || '--/--/----'}`, canvas.width - 50, 190);
-
-            // Fields
-            ctx.textAlign = "left";
-            ctx.fillText(`Name: ${record.name}`, 50, 235);
-            ctx.fillText(`Seat No: ${currentSeatNumber}`, 50, 275);
-            ctx.fillText(`Shift: ${record.shift}`, 350, 275);
-
-            // Table Border & Header
-            ctx.strokeRect(50, 315, 800, 200);
-            ctx.fillStyle = "rgba(0,0,0,0.08)";
-            ctx.fillRect(50, 315, 800, 45);
-            
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText("S.No.", 70, 343);
-            ctx.fillText("Particular", 160, 343);
-            ctx.fillText("Amount", 680, 343);
-
-            // Table Rows
-            ctx.font = "16px 'Courier New', monospace";
-            // Row 1
-            ctx.fillText("1.", 70, 395);
-            ctx.fillText("Monthly Fee", 160, 395);
-            ctx.fillText(`₹${record.monthlyFee}`, 680, 395);
-            
-            // Row 2
-            ctx.fillText("2.", 70, 435);
-            ctx.fillText(`Receipt Date: ${record.receiptDate || '-'}`, 160, 435);
-            
-            // Row 3
-            ctx.fillText("3.", 70, 475);
-            ctx.fillText(`Next Payment Date: ${record.nextPaymentDate || '-'}`, 160, 475);
-
-            // Row 4
-            ctx.fillStyle = "red";
-            ctx.fillText("4.", 70, 510);
-            ctx.fillText(`Dues: ₹${record.due}`, 160, 510);
-
-            // Footer
-            ctx.fillStyle = "#000000";
-            ctx.font = "bold 16px 'Courier New', monospace";
-            ctx.fillText(`Mob. No: ${record.phone}`, 50, 580);
-
-            ctx.textAlign = "right";
-            ctx.fillText(`Total Paid: ₹${record.paidFee} (${record.payMode})`, canvas.width - 50, 565);
-            
-            ctx.font = "italic 16px 'Courier New', monospace";
-            ctx.fillText(record.signature, canvas.width - 120, 615);
-            ctx.font = "12px 'Courier New', monospace";
-            ctx.fillText("Signature", canvas.width - 120, 635);
-            
-            ctx.beginPath();
-            ctx.moveTo(canvas.width - 230, 600);
-            ctx.lineTo(canvas.width - 50, 600);
-            ctx.setLineDash([4, 2]);
-            ctx.stroke();
-
-            // Trigger Download
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `Takshila_Slip_Seat_${currentSeatNumber}.png`;
-            link.href = dataUrl;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            alert("रसीद तुरंत डाउनलोड होकर आपके फोन की गैलरी में सेव हो गई है!");
-        }
-
-        function openWhatsAppChat() {
-            if(cachedWhatsAppUrl) {
-                window.open(cachedWhatsAppUrl, '_blank');
-            } else {
-                alert("Please save the seat details first.");
-            }
-        }
-
         function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(libraryData));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", `Takshila_Backup_${new Date().toISOString().split('T')[0]}.json`);
-            dlAnchor.click();
+            const jsonStr = JSON.stringify(libraryData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Takshila_Library_Backup_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
         }
 
         function importBackup(event) {
             const file = event.target.files[0];
             if (!file) return;
-            
+
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = (e) => {
                 try {
-                    const parsed = JSON.parse(e.target.result);
-                    libraryData = parsed;
-                    localStorage.setItem('takshila_library_data', JSON.stringify(libraryData));
-                    renderSeats();
-                    alert("Backup restored successfully!");
-                } catch (err) {
-                    alert("Invalid backup file.");
+                    const data = JSON.parse(e.target.result);
+                    if (confirm("Restore backup? Current library data will be updated.")) {
+                        libraryData = data;
+                        localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                        renderSeats();
+                        alert("Backup restored successfully!");
+                    }
+                } catch(err) {
+                    alert("Invalid JSON file: " + err.message);
                 }
             };
             reader.readAsText(file);
