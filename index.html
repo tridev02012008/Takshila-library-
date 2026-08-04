@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V15 ULTRA SUPREME (Firebase Cloud)</title>
+    <title>Takshila Smart Library PRO V15 ULTRA SUPREME (Firebase Cloud + AI)</title>
     <style>
         :root {
             --bg-color: #0d1321;
@@ -17,6 +17,7 @@
             --accent-red: #ef4444;
             --accent-yellow: #f59e0b;
             --accent-purple: #a855f7;
+            --ai-glow: #ec4899;
         }
 
         body.light-theme {
@@ -116,6 +117,18 @@
             width: 0%;
             background: linear-gradient(90deg, #3b82f6, #10b981);
             transition: width 0.3s ease;
+        }
+
+        .ai-insights-panel {
+            background: linear-gradient(135deg, rgba(236,72,153,0.15), rgba(168,85,247,0.15));
+            border: 1px solid var(--ai-glow);
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 11px;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
         .controls-panel {
@@ -413,7 +426,6 @@
             cursor: pointer;
         }
 
-        /* UPI QR Box */
         .upi-qr-box {
             margin-top: 10px;
             background: var(--card-bg);
@@ -456,6 +468,7 @@
         .btn-download { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; width: 100%; margin-top: 6px; }
         .btn-idcard { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; width: 100%; margin-top: 6px; }
         .btn-whatsapp { background: #25d366; color: #000; font-weight: 800; width: 100%; margin-top: 6px; }
+        .btn-ai-msg { background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%); color: #fff; font-weight: 800; width: 100%; margin-top: 6px; }
         .btn-call { background: #0284c7; color: #fff; width: 100%; margin-top: 6px; }
         .btn-reminder { background: #ef4444; color: #fff; width: 100%; margin-top: 6px; }
         .btn-checkin { background: #10b981; color: #fff; width: 100%; margin-top: 6px; }
@@ -587,6 +600,11 @@
             </div>
         </div>
 
+        <div class="ai-insights-panel" id="ai-smart-banner">
+            <div><strong>🤖 AI Smart Insights:</strong> <span id="ai-insight-text">Analyzing library occupancy & shift patterns...</span></div>
+            <button onclick="generateAIAnalytics()" style="background:var(--ai-glow); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">Refresh AI Insight</button>
+        </div>
+
         <div class="shift-stats-bar">
             <div class="shift-stat-item" onclick="setSeatFilter('Morning')">Morning <span id="cnt-m">0</span></div>
             <div class="shift-stat-item" onclick="setSeatFilter('Noon')">Noon <span id="cnt-n">0</span></div>
@@ -618,7 +636,7 @@
                 </div>
             </div>
 
-            <input type="text" id="search-input" class="search-box" placeholder="Search student name / phone / seat / shift..." oninput="filterSeats()">
+            <input type="text" id="search-input" class="search-box" placeholder="Search student name / phone / seat / shift / AI tags..." oninput="filterSeats()">
             
             <div class="filter-btn-group">
                 <button class="filter-chip active" id="filter-all" onclick="setSeatFilter('all')">All Seats</button>
@@ -696,7 +714,6 @@
                 </div>
             </div>
 
-            <!-- Dynamic UPI QR Display Box -->
             <div class="upi-qr-box" id="upi-qr-wrapper">
                 <span style="font-size:10px; color:var(--accent-blue); font-weight:bold;">📲 SCAN TO PAY VIA UPI</span>
                 <div style="margin-top:4px;">
@@ -749,6 +766,7 @@
             <button class="btn btn-download" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
             <button class="btn btn-idcard" id="download-idcard-btn" onclick="downloadStudentIDCard()">3. Download Student ID Card</button>
             <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="openWhatsAppChat()">4. Send WhatsApp Welcome Message</button>
+            <button class="btn btn-ai-msg" id="ai-whatsapp-btn" onclick="generateAIWhatsAppMessage()">✨ Generate Custom AI WhatsApp Draft</button>
             <button class="btn btn-call" id="call-btn" onclick="makeDirectCall()" style="display:none;">📞 Call Student Directly</button>
             <button class="btn btn-reminder" id="reminder-btn" onclick="sendWhatsAppReminder()" style="display:none;">🚨 Send Fee Overdue Reminder</button>
 
@@ -846,7 +864,6 @@
 
         const docRef = doc(db, "takshila_data", "seats_master");
 
-        // Sync with Firebase Realtime Firestore
         window.syncDataToFirebase = async function() {
             try {
                 document.getElementById('cloud-status').innerText = "☁️ Saving...";
@@ -863,7 +880,6 @@
             }
         };
 
-        // Realtime Listener to load and auto-update UI
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const cloudData = docSnap.data().data;
@@ -911,6 +927,7 @@
             
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             renderSeats();
+            generateAIAnalytics();
         });
 
         function toggleTheme() {
@@ -972,6 +989,58 @@
             const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
             const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
             document.getElementById('fee-due').value = Math.max(0, monthly - paid);
+        }
+
+        function generateAIAnalytics() {
+            let totalOccupied = 0;
+            let totalDuesCount = 0;
+            let peakShiftName = "Morning";
+            let maxShiftCount = 0;
+
+            const shiftCounts = { Morning: 0, Noon: 0, Afternoon: 0, Evening: 0, Night: 0, "All Shift": 0 };
+
+            for (let seat in libraryData) {
+                const occs = libraryData[seat] || [];
+                occs.forEach(s => {
+                    totalOccupied++;
+                    if (parseFloat(s.due) > 0) totalDuesCount++;
+                    const sh = s.shift || '';
+                    for (let key in shiftCounts) {
+                        if (sh.includes(key)) {
+                            shiftCounts[key]++;
+                            if (shiftCounts[key] > maxShiftCount) {
+                                maxShiftCount = shiftCounts[key];
+                                peakShiftName = key;
+                            }
+                        }
+                    }
+                });
+            }
+
+            const occRate = Math.round((totalOccupied / TOTAL_SEATS) * 100);
+            const aiMsg = `Occupancy rate is ${occRate}%. Peak shift demand is in '${peakShiftName}' (${maxShiftCount} members). ${totalDuesCount} member(s) have pending fees.`;
+            document.getElementById('ai-insight-text').innerText = aiMsg;
+        }
+
+        function generateAIWhatsAppMessage() {
+            const name = document.getElementById('student-name').value.trim();
+            const phone = document.getElementById('student-phone').value.trim();
+            const dueDate = document.getElementById('next-payment-date').value;
+            const dueAmt = document.getElementById('fee-due').value;
+
+            if (!phone) {
+                alert("Please enter phone number first.");
+                return;
+            }
+
+            let msg = `🌟 *Takshila Smart Library Notification* 🌟\n\nDear ${name || 'Student'},\n`;
+            if (parseFloat(dueAmt) > 0) {
+                msg += `Your library membership for Seat #${currentSeatNumber} has a pending balance of *₹${dueAmt}*.\nValid Until: *${dueDate}*\n\nPlease clear the dues to enjoy uninterrupted study environment.`;
+            } else {
+                msg += `Your registration for Seat #${currentSeatNumber} is active.\nValid Until: *${dueDate}*\n\nWish you continuous success in your exams! 📚⚡`;
+            }
+
+            window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function runFinancialAudit() {
@@ -1367,6 +1436,7 @@
             if (window.syncDataToFirebase) window.syncDataToFirebase();
 
             renderSeats();
+            generateAIAnalytics();
             alert(`Student record saved successfully for Seat #${currentSeatNumber}!`);
             closeModal();
         }
@@ -1382,6 +1452,7 @@
                     if (window.syncDataToFirebase) window.syncDataToFirebase();
                 }
                 renderSeats();
+                generateAIAnalytics();
                 closeModal();
             }
         }
@@ -1587,6 +1658,7 @@
                         localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
                         if (window.syncDataToFirebase) window.syncDataToFirebase();
                         renderSeats();
+                        generateAIAnalytics();
                         alert("Backup restored successfully!");
                     }
                 } catch(err) {
