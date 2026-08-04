@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V16 ULTRA (Voice Controlled Edition)</title>
+    <title>Takshila Smart Library PRO ULTRA (Advanced Voice Powered)</title>
     <style>
         :root {
             --bg-color: #0d1321;
@@ -41,12 +41,7 @@
             transition: background-color 0.3s;
         }
 
-        h1 {
-            color: var(--text-color);
-            margin: 0 0 10px 0;
-            font-size: 22px;
-            text-align: center;
-        }
+        h1 { color: var(--text-color); margin: 0 0 10px 0; font-size: 22px; text-align: center; }
         
         .dashboard-container {
             max-width: 680px;
@@ -78,20 +73,21 @@
         .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 9px; text-transform: uppercase; }
         .fin-card p { margin: 3px 0 0 0; font-size: 14px; font-weight: bold; color: var(--text-color); }
 
+        /* UPGRADED VOICE CONTROL UI */
         .voice-control-panel {
             background: linear-gradient(135deg, #1e1b4b 0%, #311b92 100%);
             border: 2px solid var(--accent-purple);
-            border-radius: 10px;
-            padding: 10px 14px;
+            border-radius: 12px;
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
         }
         .voice-status {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-size: 12px;
             font-weight: bold;
         }
@@ -99,21 +95,21 @@
             background: var(--accent-purple);
             color: #fff;
             border: none;
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             transition: all 0.2s;
         }
         .voice-btn.listening {
             background: var(--accent-red);
-            animation: pulse-mic 1s infinite alternate;
+            animation: pulse-mic 0.8s infinite alternate;
         }
         @keyframes pulse-mic {
             0% { transform: scale(1); box-shadow: 0 0 5px var(--accent-red); }
-            100% { transform: scale(1.05); box-shadow: 0 0 15px var(--accent-red); }
+            100% { transform: scale(1.08); box-shadow: 0 0 18px var(--accent-red); }
         }
 
         .shift-stats-bar {
@@ -610,13 +606,13 @@
     </div>
     
     <div class="dashboard-container">
-        <!-- AI Voice Assistant Control Panel -->
+        <!-- Advanced AI Voice Control Engine Panel -->
         <div class="voice-control-panel">
             <div class="voice-status">
-                <span id="voice-icon" style="font-size:18px;">🎙️</span>
+                <span id="voice-icon" style="font-size:20px;">🎙️</span>
                 <div>
-                    <div><strong>AI Voice Control Engine</strong></div>
-                    <div id="voice-transcript-text" style="font-size:10px; color:var(--subtext-color); font-weight:normal;">Click "Start Voice" and speak commands...</div>
+                    <div><strong>AI Voice Control Engine 2.0</strong></div>
+                    <div id="voice-transcript-text" style="font-size:10px; color:#cbd5e1; font-weight:normal;">Click "Start Voice" to enable hands-free management...</div>
                 </div>
             </div>
             <button class="voice-btn" id="voice-toggle-btn" onclick="toggleVoiceControl()">Start Voice 🎙️</button>
@@ -816,7 +812,7 @@
         </div>
     </div>
 
-    <!-- Hidden Template for rendering downloadable receipt -->
+    <!-- Hidden Receipt Print Container -->
     <div id="receipt-template-container" style="position: absolute; left: -9999px; top: -9999px;">
         <div class="library-slip" id="library-slip-element">
             <div class="slip-header">
@@ -861,7 +857,7 @@
         </div>
     </div>
 
-    <!-- Printable Student ID Card -->
+    <!-- ID Card Container -->
     <div id="idcard-template-container" style="position: absolute; left: -9999px; top: -9999px;">
         <div class="student-id-card" id="student-idcard-element">
             <div class="id-card-header">
@@ -883,7 +879,7 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Modular Scripts -->
+    <!-- Firebase Master SDK -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -900,38 +896,30 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         const docRef = doc(db, "takshila_data", "seats_master");
 
         window.syncDataToFirebase = async function() {
             try {
                 document.getElementById('cloud-status').innerText = "☁️ Saving...";
                 document.getElementById('cloud-status').style.background = "#f59e0b";
-                
                 await setDoc(docRef, { data: libraryData });
-                
                 document.getElementById('cloud-status').innerText = "🟢 Cloud Live";
                 document.getElementById('cloud-status').style.background = "#10b981";
             } catch (error) {
-                console.error("Firebase Sync Error: ", error);
                 document.getElementById('cloud-status').innerText = "⚠️ Offline Mode";
                 document.getElementById('cloud-status').style.background = "#ef4444";
             }
         };
 
         onSnapshot(docRef, (docSnap) => {
-            if (docSnap.exists()) {
-                const cloudData = docSnap.data().data;
-                if (cloudData) {
-                    libraryData = cloudData;
-                    localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
-                    renderSeats();
-                }
+            if (docSnap.exists() && docSnap.data().data) {
+                libraryData = docSnap.data().data;
+                localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                renderSeats();
             }
             document.getElementById('cloud-status').innerText = "🟢 Cloud Live";
             document.getElementById('cloud-status').style.background = "#10b981";
         }, (error) => {
-            console.error("Firestore Listen Error: ", error);
             document.getElementById('cloud-status').innerText = "⚠️ Offline Mode";
             document.getElementById('cloud-status').style.background = "#ef4444";
         });
@@ -943,9 +931,7 @@
         const LIBRARY_UPI_ID = "6207479929@ybl";
         
         let libraryData = {};
-        try {
-            libraryData = JSON.parse(localStorage.getItem('takshila_v14_data')) || {};
-        } catch(e) { libraryData = {}; }
+        try { libraryData = JSON.parse(localStorage.getItem('takshila_v14_data')) || {}; } catch(e) { libraryData = {}; }
 
         let currentSeatNumber = null;
         let activeOccupantIndex = 0;
@@ -954,54 +940,57 @@
         let isSystemAdminUnlocked = false;
         let activeFilter = 'all';
 
-        // Voice Recognition Setup
+        // HIGH ACCURACY VOICE ENGINE VARIABLES
         let recognition = null;
-        let isListening = false;
+        let isVoiceListening = false;
 
         window.addEventListener('DOMContentLoaded', () => {
             const savedUnlock = localStorage.getItem('takshila_admin_unlocked');
             if (savedUnlock === 'true') {
                 isSystemAdminUnlocked = true;
-                const indicator = document.getElementById('auth-status-indicator');
-                indicator.innerText = "✓";
-                indicator.style.color = "#10b981";
+                document.getElementById('auth-status-indicator').innerText = "✓";
+                document.getElementById('auth-status-indicator').style.color = "#10b981";
                 document.getElementById('global-admin-pin').value = "••••••••";
             }
             
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             renderSeats();
             generateAIAnalytics();
-            initVoiceRecognition();
+            initAdvancedVoiceEngine();
         });
 
-        /* --- VOICE CONTROL SYSTEM --- */
-        function initVoiceRecognition() {
+        /* --- UPGRADED HIGH-ACCURACY VOICE RECOGNITION ENGINE --- */
+        function initAdvancedVoiceEngine() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                document.getElementById('voice-transcript-text').innerText = "Voice Recognition not supported in this browser.";
+                document.getElementById('voice-transcript-text').innerText = "Speech API not supported in this browser.";
                 document.getElementById('voice-toggle-btn').disabled = true;
                 return;
             }
 
             recognition = new SpeechRecognition();
             recognition.continuous = true;
-            recognition.lang = 'hi-IN'; // Works for Hindi & English voice commands
             recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+            recognition.lang = 'hi-IN'; // Optimized for Hindi & English Commands
 
             recognition.onresult = (event) => {
-                const transcript = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
-                document.getElementById('voice-transcript-text').innerText = `Heard: "${transcript}"`;
-                processVoiceCommand(transcript);
+                const lastResultIndex = event.results.length - 1;
+                const transcript = event.results[lastResultIndex][0].transcript.trim().toLowerCase();
+                document.getElementById('voice-transcript-text').innerText = `Recognized: "${transcript}"`;
+                executeVoiceCommand(transcript);
             };
 
             recognition.onerror = (event) => {
-                console.error("Voice Error: ", event.error);
-                document.getElementById('voice-transcript-text').innerText = `Voice Error: ${event.error}`;
+                console.warn("Voice Engine Warning:", event.error);
+                if(event.error === 'no-speech') {
+                    document.getElementById('voice-transcript-text').innerText = "Listening for command...";
+                }
             };
 
             recognition.onend = () => {
-                if (isListening) {
-                    recognition.start(); // Auto-restart if listening flag is active
+                if (isVoiceListening) {
+                    try { recognition.start(); } catch(e) {}
                 }
             };
         }
@@ -1009,113 +998,155 @@
         function toggleVoiceControl() {
             if (!recognition) return;
             const btn = document.getElementById('voice-toggle-btn');
-            if (!isListening) {
-                recognition.start();
-                isListening = true;
-                btn.innerText = "Stop Voice 🛑";
-                btn.classList.add('listening');
-                document.getElementById('voice-transcript-text').innerText = "Listening... Speak commands!";
+            if (!isVoiceListening) {
+                try {
+                    recognition.start();
+                    isVoiceListening = true;
+                    btn.innerText = "Stop Voice 🛑";
+                    btn.classList.add('listening');
+                    document.getElementById('voice-transcript-text').innerText = "Listening actively... Speak any command!";
+                    speakFeedback("Voice engine activated");
+                } catch(e) { console.error(e); }
             } else {
-                isListening = false;
+                isVoiceListening = false;
                 recognition.stop();
                 btn.innerText = "Start Voice 🎙️";
                 btn.classList.remove('listening');
-                document.getElementById('voice-transcript-text').innerText = "Voice control stopped.";
+                document.getElementById('voice-transcript-text').innerText = "Voice engine paused.";
+                speakFeedback("Voice engine deactivated");
             }
         }
 
-        function processVoiceCommand(cmd) {
-            // Command: "Seat [Number] Open Karo" or "Open Seat [Number]"
-            const seatMatch = cmd.match(/(?:seat|नंबर|seat number)\s*(\d+)/i) || cmd.match(/(\d+)\s*(?:open|खोल)/i);
-            if (seatMatch && seatMatch[1]) {
-                const sNum = parseInt(seatMatch[1]);
-                if (sNum >= 1 && sNum <= TOTAL_SEATS) {
-                    openModal(sNum);
-                    speakText(`Seat number ${sNum} opened`);
+        function executeVoiceCommand(cmd) {
+            // Numbers Extraction helper
+            const numMatch = cmd.match(/\d+/);
+            const extractedNumber = numMatch ? parseInt(numMatch[0]) : null;
+
+            // 1. OPEN SEAT COMMAND: "seat 5 open karo", "open seat 12", "seat number 8"
+            if ((cmd.includes('seat') || cmd.includes('सीट') || cmd.includes('नंबर')) && (cmd.includes('open') || cmd.includes('खोल') || cmd.includes('karo'))) {
+                if (extractedNumber && extractedNumber >= 1 && extractedNumber <= TOTAL_SEATS) {
+                    openModal(extractedNumber);
+                    speakFeedback(`Seat ${extractedNumber} opened`);
                     return;
                 }
             }
 
-            // If Modal is open, handle form input commands
+            // 2. QUICK RENEW VIA VOICE: "quick renew seat 5", "seat 5 renew karo"
+            if (cmd.includes('renew') || cmd.includes('रिन्यू')) {
+                if (extractedNumber && extractedNumber >= 1 && extractedNumber <= TOTAL_SEATS) {
+                    currentSeatNumber = extractedNumber;
+                    activeOccupantIndex = 0;
+                    quickRenewOneMonth();
+                    speakFeedback(`Seat ${extractedNumber} renewed for 30 days`);
+                    return;
+                }
+            }
+
+            // 3. VACANT SEAT VIA VOICE: "seat 10 khali karo", "vacant seat 10"
+            if ((cmd.includes('vacant') || cmd.includes('खाली') || cmd.includes('hatao')) && extractedNumber) {
+                if (libraryData[extractedNumber]) {
+                    delete libraryData[extractedNumber];
+                    localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                    if (window.syncDataToFirebase) window.syncDataToFirebase();
+                    renderSeats();
+                    speakFeedback(`Seat ${extractedNumber} cleared`);
+                    return;
+                }
+            }
+
+            // 4. FILTERING & VIEWS: "free seats dikhao", "expired seats", "show occupied"
+            if (cmd.includes('free') || cmd.includes('खाली seat')) {
+                setSeatFilter('free');
+                speakFeedback("Showing free seats");
+                return;
+            }
+            if (cmd.includes('expired') || cmd.includes('overdue')) {
+                setSeatFilter('expired');
+                speakFeedback("Showing expired seats");
+                return;
+            }
+            if (cmd.includes('all seat') || cmd.includes('sabhibhi')) {
+                setSeatFilter('all');
+                speakFeedback("Showing all seats");
+                return;
+            }
+
+            // 5. INQUIRY COMMANDS: "total collection", "kitna balance hai"
+            if (cmd.includes('collection') || cmd.includes('earning') || cmd.includes('kamai')) {
+                const daily = document.getElementById('daily-amount').innerText;
+                const monthly = document.getElementById('monthly-amount').innerText;
+                speakFeedback(`Today collection is ${daily} rupees. Monthly collection is ${monthly} rupees.`);
+                return;
+            }
+
+            // 6. FORM CONTROLS (WHEN MODAL IS OPEN)
             const modal = document.getElementById('student-modal');
             if (modal.style.display === 'flex') {
                 if (cmd.includes('name') || cmd.includes('नाम')) {
-                    const nameVal = cmd.replace(/.*(?:name|नाम)\s*/i, '');
-                    if (nameVal) {
-                        document.getElementById('student-name').value = capitalizeFirst(nameVal);
-                        speakText(`Name set to ${nameVal}`);
+                    let val = cmd.replace(/.*(?:name|नाम)\s*/i, '').trim();
+                    if (val) {
+                        document.getElementById('student-name').value = capitalizeFirst(val);
+                        speakFeedback(`Name set to ${val}`);
                     }
                 } else if (cmd.includes('phone') || cmd.includes('नंबर') || cmd.includes('mobile')) {
-                    const phoneVal = cmd.replace(/\D/g, '');
-                    if (phoneVal) {
-                        document.getElementById('student-phone').value = phoneVal;
-                        speakText(`Phone updated`);
-                    }
-                } else if (cmd.includes('address') || cmd.includes('पता')) {
-                    const addrVal = cmd.replace(/.*(?:address|पता)\s*/i, '');
-                    if (addrVal) {
-                        document.getElementById('student-address').value = capitalizeFirst(addrVal);
+                    let val = cmd.replace(/\D/g, '');
+                    if (val) {
+                        document.getElementById('student-phone').value = val;
+                        speakFeedback("Phone updated");
                     }
                 } else if (cmd.includes('fee') || cmd.includes('फीस')) {
-                    const feeVal = cmd.replace(/\D/g, '');
-                    if (feeVal) {
-                        document.getElementById('fee-monthly').value = feeVal;
-                        calculateDues();
-                        updateUpiQr();
+                    if (extractedNumber) {
+                        document.getElementById('fee-monthly').value = extractedNumber;
+                        calculateDues(); updateUpiQr();
+                        speakFeedback(`Fee set to ${extractedNumber}`);
                     }
                 } else if (cmd.includes('paid') || cmd.includes('जमा')) {
-                    const paidVal = cmd.replace(/\D/g, '');
-                    if (paidVal) {
-                        document.getElementById('fee-paid').value = paidVal;
-                        calculateDues();
-                        updateUpiQr();
+                    if (extractedNumber) {
+                        document.getElementById('fee-paid').value = extractedNumber;
+                        calculateDues(); updateUpiQr();
+                        speakFeedback(`Paid amount set to ${extractedNumber}`);
                     }
-                } else if (cmd.includes('shift') || cmd.includes('शिफ्ट')) {
-                    if (cmd.includes('morning') || cmd.includes('मॉर्निंग')) selectShiftVoice('Morning');
-                    else if (cmd.includes('noon') || cmd.includes('दोपहर')) selectShiftVoice('Noon');
-                    else if (cmd.includes('afternoon')) selectShiftVoice('Afternoon');
-                    else if (cmd.includes('evening') || cmd.includes('शाम')) selectShiftVoice('Evening');
-                    else if (cmd.includes('night') || cmd.includes('नाईट')) selectShiftVoice('Night');
-                    else if (cmd.includes('all') || cmd.includes('फुल')) selectShiftVoice('All Shift');
-                } else if (cmd.includes('save') || cmd.includes('सेव')) {
+                } else if (cmd.includes('morning')) setShiftVoice('Morning');
+                else if (cmd.includes('noon')) setShiftVoice('Noon');
+                else if (cmd.includes('afternoon')) setShiftVoice('Afternoon');
+                else if (cmd.includes('evening')) setShiftVoice('Evening');
+                else if (cmd.includes('night')) setShiftVoice('Night');
+                else if (cmd.includes('full day') || cmd.includes('all shift')) setShiftVoice('All Shift');
+                else if (cmd.includes('save') || cmd.includes('सेव')) {
                     saveActiveOccupant();
-                    speakText("Record saved successfully");
                 } else if (cmd.includes('close') || cmd.includes('बंद')) {
                     closeModal();
-                    speakText("Form closed");
+                    speakFeedback("Modal closed");
                 }
             } else {
-                // Global Commands
+                // GLOBAL SEARCH
                 if (cmd.includes('search') || cmd.includes('खोजो')) {
-                    const query = cmd.replace(/.*(?:search|खोजो)\s*/i, '');
+                    let query = cmd.replace(/.*(?:search|खोजो)\s*/i, '').trim();
                     document.getElementById('search-input').value = query;
                     filterSeats();
                 }
             }
         }
 
-        function selectShiftVoice(shiftName) {
+        function setShiftVoice(shiftVal) {
             document.querySelectorAll('input[name="shifts"]').forEach(b => {
-                b.checked = (b.value.toLowerCase() === shiftName.toLowerCase());
+                b.checked = (b.value.toLowerCase() === shiftVal.toLowerCase());
             });
-            speakText(`Shift set to ${shiftName}`);
+            speakFeedback(`Shift set to ${shiftVal}`);
         }
 
-        function speakText(text) {
+        function speakFeedback(text) {
             if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'hi-IN';
-                window.speechSynthesis.speak(utterance);
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = 'en-IN';
+                window.speechSynthesis.speak(utter);
             }
         }
 
-        function capitalizeFirst(str) {
-            return str.charAt(0).toUpperCase() + str.slice(1);
-        }
+        function capitalizeFirst(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
 
-        function toggleTheme() {
-            document.body.classList.toggle('light-theme');
-        }
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
 
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
@@ -1187,7 +1218,7 @@
                 alert(`🎯 AI Recommendation: Seat #${recommendedSeat} is completely vacant and optimal for new admission.`);
                 openModal(recommendedSeat);
             } else {
-                alert("⚠️ All seats have at least one shift occupied! AI suggests checking multi-shift sharing.");
+                alert("⚠️ All seats have at least one shift occupied!");
             }
         }
 
@@ -1228,16 +1259,13 @@
             const dueDate = document.getElementById('next-payment-date').value;
             const dueAmt = document.getElementById('fee-due').value;
 
-            if (!phone) {
-                alert("Please enter phone number first.");
-                return;
-            }
+            if (!phone) { alert("Please enter phone number first."); return; }
 
             let msg = `🌟 *Takshila Smart Library Notification* 🌟\n\nDear ${name || 'Student'},\n`;
             if (parseFloat(dueAmt) > 0) {
-                msg += `Your library membership for Seat #${currentSeatNumber} has a pending balance of *₹${dueAmt}*.\nValid Until: *${dueDate}*\n\nPlease clear the dues to enjoy uninterrupted study environment.`;
+                msg += `Your library membership for Seat #${currentSeatNumber} has a pending balance of *₹${dueAmt}*.\nValid Until: *${dueDate}*\n\nPlease clear the dues.`;
             } else {
-                msg += `Your registration for Seat #${currentSeatNumber} is active.\nValid Until: *${dueDate}*\n\nWish you continuous success in your exams! 📚⚡`;
+                msg += `Your registration for Seat #${currentSeatNumber} is active.\nValid Until: *${dueDate}*\n\nWish you continuous success! 📚⚡`;
             }
 
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
@@ -1265,12 +1293,8 @@
                         const rDate = new Date(student.receiptDate);
                         const paid = parseFloat(student.paidFee) || 0;
 
-                        if (student.receiptDate === todayStr) {
-                            dailyTotal += paid;
-                        }
-                        if (rDate.getMonth() === currentMonth && rDate.getFullYear() === now.getFullYear()) {
-                            monthlyTotal += paid;
-                        }
+                        if (student.receiptDate === todayStr) dailyTotal += paid;
+                        if (rDate.getMonth() === currentMonth && rDate.getFullYear() === now.getFullYear()) monthlyTotal += paid;
 
                         const sh = student.shift || '';
                         if (sh.includes('Morning')) cntM++;
@@ -1553,7 +1577,7 @@
             document.getElementById('fee-due').value = '0';
 
             saveActiveOccupant();
-            alert("✨ Quick Renewal Completed! Month extended by 30 days.");
+            speakFeedback("Record renewed for 30 days");
         }
 
         function toggleFormLock() {
@@ -1585,7 +1609,7 @@
             const selectedShifts = Array.from(document.querySelectorAll('input[name="shifts"]:checked')).map(b => b.value);
 
             if (!name || !phone || !dueDate || selectedShifts.length === 0) {
-                alert("Please fill required fields: Name, WhatsApp Phone, Shift, and Next Due Date.");
+                alert("Please fill required fields: Name, Phone, Shift, and Next Due Date.");
                 return;
             }
 
@@ -1613,12 +1637,12 @@
 
             renderSeats();
             generateAIAnalytics();
-            alert(`Student record saved successfully for Seat #${currentSeatNumber}!`);
+            speakFeedback("Student detail saved successfully");
             closeModal();
         }
 
         function vacantActiveOccupant() {
-            if (confirm("Are you sure you want to remove this student from the seat?")) {
+            if (confirm("Are you sure you want to remove this student?")) {
                 if (libraryData[currentSeatNumber]) {
                     libraryData[currentSeatNumber].splice(activeOccupantIndex, 1);
                     if (libraryData[currentSeatNumber].length === 0) {
@@ -1742,10 +1766,7 @@
             const dueDate = document.getElementById('next-payment-date').value;
             const dueAmt = document.getElementById('fee-due').value;
 
-            if (!phone) {
-                alert("Please enter a valid WhatsApp phone number.");
-                return;
-            }
+            if (!phone) { alert("Please enter WhatsApp phone number."); return; }
 
             const message = `Hello ${name},\nWelcome to *Takshila Smart Library*!\nYour booking for Seat #${currentSeatNumber} is confirmed.\n\nNext Due Date: *${dueDate}*\nRemaining Dues: *₹${dueAmt}*\n\nThank you!`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
@@ -1840,9 +1861,7 @@
                         generateAIAnalytics();
                         alert("Backup restored successfully!");
                     }
-                } catch(err) {
-                    alert("Invalid JSON file: " + err.message);
-                }
+                } catch(err) { alert("Invalid JSON file: " + err.message); }
             };
             reader.readAsText(file);
         }
