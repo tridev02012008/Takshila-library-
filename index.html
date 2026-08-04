@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V14 SUPREME</title>
+    <title>Takshila Smart Library PRO V15 ULTRA SUPREME (Firebase Cloud)</title>
     <style>
         :root {
             --bg-color: #0d1321;
@@ -77,7 +77,6 @@
         .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 10px; text-transform: uppercase; }
         .fin-card p { margin: 3px 0 0 0; font-size: 16px; font-weight: bold; color: var(--text-color); }
 
-        /* Shift Counts Dashboard */
         .shift-stats-bar {
             background: var(--panel-bg);
             border: 1px solid var(--border-color);
@@ -88,7 +87,7 @@
             font-size: 10px;
             font-weight: bold;
         }
-        .shift-stat-item { text-align: center; }
+        .shift-stat-item { text-align: center; cursor: pointer; }
         .shift-stat-item span { display: block; font-size: 13px; color: var(--accent-blue); }
 
         .occupancy-bar-wrapper {
@@ -155,6 +154,7 @@
             gap: 4px;
             width: 100%;
             margin-top: 4px;
+            overflow-x: auto;
         }
         .filter-chip {
             flex: 1;
@@ -167,6 +167,7 @@
             cursor: pointer;
             text-align: center;
             font-weight: 600;
+            white-space: nowrap;
         }
         .filter-chip.active {
             background: var(--accent-blue);
@@ -297,6 +298,17 @@
             border-radius: 4px;
             font-size: 8px;
             font-weight: bold;
+        }
+
+        .checkin-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 5px var(--accent-green);
         }
 
         /* Modal Styles */
@@ -444,7 +456,9 @@
         .btn-download { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; width: 100%; margin-top: 6px; }
         .btn-idcard { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; width: 100%; margin-top: 6px; }
         .btn-whatsapp { background: #25d366; color: #000; font-weight: 800; width: 100%; margin-top: 6px; }
+        .btn-call { background: #0284c7; color: #fff; width: 100%; margin-top: 6px; }
         .btn-reminder { background: #ef4444; color: #fff; width: 100%; margin-top: 6px; }
+        .btn-checkin { background: #10b981; color: #fff; width: 100%; margin-top: 6px; }
         .btn-clear { background: var(--accent-red); color: white; }
         .btn-cancel { background: #475569; color: white; }
 
@@ -471,6 +485,18 @@
             text-align: center;
             border: 1px solid #78350f;
             display: none;
+        }
+
+        .cloud-status-badge {
+            font-size: 10px;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: #0284c7;
+            color: white;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .library-slip {
@@ -522,14 +548,27 @@
         }
         .id-details { font-size: 11px; display: flex; flex-direction: column; gap: 3px; }
         .id-details strong { color: #94a3b8; }
+        .id-card-qr {
+            position: absolute;
+            bottom: 12px;
+            right: 14px;
+            width: 55px;
+            height: 55px;
+            background: #fff;
+            padding: 2px;
+            border-radius: 4px;
+        }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:680px;">
-        <h1>Takshila Smart Library PRO SUPREME</h1>
-        <button onclick="toggleTheme()" style="background:var(--card-bg); color:var(--text-color); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:10px;">🌓 Theme Switch</button>
+        <h1>Takshila Smart Library ULTRA</h1>
+        <div style="display:flex; gap:8px; align-items:center;">
+            <span class="cloud-status-badge" id="cloud-status">☁️ Syncing...</span>
+            <button onclick="toggleTheme()" style="background:var(--card-bg); color:var(--text-color); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:10px;">🌓 Theme Switch</button>
+        </div>
     </div>
     
     <div class="dashboard-container">
@@ -549,12 +588,12 @@
         </div>
 
         <div class="shift-stats-bar">
-            <div class="shift-stat-item">Morning <span id="cnt-m">0</span></div>
-            <div class="shift-stat-item">Noon <span id="cnt-n">0</span></div>
-            <div class="shift-stat-item">Afternoon <span id="cnt-a">0</span></div>
-            <div class="shift-stat-item">Evening <span id="cnt-e">0</span></div>
-            <div class="shift-stat-item">Night <span id="cnt-night">0</span></div>
-            <div class="shift-stat-item">All Shift <span id="cnt-all">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('Morning')">Morning <span id="cnt-m">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('Noon')">Noon <span id="cnt-n">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('Afternoon')">Afternoon <span id="cnt-a">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('Evening')">Evening <span id="cnt-e">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('Night')">Night <span id="cnt-night">0</span></div>
+            <div class="shift-stat-item" onclick="setSeatFilter('All Shift')">All Shift <span id="cnt-all">0</span></div>
         </div>
 
         <div class="occupancy-bar-wrapper">
@@ -588,10 +627,13 @@
                 <button class="filter-chip expired-chip" id="filter-expired" onclick="setSeatFilter('expired')">🚨 Overdue / Expired</button>
             </div>
 
-            <div class="backup-btns" style="margin-top:4px; width:100%; display:flex; justify-content:flex-end; gap:6px;">
-                <button onclick="exportBackup()">Export Backup</button>
-                <button onclick="document.getElementById('upload-file').click()">Import Restore</button>
-                <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
+            <div class="backup-btns" style="margin-top:4px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+                <button onclick="exportDueListCSV()" style="background:#f59e0b; color:#000; font-weight:bold;">📥 Export Overdue List (CSV)</button>
+                <div style="display:flex; gap:6px;">
+                    <button onclick="exportBackup()">Export Backup</button>
+                    <button onclick="document.getElementById('upload-file').click()">Import Restore</button>
+                    <input type="file" id="upload-file" accept=".json" style="display:none" onchange="importBackup(event)">
+                </div>
             </div>
         </div>
     </div>
@@ -701,11 +743,13 @@
                 </div>
             </div>
 
+            <button class="btn btn-checkin" id="checkin-toggle-btn" onclick="toggleStudentCheckIn()" style="display:none;">📍 Toggle Check-In Status</button>
             <button class="btn btn-renew" id="quick-renew-btn" onclick="quickRenewOneMonth()" style="display:none;">⚡ Quick 1-Month Renew (+30 Days)</button>
             <button class="btn btn-save" id="save-btn" onclick="saveActiveOccupant()">1. Save / Update Student</button>
             <button class="btn btn-download" id="download-slip-btn" onclick="downloadReceiptImage()">2. Download Slip (Gallery)</button>
             <button class="btn btn-idcard" id="download-idcard-btn" onclick="downloadStudentIDCard()">3. Download Student ID Card</button>
             <button class="btn btn-whatsapp" id="whatsapp-btn" onclick="openWhatsAppChat()">4. Send WhatsApp Welcome Message</button>
+            <button class="btn btn-call" id="call-btn" onclick="makeDirectCall()" style="display:none;">📞 Call Student Directly</button>
             <button class="btn btn-reminder" id="reminder-btn" onclick="sendWhatsAppReminder()" style="display:none;">🚨 Send Fee Overdue Reminder</button>
 
             <div class="btn-row">
@@ -777,9 +821,66 @@
                     <div><strong>Valid Till:</strong> <span id="id-card-validity" style="color:#f59e0b;"></span></div>
                 </div>
             </div>
-            <div style="position:absolute; bottom:8px; right:14px; font-size:8px; color:#64748b; font-style:italic;">Manali Chowk, Bhagalpur</div>
+            <img id="id-card-qr-img" class="id-card-qr" src="" alt="QR">
+            <div style="position:absolute; bottom:6px; left:14px; font-size:8px; color:#64748b; font-style:italic;">Manali Chowk, Bhagalpur</div>
         </div>
     </div>
+
+    <!-- Firebase SDK Modular Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCq7TT8idTn21s72cLWCg9F52XvyEEyXw4",
+            authDomain: "takshila-library.firebaseapp.com",
+            projectId: "takshila-library",
+            storageBucket: "takshila-library.firebasestorage.app",
+            messagingSenderId: "77253009768",
+            appId: "1:77253009768:web:468afcf9db127e514976dd",
+            measurementId: "G-E8JK4TPBQP"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const docRef = doc(db, "takshila_data", "seats_master");
+
+        // Sync with Firebase Realtime Firestore
+        window.syncDataToFirebase = async function() {
+            try {
+                document.getElementById('cloud-status').innerText = "☁️ Saving...";
+                document.getElementById('cloud-status').style.background = "#f59e0b";
+                
+                await setDoc(docRef, { data: libraryData });
+                
+                document.getElementById('cloud-status').innerText = "🟢 Cloud Live";
+                document.getElementById('cloud-status').style.background = "#10b981";
+            } catch (error) {
+                console.error("Firebase Sync Error: ", error);
+                document.getElementById('cloud-status').innerText = "⚠️ Offline Mode";
+                document.getElementById('cloud-status').style.background = "#ef4444";
+            }
+        };
+
+        // Realtime Listener to load and auto-update UI
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data().data;
+                if (cloudData) {
+                    libraryData = cloudData;
+                    localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                    renderSeats();
+                }
+            }
+            document.getElementById('cloud-status').innerText = "🟢 Cloud Live";
+            document.getElementById('cloud-status').style.background = "#10b981";
+        }, (error) => {
+            console.error("Firestore Listen Error: ", error);
+            document.getElementById('cloud-status').innerText = "⚠️ Offline Mode";
+            document.getElementById('cloud-status').style.background = "#ef4444";
+        });
+    </script>
 
     <script>
         const TOTAL_SEATS = 89;
@@ -834,7 +935,6 @@
 
         function updateUpiQr() {
             const amt = document.getElementById('fee-paid').value || '0';
-            const name = encodeURIComponent(document.getElementById('student-name').value || 'Takshila Library');
             const upiUrl = `upi://pay?pa=${LIBRARY_UPI_ID}&pn=TakshilaLibrary&am=${amt}&cu=INR&tn=Fee_Seat_${currentSeatNumber}`;
             const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
             document.getElementById('upi-qr-img').src = qrApi;
@@ -958,6 +1058,7 @@
                 let isExpired = false;
                 let isWarning = false;
                 let activeShiftsCombined = [];
+                let isAnyCheckedIn = false;
 
                 if (occupants.length > 0) {
                     occupiedSeatsCount++;
@@ -970,6 +1071,7 @@
                         namesList.push(occ.name);
                         totalDuesOnSeat += (parseFloat(occ.due) || 0);
                         if (occ.shift) activeShiftsCombined.push(occ.shift);
+                        if (occ.isCheckedIn) isAnyCheckedIn = true;
 
                         if (occ.nextPaymentDate) {
                             const dueDate = new Date(occ.nextPaymentDate).setHours(0,0,0,0);
@@ -978,6 +1080,12 @@
                             else if (diffDays <= 2) isWarning = true;
                         }
                     });
+
+                    if (isAnyCheckedIn) {
+                        const checkinDot = document.createElement('div');
+                        checkinDot.classList.add('checkin-badge');
+                        seat.appendChild(checkinDot);
+                    }
 
                     if (isExpired) {
                         seat.classList.remove('occupied');
@@ -1128,8 +1236,12 @@
 
                 document.getElementById('vacant-btn').style.display = 'block';
                 document.getElementById('quick-renew-btn').style.display = 'block';
+                document.getElementById('call-btn').style.display = 'block';
                 
-                // Show Overdue reminder button if due date passed
+                const checkInBtn = document.getElementById('checkin-toggle-btn');
+                checkInBtn.style.display = 'block';
+                checkInBtn.innerText = data.isCheckedIn ? "🔴 Check-Out Student" : "🟢 Check-In Student (Inside Library)";
+
                 if (data.nextPaymentDate) {
                     const dueDate = new Date(data.nextPaymentDate).setHours(0,0,0,0);
                     const todayTime = new Date().setHours(0,0,0,0);
@@ -1163,8 +1275,20 @@
             document.getElementById('vacant-btn').style.display = 'none';
             document.getElementById('quick-renew-btn').style.display = 'none';
             document.getElementById('reminder-btn').style.display = 'none';
+            document.getElementById('call-btn').style.display = 'none';
+            document.getElementById('checkin-toggle-btn').style.display = 'none';
             updateUpiQr();
             toggleFormLock();
+        }
+
+        function toggleStudentCheckIn() {
+            if (!libraryData[currentSeatNumber] || !libraryData[currentSeatNumber][activeOccupantIndex]) return;
+            const current = libraryData[currentSeatNumber][activeOccupantIndex].isCheckedIn || false;
+            libraryData[currentSeatNumber][activeOccupantIndex].isCheckedIn = !current;
+            localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+            if (window.syncDataToFirebase) window.syncDataToFirebase();
+            loadOccupantDataIntoForm();
+            renderSeats();
         }
 
         function quickRenewOneMonth() {
@@ -1219,6 +1343,8 @@
 
             if (!libraryData[currentSeatNumber]) libraryData[currentSeatNumber] = [];
 
+            const isCheckInPrev = libraryData[currentSeatNumber][activeOccupantIndex]?.isCheckedIn || false;
+
             const studentRecord = {
                 name,
                 address: document.getElementById('student-address').value.trim(),
@@ -1231,11 +1357,14 @@
                 receiptDate: document.getElementById('receipt-date').value,
                 nextPaymentDate: dueDate,
                 signature: document.getElementById('slip-signature-picker').value,
-                idProof: capturedImageBase64
+                idProof: capturedImageBase64,
+                isCheckedIn: isCheckInPrev
             };
 
             libraryData[currentSeatNumber][activeOccupantIndex] = studentRecord;
             localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+
+            if (window.syncDataToFirebase) window.syncDataToFirebase();
 
             renderSeats();
             alert(`Student record saved successfully for Seat #${currentSeatNumber}!`);
@@ -1250,6 +1379,7 @@
                         delete libraryData[currentSeatNumber];
                     }
                     localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                    if (window.syncDataToFirebase) window.syncDataToFirebase();
                 }
                 renderSeats();
                 closeModal();
@@ -1332,19 +1462,26 @@
         }
 
         function downloadStudentIDCard() {
-            document.getElementById('id-card-name').innerText = document.getElementById('student-name').value || 'Student';
+            const name = document.getElementById('student-name').value || 'Student';
+            const phone = document.getElementById('student-phone').value || '---';
+            const due = document.getElementById('next-payment-date').value || '---';
+
+            document.getElementById('id-card-name').innerText = name;
             document.getElementById('id-card-seat').innerText = `#${currentSeatNumber}`;
             document.getElementById('id-card-shift').innerText = Array.from(document.querySelectorAll('input[name="shifts"]:checked')).map(b => b.value).join(', ') || 'Regular';
-            document.getElementById('id-card-phone').innerText = document.getElementById('student-phone').value || '---';
-            document.getElementById('id-card-validity').innerText = document.getElementById('next-payment-date').value || '---';
+            document.getElementById('id-card-phone').innerText = phone;
+            document.getElementById('id-card-validity').innerText = due;
             
+            const cardInfo = `Takshila Library\nName: ${name}\nSeat: #${currentSeatNumber}\nPhone: ${phone}\nValid: ${due}`;
+            document.getElementById('id-card-qr-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(cardInfo)}`;
+
             const photoImg = document.getElementById('id-card-photo-img');
             photoImg.src = capturedImageBase64 || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" fill="%23cbd5e1"><rect width="100" height="100"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-size="12" fill="%23000">No Photo</text></svg>';
 
             const elem = document.getElementById('student-idcard-element');
             html2canvas(elem, { scale: 2 }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Takshila_ID_Card_${document.getElementById('student-name').value.replace(/\s+/g, '_')}.png`;
+                link.download = `Takshila_ID_Card_${name.replace(/\s+/g, '_')}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             });
@@ -1376,6 +1513,12 @@
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
+        function makeDirectCall() {
+            const phone = document.getElementById('student-phone').value.trim();
+            if (phone) window.location.href = `tel:${phone}`;
+            else alert("Phone number not available!");
+        }
+
         function filterSeats() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
             document.querySelectorAll('.seat').forEach(seat => {
@@ -1388,10 +1531,38 @@
                 if (activeFilter === 'occupied') matchesFilter = (status === 'occupied' || status === 'expired');
                 else if (activeFilter === 'free') matchesFilter = (status === 'free');
                 else if (activeFilter === 'expired') matchesFilter = (status === 'expired');
+                else if (['Morning', 'Noon', 'Afternoon', 'Evening', 'Night', 'All Shift'].includes(activeFilter)) {
+                    matchesFilter = searchData.toLowerCase().includes(activeFilter.toLowerCase());
+                }
 
                 if (matchesSearch && matchesFilter) seat.classList.remove('hidden');
                 else seat.classList.add('hidden');
             });
+        }
+
+        function exportDueListCSV() {
+            let csvContent = "data:text/csv;charset=utf-8,Seat,Name,Phone,Shift,NextDueDate,Dues\n";
+            const todayTime = new Date().setHours(0,0,0,0);
+
+            for (let seat in libraryData) {
+                const occupants = libraryData[seat] || [];
+                occupants.forEach(occ => {
+                    if (occ && occ.nextPaymentDate) {
+                        const dueDate = new Date(occ.nextPaymentDate).setHours(0,0,0,0);
+                        if (dueDate <= todayTime || (parseFloat(occ.due) > 0)) {
+                            csvContent += `${seat},"${occ.name}",${occ.phone},"${occ.shift}",${occ.nextPaymentDate},${occ.due || 0}\n`;
+                        }
+                    }
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Takshila_Overdue_Students_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
         function exportBackup() {
@@ -1414,6 +1585,7 @@
                     if (confirm("Restore backup? Current library data will be updated.")) {
                         libraryData = data;
                         localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                        if (window.syncDataToFirebase) window.syncDataToFirebase();
                         renderSeats();
                         alert("Backup restored successfully!");
                     }
