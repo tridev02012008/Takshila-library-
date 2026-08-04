@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO V15 ULTRA SUPREME (Firebase Cloud + AI)</title>
+    <title>Takshila Smart Library PRO V16 ENTERPRISE (Firebase Cloud + AI + Fine Engine + Biometric Scanner)</title>
     <style>
         :root {
             --bg-color: #0d1321;
@@ -59,14 +59,14 @@
 
         .finance-panel {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 8px;
             width: 100%;
         }
 
         .fin-card {
             background: var(--card-bg);
-            padding: 10px;
+            padding: 8px;
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
             text-align: center;
@@ -75,8 +75,9 @@
         .fin-card.daily { border-left-color: var(--accent-green); }
         .fin-card.month { border-left-color: var(--accent-yellow); }
         .fin-card.members { border-left-color: var(--accent-blue); }
-        .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 10px; text-transform: uppercase; }
-        .fin-card p { margin: 3px 0 0 0; font-size: 16px; font-weight: bold; color: var(--text-color); }
+        .fin-card.fine { border-left-color: var(--accent-purple); }
+        .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 9px; text-transform: uppercase; }
+        .fin-card p { margin: 3px 0 0 0; font-size: 14px; font-weight: bold; color: var(--text-color); }
 
         .shift-stats-bar {
             background: var(--panel-bg);
@@ -324,7 +325,6 @@
             box-shadow: 0 0 5px var(--accent-green);
         }
 
-        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -598,11 +598,18 @@
                 <h4>Active Students</h4>
                 <p><span id="active-students-count">0</span></p>
             </div>
+            <div class="fin-card fine">
+                <h4>Est. Late Fines</h4>
+                <p>₹<span id="total-fine-amount">0</span></p>
+            </div>
         </div>
 
         <div class="ai-insights-panel" id="ai-smart-banner">
             <div><strong>🤖 AI Smart Insights:</strong> <span id="ai-insight-text">Analyzing library occupancy & shift patterns...</span></div>
-            <button onclick="generateAIAnalytics()" style="background:var(--ai-glow); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">Refresh AI Insight</button>
+            <div style="display:flex; gap:4px;">
+                <button onclick="recommendSeatByAI()" style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">🎯 AI Recommend Seat</button>
+                <button onclick="generateAIAnalytics()" style="background:var(--ai-glow); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">Refresh AI</button>
+            </div>
         </div>
 
         <div class="shift-stats-bar">
@@ -645,8 +652,9 @@
                 <button class="filter-chip expired-chip" id="filter-expired" onclick="setSeatFilter('expired')">🚨 Overdue / Expired</button>
             </div>
 
-            <div class="backup-btns" style="margin-top:4px; width:100%; display:flex; justify-content:space-between; align-items:center;">
+            <div class="backup-btns" style="margin-top:4px; width:100%; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;">
                 <button onclick="exportDueListCSV()" style="background:#f59e0b; color:#000; font-weight:bold;">📥 Export Overdue List (CSV)</button>
+                <button onclick="simulateBiometricScanner()" style="background:#a855f7; color:#fff; font-weight:bold;">📟 Gate Entry Scanner Log</button>
                 <div style="display:flex; gap:6px;">
                     <button onclick="exportBackup()">Export Backup</button>
                     <button onclick="document.getElementById('upload-file').click()">Import Restore</button>
@@ -709,8 +717,19 @@
                     <input type="number" id="fee-paid" value="700" oninput="calculateDues(); updateUpiQr();">
                 </div>
                 <div class="form-group">
-                    <label>Dues (₹)</label>
+                    <label>Base Dues (₹)</label>
                     <input type="number" id="fee-due" value="0" readonly style="background:var(--card-bg); font-weight:bold; color:#ef4444;">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Auto Late Fine (₹20/Day)</label>
+                    <input type="number" id="fee-fine" value="0" readonly style="background:var(--card-bg); color:var(--accent-yellow); font-weight:bold;">
+                </div>
+                <div class="form-group">
+                    <label>Total Payable + Fine (₹)</label>
+                    <input type="number" id="fee-total-payable" value="0" readonly style="background:var(--card-bg); color:#10b981; font-weight:bold;">
                 </div>
             </div>
 
@@ -736,7 +755,7 @@
                 </div>
                 <div class="form-group">
                     <label>Next Due Date *</label>
-                    <input type="date" id="next-payment-date">
+                    <input type="date" id="next-payment-date" onchange="calculateDues()">
                 </div>
             </div>
 
@@ -808,7 +827,7 @@
                     <tr><td>1.</td><td>Monthly Fee</td><td id="table-monthly">-</td></tr>
                     <tr><td>2.</td><td>Receipt Date</td><td id="table-validity">-</td></tr>
                     <tr><td>3.</td><td>Next Payment Date</td><td id="table-next-date">-</td></tr>
-                    <tr><td>4.</td><td>Dues</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
+                    <tr><td>4.</td><td>Dues + Late Fine</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
                 </tbody>
             </table>
 
@@ -902,6 +921,7 @@
         const TOTAL_SEATS = 89;
         const ALLOWED_ADMIN_PINS = ["9815761696", "9835964135", "7634993778", "9155435099", "7488038058"];
         const LIBRARY_UPI_ID = "6207479929@ybl";
+        const DAILY_LATE_FINE_RATE = 20;
         
         let libraryData = {};
         try {
@@ -951,7 +971,7 @@
         });
 
         function updateUpiQr() {
-            const amt = document.getElementById('fee-paid').value || '0';
+            const amt = document.getElementById('fee-total-payable').value || document.getElementById('fee-paid').value || '0';
             const upiUrl = `upi://pay?pa=${LIBRARY_UPI_ID}&pn=TakshilaLibrary&am=${amt}&cu=INR&tn=Fee_Seat_${currentSeatNumber}`;
             const qrApi = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(upiUrl)}`;
             document.getElementById('upi-qr-img').src = qrApi;
@@ -988,7 +1008,59 @@
         function calculateDues() {
             const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
             const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
-            document.getElementById('fee-due').value = Math.max(0, monthly - paid);
+            const baseDue = Math.max(0, monthly - paid);
+            document.getElementById('fee-due').value = baseDue;
+
+            const dueDateVal = document.getElementById('next-payment-date').value;
+            let lateFine = 0;
+
+            if (dueDateVal) {
+                const dueDate = new Date(dueDateVal).setHours(0,0,0,0);
+                const todayTime = new Date().setHours(0,0,0,0);
+                if (todayTime > dueDate) {
+                    const overdueDays = Math.floor((todayTime - dueDate) / (1000 * 60 * 60 * 24));
+                    lateFine = overdueDays * DAILY_LATE_FINE_RATE;
+                }
+            }
+
+            document.getElementById('fee-fine').value = lateFine;
+            document.getElementById('fee-total-payable').value = baseDue + lateFine;
+        }
+
+        function recommendSeatByAI() {
+            let recommendedSeat = null;
+            for (let i = 1; i <= TOTAL_SEATS; i++) {
+                if (!libraryData[i] || libraryData[i].length === 0) {
+                    recommendedSeat = i;
+                    break;
+                }
+            }
+            if (recommendedSeat) {
+                alert(`🎯 AI Recommendation: Seat #${recommendedSeat} is completely vacant and optimal for new admission.`);
+                openModal(recommendedSeat);
+            } else {
+                alert("⚠️ All seats have at least one shift occupied! AI suggests checking multi-shift sharing.");
+            }
+        }
+
+        function simulateBiometricScanner() {
+            const seatPrompt = prompt("📟 SIMULATE BIOMETRIC SCANNER / QR CODE GATE\nEnter Seat Number to Check-In/Out:");
+            if (!seatPrompt) return;
+            const seatNum = parseInt(seatPrompt.trim());
+            if (seatNum >= 1 && seatNum <= TOTAL_SEATS) {
+                if (libraryData[seatNum] && libraryData[seatNum].length > 0) {
+                    const currentStatus = libraryData[seatNum][0].isCheckedIn || false;
+                    libraryData[seatNum][0].isCheckedIn = !currentStatus;
+                    localStorage.setItem('takshila_v14_data', JSON.stringify(libraryData));
+                    if (window.syncDataToFirebase) window.syncDataToFirebase();
+                    renderSeats();
+                    alert(`✅ Entry Gate Action: Student '${libraryData[seatNum][0].name}' is now ${!currentStatus ? 'Checked-IN' : 'Checked-OUT'}`);
+                } else {
+                    alert("❌ Seat is vacant! Cannot log gate entry.");
+                }
+            } else {
+                alert("Invalid seat number!");
+            }
         }
 
         function generateAIAnalytics() {
@@ -1026,7 +1098,7 @@
             const name = document.getElementById('student-name').value.trim();
             const phone = document.getElementById('student-phone').value.trim();
             const dueDate = document.getElementById('next-payment-date').value;
-            const dueAmt = document.getElementById('fee-due').value;
+            const dueAmt = document.getElementById('fee-total-payable').value;
 
             if (!phone) {
                 alert("Please enter phone number first.");
@@ -1035,7 +1107,7 @@
 
             let msg = `🌟 *Takshila Smart Library Notification* 🌟\n\nDear ${name || 'Student'},\n`;
             if (parseFloat(dueAmt) > 0) {
-                msg += `Your library membership for Seat #${currentSeatNumber} has a pending balance of *₹${dueAmt}*.\nValid Until: *${dueDate}*\n\nPlease clear the dues to enjoy uninterrupted study environment.`;
+                msg += `Your library membership for Seat #${currentSeatNumber} has a pending balance (including late fines) of *₹${dueAmt}*.\nValid Until: *${dueDate}*\n\nPlease clear the dues to enjoy uninterrupted study environment.`;
             } else {
                 msg += `Your registration for Seat #${currentSeatNumber} is active.\nValid Until: *${dueDate}*\n\nWish you continuous success in your exams! 📚⚡`;
             }
@@ -1054,8 +1126,10 @@
             let dailyTotal = 0;
             let monthlyTotal = 0;
             let activeStudents = 0;
+            let totalEstLateFine = 0;
 
             let cntM = 0, cntN = 0, cntA = 0, cntE = 0, cntNight = 0, cntAll = 0;
+            const todayTime = new Date().setHours(0,0,0,0);
 
             for (let seat in libraryData) {
                 const occupants = libraryData[seat] || [];
@@ -1072,6 +1146,14 @@
                             monthlyTotal += paid;
                         }
 
+                        if (student.nextPaymentDate) {
+                            const dueDate = new Date(student.nextPaymentDate).setHours(0,0,0,0);
+                            if (todayTime > dueDate) {
+                                const days = Math.floor((todayTime - dueDate) / (1000 * 60 * 60 * 24));
+                                totalEstLateFine += days * DAILY_LATE_FINE_RATE;
+                            }
+                        }
+
                         const sh = student.shift || '';
                         if (sh.includes('Morning')) cntM++;
                         if (sh.includes('Noon')) cntN++;
@@ -1086,6 +1168,7 @@
             document.getElementById('daily-amount').innerText = dailyTotal;
             document.getElementById('monthly-amount').innerText = monthlyTotal;
             document.getElementById('active-students-count').innerText = activeStudents;
+            document.getElementById('total-fine-amount').innerText = totalEstLateFine;
 
             document.getElementById('cnt-m').innerText = cntM;
             document.getElementById('cnt-n').innerText = cntN;
@@ -1311,6 +1394,8 @@
                 checkInBtn.style.display = 'block';
                 checkInBtn.innerText = data.isCheckedIn ? "🔴 Check-Out Student" : "🟢 Check-In Student (Inside Library)";
 
+                calculateDues();
+
                 if (data.nextPaymentDate) {
                     const dueDate = new Date(data.nextPaymentDate).setHours(0,0,0,0);
                     const todayTime = new Date().setHours(0,0,0,0);
@@ -1335,6 +1420,8 @@
             document.getElementById('fee-monthly').value = '700';
             document.getElementById('fee-paid').value = '700';
             document.getElementById('fee-due').value = '0';
+            document.getElementById('fee-fine').value = '0';
+            document.getElementById('fee-total-payable').value = '0';
             document.getElementById('pay-mode').value = 'UPI';
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('next-payment-date').value = '';
@@ -1372,6 +1459,8 @@
             document.getElementById('next-payment-date').value = nextDueStr;
             document.getElementById('fee-paid').value = document.getElementById('fee-monthly').value;
             document.getElementById('fee-due').value = '0';
+            document.getElementById('fee-fine').value = '0';
+            document.getElementById('fee-total-payable').value = '0';
 
             saveActiveOccupant();
             alert("✨ Quick Renewal Completed! Month extended by 30 days.");
@@ -1422,6 +1511,7 @@
                 monthlyFee: document.getElementById('fee-monthly').value,
                 paidFee: document.getElementById('fee-paid').value,
                 due: document.getElementById('fee-due').value,
+                fineAmt: document.getElementById('fee-fine').value,
                 payMode: document.getElementById('pay-mode').value,
                 receiptDate: document.getElementById('receipt-date').value,
                 nextPaymentDate: dueDate,
@@ -1513,7 +1603,10 @@
             document.getElementById('table-monthly').innerText = `₹${document.getElementById('fee-monthly').value || 0}`;
             document.getElementById('table-validity').innerText = document.getElementById('receipt-date').value || '-';
             document.getElementById('table-next-date').innerText = document.getElementById('next-payment-date').value || '-';
-            document.getElementById('table-dues').innerText = `₹${document.getElementById('fee-due').value || 0}`;
+            
+            const dueAmt = parseFloat(document.getElementById('fee-due').value || 0);
+            const fineAmt = parseFloat(document.getElementById('fee-fine').value || 0);
+            document.getElementById('table-dues').innerText = `₹${dueAmt} (+₹${fineAmt} Late Fine)`;
             
             document.getElementById('slip-mob-val').innerText = phone;
             document.getElementById('slip-total-val').innerText = document.getElementById('fee-paid').value || '0';
@@ -1562,14 +1655,14 @@
             const phone = document.getElementById('student-phone').value.trim();
             const name = document.getElementById('student-name').value.trim();
             const dueDate = document.getElementById('next-payment-date').value;
-            const dueAmt = document.getElementById('fee-due').value;
+            const dueAmt = document.getElementById('fee-total-payable').value;
 
             if (!phone) {
                 alert("Please enter a valid WhatsApp phone number.");
                 return;
             }
 
-            const message = `Hello ${name},\nWelcome to *Takshila Smart Library*!\nYour booking for Seat #${currentSeatNumber} is confirmed.\n\nNext Due Date: *${dueDate}*\nRemaining Dues: *₹${dueAmt}*\n\nThank you!`;
+            const message = `Hello ${name},\nWelcome to *Takshila Smart Library*!\nYour booking for Seat #${currentSeatNumber} is confirmed.\n\nNext Due Date: *${dueDate}*\nRemaining Dues + Fine: *₹${dueAmt}*\n\nThank you!`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
@@ -1577,10 +1670,11 @@
             const phone = document.getElementById('student-phone').value.trim();
             const name = document.getElementById('student-name').value.trim();
             const dueDate = document.getElementById('next-payment-date').value;
+            const fineAmt = document.getElementById('fee-fine').value;
 
             if (!phone) return;
 
-            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
+            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nAccrued Late Fine: *₹${fineAmt}* (₹20/day).\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
@@ -1612,7 +1706,7 @@
         }
 
         function exportDueListCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,Seat,Name,Phone,Shift,NextDueDate,Dues\n";
+            let csvContent = "data:text/csv;charset=utf-8,Seat,Name,Phone,Shift,NextDueDate,Dues,LateFine\n";
             const todayTime = new Date().setHours(0,0,0,0);
 
             for (let seat in libraryData) {
@@ -1620,8 +1714,13 @@
                 occupants.forEach(occ => {
                     if (occ && occ.nextPaymentDate) {
                         const dueDate = new Date(occ.nextPaymentDate).setHours(0,0,0,0);
+                        let fine = 0;
+                        if (todayTime > dueDate) {
+                            const days = Math.floor((todayTime - dueDate) / (1000 * 60 * 60 * 24));
+                            fine = days * DAILY_LATE_FINE_RATE;
+                        }
                         if (dueDate <= todayTime || (parseFloat(occ.due) > 0)) {
-                            csvContent += `${seat},"${occ.name}",${occ.phone},"${occ.shift}",${occ.nextPaymentDate},${occ.due || 0}\n`;
+                            csvContent += `${seat},"${occ.name}",${occ.phone},"${occ.shift}",${occ.nextPaymentDate},${occ.due || 0},${fine}\n`;
                         }
                     }
                 });
