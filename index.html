@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Takshila Smart Library PRO ULTRA (Advanced Edition)</title>
+    <title>Takshila Smart Library PRO ULTRA MAX</title>
     <style>
         :root {
             --bg-color: #0d1321;
@@ -54,8 +54,8 @@
 
         .finance-panel {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
             width: 100%;
         }
 
@@ -70,26 +70,21 @@
         .fin-card.daily { border-left-color: var(--accent-green); }
         .fin-card.month { border-left-color: var(--accent-yellow); }
         .fin-card.members { border-left-color: var(--accent-blue); }
+        .fin-card.profit { border-left-color: var(--accent-purple); }
         .fin-card h4 { margin: 0; color: var(--subtext-color); font-size: 9px; text-transform: uppercase; }
-        .fin-card p { margin: 3px 0 0 0; font-size: 14px; font-weight: bold; color: var(--text-color); }
+        .fin-card p { margin: 3px 0 0 0; font-size: 13px; font-weight: bold; color: var(--text-color); }
 
-        /* NEW DIGI-CLOCK & SMART ACTION TOOLBAR */
         .smart-action-panel {
             background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
             border: 2px solid var(--accent-blue);
             border-radius: 12px;
-            padding: 10px 16px;
+            padding: 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.2);
         }
-        .clock-display {
-            font-size: 18px;
-            font-weight: bold;
-            color: var(--accent-blue);
-            font-family: monospace;
-        }
+
         .quick-action-btn {
             background: var(--accent-green);
             color: #000;
@@ -102,7 +97,7 @@
             box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             transition: transform 0.2s;
         }
-        .quick-action-btn:hover { transform: scale(1.05); }
+        .quick-action-btn:hover { transform: scale(1.03); }
 
         .shift-stats-bar {
             background: var(--panel-bg);
@@ -269,7 +264,7 @@
             border: 2px solid var(--accent-red) !important;
             animation: seat-red-blink 1.2s infinite ease-in-out;
         }
-        
+
         @keyframes seat-red-blink {
             0% { opacity: 0.6; border-color: var(--accent-red); box-shadow: 0 0 2px var(--accent-red); }
             50% { opacity: 1; border-color: #f87171; box-shadow: 0 0 10px var(--accent-red); }
@@ -584,13 +579,24 @@
             padding: 2px;
             border-radius: 4px;
         }
+
+        .expiry-radar-box {
+            background: var(--card-bg);
+            border: 1px solid var(--accent-yellow);
+            border-radius: 8px;
+            padding: 8px;
+            margin-top: 6px;
+        }
+        .radar-title { font-size: 11px; font-weight: bold; color: var(--accent-yellow); margin-bottom: 4px; }
+        .radar-list { font-size: 10px; display: flex; flex-direction: column; gap: 4px; max-height: 80px; overflow-y: auto; }
+        .radar-item { display: flex; justify-content: space-between; background: var(--panel-bg); padding: 4px 6px; border-radius: 4px; }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
     <div style="display:flex; justify-content:space-between; align-items:center; width:100%; max-width:680px;">
-        <h1>Takshila Smart Library ULTRA</h1>
+        <h1>Takshila Smart Library ULTRA MAX</h1>
         <div style="display:flex; gap:8px; align-items:center;">
             <span class="cloud-status-badge" id="cloud-status">☁️ Syncing...</span>
             <button onclick="toggleTheme()" style="background:var(--card-bg); color:var(--text-color); border:1px solid var(--border-color); padding:4px 8px; border-radius:6px; cursor:pointer; font-size:10px;">🌓 Theme Switch</button>
@@ -598,13 +604,12 @@
     </div>
     
     <div class="dashboard-container">
-        <!-- DIGITAL CLOCK & FAST ACTION PANEL (REPLACED VOICE ENGINE) -->
+        <!-- SMART ACTION TOOLBAR -->
         <div class="smart-action-panel">
             <div>
-                <div style="font-size:10px; color:var(--subtext-color);">LIVE SYSTEM TIME</div>
-                <div class="clock-display" id="live-clock">00:00:00 AM</div>
+                <button class="quick-action-btn" onclick="openExpenseModal()">💸 Manage Expenses</button>
             </div>
-            <button class="quick-action-btn" onclick="recommendSeatByAI()">⚡ Quick Seat Allocator</button>
+            <button class="quick-action-btn" style="background:var(--accent-blue); color:#000;" onclick="recommendSeatByAI()">🎯 AI Seat Recommender</button>
         </div>
 
         <div class="finance-panel">
@@ -620,13 +625,25 @@
                 <h4>Active Students</h4>
                 <p><span id="active-students-count">0</span></p>
             </div>
+            <div class="fin-card profit">
+                <h4>Net Profit</h4>
+                <p>₹<span id="net-profit-amount">0</span></p>
+            </div>
+        </div>
+
+        <!-- 3-DAY EXPIRY RADAR WIDGET -->
+        <div class="expiry-radar-box">
+            <div class="radar-title">⚠️ Upcoming Membership Expirations (Next 3 Days)</div>
+            <div class="radar-list" id="expiry-radar-list">
+                <div style="color:var(--subtext-color);">No memberships expiring in the next 3 days.</div>
+            </div>
         </div>
 
         <div class="ai-insights-panel" id="ai-smart-banner">
             <div><strong>🤖 AI Smart Insights:</strong> <span id="ai-insight-text">Analyzing library occupancy & shift patterns...</span></div>
             <div style="display:flex; gap:4px;">
-                <button onclick="recommendSeatByAI()" style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">🎯 AI Recommend Seat</button>
-                <button onclick="generateAIAnalytics()" style="background:var(--ai-glow); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">Refresh AI</button>
+                <button onclick="recommendSeatByAI()" style="background:#10b981; color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">🎯 AI Allocate</button>
+                <button onclick="generateAIAnalytics()" style="background:var(--ai-glow); color:#fff; border:none; padding:4px 8px; border-radius:4px; font-size:9px; cursor:pointer; font-weight:bold;">Refresh</button>
             </div>
         </div>
 
@@ -683,6 +700,36 @@
 
     <div class="grid-container" id="seats-grid"></div>
 
+    <!-- Expense Tracker Modal -->
+    <div class="modal" id="expense-modal">
+        <div class="modal-content" style="max-width:380px;">
+            <div class="modal-header">
+                <h3>Monthly Expenses Tracker</h3>
+                <span style="cursor:pointer; font-size:18px;" onclick="closeExpenseModal()">✕</span>
+            </div>
+            <div class="form-group">
+                <label>Electricity Bill (₹)</label>
+                <input type="number" id="exp-electricity" value="0" oninput="calculateNetProfit()">
+            </div>
+            <div class="form-group">
+                <label>Room Rent (₹)</label>
+                <input type="number" id="exp-rent" value="0" oninput="calculateNetProfit()">
+            </div>
+            <div class="form-group">
+                <label>Wi-Fi / Internet (₹)</label>
+                <input type="number" id="exp-wifi" value="0" oninput="calculateNetProfit()">
+            </div>
+            <div class="form-group">
+                <label>Maintenance / Misc (₹)</label>
+                <input type="number" id="exp-misc" value="0" oninput="calculateNetProfit()">
+            </div>
+            <div style="margin-top:10px; font-weight:bold; text-align:right; font-size:12px; color:var(--accent-purple);">
+                Total Expense: ₹<span id="exp-total-val">0</span>
+            </div>
+            <button class="btn btn-save" onclick="saveExpenses()">Save Expenses</button>
+        </div>
+    </div>
+
     <!-- Student Detail Modal -->
     <div class="modal" id="student-modal">
         <div class="modal-content">
@@ -732,6 +779,10 @@
                 <div class="form-group">
                     <label>Paid Amount (₹)</label>
                     <input type="number" id="fee-paid" value="700" oninput="calculateDues(); updateUpiQr();">
+                </div>
+                <div class="form-group">
+                    <label>Late Fee Fine (₹10/Day)</label>
+                    <input type="number" id="fee-fine" value="0" readonly style="background:var(--card-bg); font-weight:bold; color:#f59e0b;">
                 </div>
                 <div class="form-group">
                     <label>Base Dues (₹)</label>
@@ -832,7 +883,7 @@
                     <tr><td>1.</td><td>Monthly Fee</td><td id="table-monthly">-</td></tr>
                     <tr><td>2.</td><td>Receipt Date</td><td id="table-validity">-</td></tr>
                     <tr><td>3.</td><td>Next Payment Date</td><td id="table-next-date">-</td></tr>
-                    <tr><td>4.</td><td>Dues</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
+                    <tr><td>4.</td><td>Dues (+ Fine)</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
                 </tbody>
             </table>
 
@@ -922,6 +973,9 @@
         let libraryData = {};
         try { libraryData = JSON.parse(localStorage.getItem('takshila_v14_data')) || {}; } catch(e) { libraryData = {}; }
 
+        let expensesData = {};
+        try { expensesData = JSON.parse(localStorage.getItem('takshila_expenses')) || { electricity: 0, rent: 0, wifi: 0, misc: 0 }; } catch(e) { expensesData = { electricity: 0, rent: 0, wifi: 0, misc: 0 }; }
+
         let currentSeatNumber = null;
         let activeOccupantIndex = 0;
         let localStream = null;
@@ -941,19 +995,63 @@
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             renderSeats();
             generateAIAnalytics();
-            
-            // Live Clock Feature
-            setInterval(updateLiveClock, 1000);
-            updateLiveClock();
+            updateExpiryRadar();
         });
 
-        function updateLiveClock() {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString();
-            document.getElementById('live-clock').innerText = timeStr;
+        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+
+        function openExpenseModal() {
+            document.getElementById('exp-electricity').value = expensesData.electricity || 0;
+            document.getElementById('exp-rent').value = expensesData.rent || 0;
+            document.getElementById('exp-wifi').value = expensesData.wifi || 0;
+            document.getElementById('exp-misc').value = expensesData.misc || 0;
+            calculateNetProfit();
+            document.getElementById('expense-modal').style.display = 'flex';
         }
 
-        function toggleTheme() { document.body.classList.toggle('light-theme'); }
+        function closeExpenseModal() {
+            document.getElementById('expense-modal').style.display = 'none';
+        }
+
+        function saveExpenses() {
+            expensesData = {
+                electricity: parseFloat(document.getElementById('exp-electricity').value) || 0,
+                rent: parseFloat(document.getElementById('exp-rent').value) || 0,
+                wifi: parseFloat(document.getElementById('exp-wifi').value) || 0,
+                misc: parseFloat(document.getElementById('exp-misc').value) || 0
+            };
+            localStorage.setItem('takshila_expenses', JSON.stringify(expensesData));
+            runFinancialAudit();
+            closeExpenseModal();
+        }
+
+        function updateExpiryRadar() {
+            const list = document.getElementById('expiry-radar-list');
+            list.innerHTML = '';
+            const today = new Date().setHours(0,0,0,0);
+            let count = 0;
+
+            for (let seat in libraryData) {
+                const occupants = libraryData[seat] || [];
+                occupants.forEach(occ => {
+                    if (occ && occ.nextPaymentDate) {
+                        const dueDate = new Date(occ.nextPaymentDate).setHours(0,0,0,0);
+                        const diffDays = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24));
+                        if (diffDays >= 0 && diffDays <= 3) {
+                            count++;
+                            const item = document.createElement('div');
+                            item.classList.add('radar-item');
+                            item.innerHTML = `<span><strong>Seat #${seat}:</strong> ${occ.name} (${occ.phone})</span> <span style="color:var(--accent-yellow); font-weight:bold;">${diffDays === 0 ? 'Today' : 'In ' + diffDays + ' Days'}</span>`;
+                            list.appendChild(item);
+                        }
+                    }
+                });
+            }
+
+            if (count === 0) {
+                list.innerHTML = `<div style="color:var(--subtext-color);">No memberships expiring in the next 3 days.</div>`;
+            }
+        }
 
         document.querySelectorAll('input[name="shifts"]').forEach(box => {
             box.addEventListener('change', function() {
@@ -1009,7 +1107,20 @@
         function calculateDues() {
             const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
             const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
-            const baseDue = Math.max(0, monthly - paid);
+            const dueDateStr = document.getElementById('next-payment-date').value;
+            
+            let fine = 0;
+            if (dueDateStr) {
+                const dueDate = new Date(dueDateStr).setHours(0,0,0,0);
+                const today = new Date().setHours(0,0,0,0);
+                const diffDays = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
+                if (diffDays > 0) {
+                    fine = diffDays * 10; // ₹10 per day late fee fine
+                }
+            }
+
+            document.getElementById('fee-fine').value = fine;
+            const baseDue = Math.max(0, (monthly + fine) - paid);
             document.getElementById('fee-due').value = baseDue;
         }
 
@@ -1078,6 +1189,18 @@
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        function calculateNetProfit() {
+            const m = parseFloat(document.getElementById('monthly-amount').innerText) || 0;
+            const e1 = parseFloat(document.getElementById('exp-electricity').value) || 0;
+            const e2 = parseFloat(document.getElementById('exp-rent').value) || 0;
+            const e3 = parseFloat(document.getElementById('exp-wifi').value) || 0;
+            const e4 = parseFloat(document.getElementById('exp-misc').value) || 0;
+
+            const totExp = e1 + e2 + e3 + e4;
+            document.getElementById('exp-total-val').innerText = totExp;
+            document.getElementById('net-profit-amount').innerText = m - totExp;
+        }
+
         function runFinancialAudit() {
             const now = new Date();
             const todayStr = now.toISOString().split('T')[0];
@@ -1124,6 +1247,9 @@
             document.getElementById('cnt-e').innerText = cntE;
             document.getElementById('cnt-night').innerText = cntNight;
             document.getElementById('cnt-all').innerText = cntAll;
+
+            const totExp = (expensesData.electricity || 0) + (expensesData.rent || 0) + (expensesData.wifi || 0) + (expensesData.misc || 0);
+            document.getElementById('net-profit-amount').innerText = monthlyTotal - totExp;
         }
 
         function setSeatFilter(filterType) {
@@ -1249,6 +1375,7 @@
             document.getElementById('occupancy-percent-text').innerText = `${percent}% Full (${occupiedSeatsCount}/${TOTAL_SEATS})`;
 
             runFinancialAudit();
+            updateExpiryRadar();
             filterSeats();
         }
 
@@ -1356,6 +1483,7 @@
             document.getElementById('fee-monthly').value = '700';
             document.getElementById('fee-paid').value = '700';
             document.getElementById('fee-due').value = '0';
+            document.getElementById('fee-fine').value = '0';
             document.getElementById('pay-mode').value = 'UPI';
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('next-payment-date').value = '';
@@ -1382,6 +1510,7 @@
             document.getElementById('next-payment-date').value = nextDueStr;
             document.getElementById('fee-paid').value = document.getElementById('fee-monthly').value;
             document.getElementById('fee-due').value = '0';
+            document.getElementById('fee-fine').value = '0';
 
             saveActiveOccupant();
         }
@@ -1429,6 +1558,7 @@
                 monthlyFee: document.getElementById('fee-monthly').value,
                 paidFee: document.getElementById('fee-paid').value,
                 due: document.getElementById('fee-due').value,
+                fine: document.getElementById('fee-fine').value,
                 payMode: document.getElementById('pay-mode').value,
                 receiptDate: document.getElementById('receipt-date').value,
                 nextPaymentDate: dueDate,
@@ -1585,7 +1715,7 @@
 
             if (!phone) return;
 
-            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nPending Dues: *₹${dueAmt}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
+            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nPending Dues (+ Fine): *₹${dueAmt}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
