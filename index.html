@@ -774,19 +774,15 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Monthly Fee (₹)</label>
-                    <input type="number" id="fee-monthly" value="700" oninput="calculateDues(); updateUpiQr();">
+                    <input type="number" id="fee-monthly" value="700" oninput="updateUpiQr();">
                 </div>
                 <div class="form-group">
                     <label>Paid Amount (₹)</label>
-                    <input type="number" id="fee-paid" value="700" oninput="calculateDues(); updateUpiQr();">
+                    <input type="number" id="fee-paid" value="700" oninput="updateUpiQr();">
                 </div>
                 <div class="form-group">
-                    <label>Late Fee Fine (₹10/Day)</label>
-                    <input type="number" id="fee-fine" value="0" readonly style="background:var(--card-bg); font-weight:bold; color:#f59e0b;">
-                </div>
-                <div class="form-group">
-                    <label>Base Dues (₹)</label>
-                    <input type="number" id="fee-due" value="0" readonly style="background:var(--card-bg); font-weight:bold; color:#ef4444;">
+                    <label>Due Amount (₹)</label>
+                    <input type="number" id="fee-due" value="0" style="background:var(--card-bg); font-weight:bold; color:#ef4444;">
                 </div>
             </div>
 
@@ -812,7 +808,7 @@
                 </div>
                 <div class="form-group">
                     <label>Next Due Date *</label>
-                    <input type="date" id="next-payment-date" onchange="calculateDues()">
+                    <input type="date" id="next-payment-date">
                 </div>
             </div>
 
@@ -883,7 +879,7 @@
                     <tr><td>1.</td><td>Monthly Fee</td><td id="table-monthly">-</td></tr>
                     <tr><td>2.</td><td>Receipt Date</td><td id="table-validity">-</td></tr>
                     <tr><td>3.</td><td>Next Payment Date</td><td id="table-next-date">-</td></tr>
-                    <tr><td>4.</td><td>Dues (+ Fine)</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
+                    <tr><td>4.</td><td>Dues</td><td id="table-dues" style="color:red; font-weight:bold;">-</td></tr>
                 </tbody>
             </table>
 
@@ -1102,26 +1098,6 @@
             document.getElementById('auth-status-indicator').style.color = "#ef4444";
             if (currentSeatNumber) toggleFormLock();
             alert("Admin Access Locked.");
-        }
-
-        function calculateDues() {
-            const monthly = parseFloat(document.getElementById('fee-monthly').value) || 0;
-            const paid = parseFloat(document.getElementById('fee-paid').value) || 0;
-            const dueDateStr = document.getElementById('next-payment-date').value;
-            
-            let fine = 0;
-            if (dueDateStr) {
-                const dueDate = new Date(dueDateStr).setHours(0,0,0,0);
-                const today = new Date().setHours(0,0,0,0);
-                const diffDays = Math.ceil((today - dueDate) / (1000 * 60 * 60 * 24));
-                if (diffDays > 0) {
-                    fine = diffDays * 10; // ₹10 per day late fee fine
-                }
-            }
-
-            document.getElementById('fee-fine').value = fine;
-            const baseDue = Math.max(0, (monthly + fine) - paid);
-            document.getElementById('fee-due').value = baseDue;
         }
 
         function recommendSeatByAI() {
@@ -1457,8 +1433,6 @@
                 document.getElementById('quick-renew-btn').style.display = 'block';
                 document.getElementById('call-btn').style.display = 'block';
 
-                calculateDues();
-
                 if (data.nextPaymentDate) {
                     const dueDate = new Date(data.nextPaymentDate).setHours(0,0,0,0);
                     const todayTime = new Date().setHours(0,0,0,0);
@@ -1483,7 +1457,6 @@
             document.getElementById('fee-monthly').value = '700';
             document.getElementById('fee-paid').value = '700';
             document.getElementById('fee-due').value = '0';
-            document.getElementById('fee-fine').value = '0';
             document.getElementById('pay-mode').value = 'UPI';
             document.getElementById('receipt-date').value = new Date().toISOString().split('T')[0];
             document.getElementById('next-payment-date').value = '';
@@ -1510,7 +1483,6 @@
             document.getElementById('next-payment-date').value = nextDueStr;
             document.getElementById('fee-paid').value = document.getElementById('fee-monthly').value;
             document.getElementById('fee-due').value = '0';
-            document.getElementById('fee-fine').value = '0';
 
             saveActiveOccupant();
         }
@@ -1525,6 +1497,7 @@
             document.getElementById('student-phone').disabled = shouldLock;
             document.getElementById('fee-monthly').disabled = shouldLock;
             document.getElementById('fee-paid').disabled = shouldLock;
+            document.getElementById('fee-due').disabled = shouldLock;
             document.getElementById('pay-mode').disabled = shouldLock;
             document.getElementById('receipt-date').disabled = shouldLock;
             document.getElementById('next-payment-date').disabled = shouldLock;
@@ -1558,7 +1531,6 @@
                 monthlyFee: document.getElementById('fee-monthly').value,
                 paidFee: document.getElementById('fee-paid').value,
                 due: document.getElementById('fee-due').value,
-                fine: document.getElementById('fee-fine').value,
                 payMode: document.getElementById('pay-mode').value,
                 receiptDate: document.getElementById('receipt-date').value,
                 nextPaymentDate: dueDate,
@@ -1715,7 +1687,7 @@
 
             if (!phone) return;
 
-            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nPending Dues (+ Fine): *₹${dueAmt}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
+            const message = `🚨 *Fee Payment Reminder* 🚨\nDear ${name},\nYour Takshila Library monthly validity for Seat #${currentSeatNumber} expired on *${dueDate}*.\nPending Dues: *₹${dueAmt}*.\nKindly pay your monthly fee to continue your seat.\n\nThank You!`;
             window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(message)}`, '_blank');
         }
 
